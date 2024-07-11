@@ -55,3 +55,11 @@ export const LeaveEndpoints= {
     EMPLOYEE_DECLINED_LEAVE_REQUESTS: (employeeId)=>BASE_URL +`/leave/declinedLeaveRequestsForEmployee?employeeId=${employeeId}`,
     EMPLOYEE_LEAVE_LIST: (employeeId)=>BASE_URL +`/leave/getLeaveRequestsForEmployee/${employeeId}`
 }
+
+// Role Endpoints
+export const RoleEndpoints= {
+    GET_ROLE_REQUEST: BASE_URL + '/role',
+    UPDATE_ROLE_REQUEST: BASE_URL + '/role',
+    ADD_ROLE_REQUEST: BASE_URL + '/role'
+
+}
