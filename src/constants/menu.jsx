@@ -270,6 +270,30 @@ const MenuItems = () => {
         ],
       },
       {
+        key: "Role",
+        label: t("Role"),
+        isTitle: false,
+        icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+        children: [
+          {
+            key: "NewRole",
+            label: t("New Role"),
+            url: "/role/role-create-update",
+            parentKey: "Role",
+            icon: (
+              <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+            ),
+          },
+          {
+            key: "Role List",
+            label: t("Role List"),
+            url: "/role/role-list",
+            parentKey: "Role",
+            icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+          },
+        ],
+      },
+      {
         key: "Employee",
         label: t("Employee"),
         isTitle: false,

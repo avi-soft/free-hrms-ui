@@ -20,6 +20,7 @@ import DeclinedLeaveList from "./components/core/dashboard/Leave/DeclinedLeaveLi
 import RequestedLeaveList from "./components/core/dashboard/Leave/RequestedLeaveList";
 import AllReviews from "./components/core/dashboard/AdminPanel/Performance/AllReviews";
 import { useSelector } from "react-redux";
+import CreateRole from "./components/core/dashboard/AdminPanel/Role/CreateRole";
 
 function App() {
   const { darkMode } = useSelector((state) => state.theme);
@@ -48,6 +49,10 @@ function App() {
             <Route
               path="/employee/employee-create-update"
               element={<CreateUpdateEmployee />}
+            />
+            <Route
+              path="/role/role-create-update"
+              element={<CreateRole/>}
             />
             <Route
               path="/department/department-create-update"

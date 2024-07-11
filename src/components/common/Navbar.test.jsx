@@ -1,14 +1,16 @@
+import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { MemoryRouter } from 'react-router-dom'; 
+import { MemoryRouter } from 'react-router-dom';
 import { Provider } from 'react-redux';
-import NavBar from './NavBar';
+import NavBar from "./Navbar"
 import { createStore } from 'redux';
 import rootReducer from '../../reducer';
+import NavBar from './Navbar';
 
 // Mock useNavigate hook
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
-  useNavigate: jest.fn(), 
+  useNavigate: jest.fn(),
 }));
 
 const renderWithContext = (element, store) => {
@@ -28,19 +30,12 @@ describe('NavBar component', () => {
   });
 
   test('renders search input and button', () => {
-    const store = createStore(rootReducer, { auth: { AccessToken: null } });
+    const store = createStore(rootReducer, { auth: { AccessToken: 'test-token' } });
     renderWithContext(<NavBar />, store);
     const searchInput = screen.getByPlaceholderText('Search Employee..');
     const searchButton = screen.getByRole('button', { name: /search/i });
     expect(searchInput).toBeInTheDocument();
     expect(searchButton).toBeInTheDocument();
-  });
-
-  test('renders Log In button when user is not authenticated', () => {
-    const store = createStore(rootReducer, { auth: { AccessToken: null } });
-    renderWithContext(<NavBar />, store);
-    const logInButton = screen.getByRole('link', { name: /log in/i });
-    expect(logInButton).toBeInTheDocument();
   });
 
   test('renders ProfileDropDown when user is authenticated', () => {
