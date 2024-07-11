@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -10,15 +10,22 @@ import { EmployeeSearch } from "../../../../../services/operations/employeeAPI";
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
-  const { register, handleSubmit, setValue } = useForm();
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm();
   const [searchResults, setSearchResults] = useState([]);
   const [selectedManager, setSelectedManager] = useState(null);
-  const [showRadio, setShowRadio] = useState(false);
+  const [showCheckbox, setShowCheckbox] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [noSearch, setNoSearch] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const location = useLocation();
   const { darkMode } = useSelector((state) => state.theme);
+  const debounceTimeoutRef = useRef(null);
 
   const { isEditing, department } = location.state || {
     isEditing: false,
@@ -31,8 +38,8 @@ const CreateUpdateDepartment = () => {
       setValue("description", department.description);
       if (department.manager) {
         setSelectedManager(department.manager);
-        setShowRadio(true);
-        setSearchResults(department.manager);
+        setShowCheckbox(true);
+        setSearchResults([department.manager]);
       }
     }
   }, [isEditing, department, setValue]);
@@ -59,20 +66,49 @@ const CreateUpdateDepartment = () => {
     try {
       const response = await dispatch(EmployeeSearch(AccessToken, searchTerm));
       const data = response?.data;
+      console.log(data);
+
       if (Array.isArray(data) && data.length > 0) {
-        setSearchResults(data[0]);
-        setShowRadio(true);
+        setSearchResults(data);
+        setShowCheckbox(true);
       } else {
         setSearchResults([]);
-        setShowRadio(false);
+        setShowCheckbox(false);
+        setNoSearch(true);
       }
     } catch (error) {
       console.error("Error searching employees:", error);
     }
   };
 
+  const debounceSearch = useCallback((searchTerm) => {
+    if (debounceTimeoutRef.current) {
+      clearTimeout(debounceTimeoutRef.current);
+    }
+    debounceTimeoutRef.current = setTimeout(() => {
+      handleSearch(searchTerm);
+    }, 400);
+  }, []);
+
+  const handleInputChange = (e) => {
+    setSelectedManager(null);
+    debounceSearch(e.target.value);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (debounceTimeoutRef.current) {
+        clearTimeout(debounceTimeoutRef.current);
+      }
+    };
+  }, []);
+
   const handleSelectManager = (manager) => {
-    setSelectedManager(manager);
+    if (selectedManager?.userId === manager.userId) {
+      setSelectedManager(null);
+    } else {
+      setSelectedManager(manager);
+    }
   };
 
   return (
@@ -119,15 +155,25 @@ const CreateUpdateDepartment = () => {
               Department Name<sup className="text-red-900 font-bold">*</sup>
             </label>
             <input
-              type="text"
-              required
-              placeholder="Department Name..."
               id="department"
-              {...register("department")}
+              type="text"
+              placeholder="Department Name..."
+              {...register("department", {
+                required: "Department Name is required",
+                minLength: {
+                  value: 3,
+                  message: "Department Name must be at least 3 characters",
+                },
+              })}
               className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                 darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
               }`}
             />
+            {errors.department && (
+              <p className="text-red-500 mt-1">
+                {errors.department.message}
+              </p>
+            )}
           </div>
           <div className="mb-4">
             <label
@@ -140,15 +186,25 @@ const CreateUpdateDepartment = () => {
               <sup className="text-red-900 font-bold">*</sup>
             </label>
             <input
+              id="description"
               type="text"
               placeholder="Department Description..."
-              required
-              id="description"
-              {...register("description")}
+              {...register("description", {
+                required: "Description is required",
+                minLength: {
+                  value: 5,
+                  message: "Description must be at least 10 characters",
+                },
+              })}
               className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                 darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
               }`}
             />
+            {errors.description && (
+              <p className="text-red-500  mt-1">
+                {errors.description.message}
+              </p>
+            )}
           </div>
           <div className="mb-4">
             <label
@@ -161,35 +217,64 @@ const CreateUpdateDepartment = () => {
             </label>
             <input
               data-testid="employeeSearch"
+              required
               type="text"
               id="employeeSearch"
               placeholder="Search employee for adding as manager.."
-              onChange={(e) => handleSearch(e.target.value)}
+              onChange={handleInputChange}
               className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                 darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
               }`}
             />
           </div>
-          {showRadio && (
+          {showCheckbox && searchResults.length > 0 ? (
             <div className="mb-4">
-              <input
-                type="radio"
-                id={`employee_${searchResults.userId}`}
-                name="selectedEmployee"
-                value={searchResults.userId}
-                checked={selectedManager?.userId === searchResults.userId}
-                onChange={() => handleSelectManager(searchResults)}
-                className="mr-2"
-              />
-              <label
-                htmlFor={`employee_${searchResults.userId}`}
-                className={`text-gray-700 text-sm font-semibold ${
-                  darkMode ? "text-white" : ""
-                }`}
-                data-testid={`search-result-item-label-${searchResults.userId}`}
-              >
-                {searchResults.firstName} {searchResults.lastName}
-              </label>
+              {searchResults.map((result) => (
+                <div key={result.userId} className="flex items-center mb-2">
+                  <input
+                    type="checkbox"
+                    id={`employee_${result.userId}`}
+                    name="selectedEmployee"
+                    required
+                    value={result.userId}
+                    checked={selectedManager?.userId === result.userId}
+                    onChange={() => handleSelectManager(result)}
+                    className="mr-2"
+                  />
+                  <label
+                    htmlFor={`employee_${result.userId}`}
+                    className={`text-gray-700 text-sm font-semibold ${
+                      darkMode ? "text-white" : ""
+                    }`}
+                    data-testid={`search-result-item-label-${result.userId}`}
+                  >
+                    {result.firstName} {result.lastName}
+                  </label>
+                </div>
+              ))}
+            </div>
+          ) : noSearch && (
+            <div className="mb-4">
+              <p className="text-red-500 text-sm font-semibold">
+                No employees found with the given search term.
+              </p>
+            </div>
+          )}
+          {selectedManager && (
+            <div className="mb-4">
+              <div className="flex items-center">
+                <p className="text-gray-700 text-sm font-semibold mr-2">
+                  Selected Manager: {selectedManager.firstName}{" "}
+                  {selectedManager.lastName}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => setSelectedManager(null)}
+                  className="text-red-500"
+                >
+                  Clear
+                </button>
+              </div>
             </div>
           )}
           <button
