@@ -10,6 +10,8 @@ import { toggleDarkMode } from "../../slices/themeSlice";
 import LogBtn from "../core/Navbar/LogBtn";
 import ProfileDropDown from "../core/Navbar/ProfileDropDown";
 
+
+
 const NavBar = () => {
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
@@ -43,7 +45,9 @@ const NavBar = () => {
             <img src="https://avisoft.io/logo.svg" alt="Logo" />
           </Link>
         </div>
-        <form
+        {
+          AccessToken &&
+          <form
           onSubmit={handleSubmit(onSubmit)}
           className="ml-10 flex items-center"
         >
@@ -69,6 +73,8 @@ const NavBar = () => {
             Search
           </button>
         </form>
+        }
+
         <div className="flex justify-between items-center gap-2">
           <button onClick={handleThemeToggle} className="mt-1">
             {darkMode ? (
@@ -77,12 +83,8 @@ const NavBar = () => {
               <img className="active-theme" src={Moon} height={30} width={30} />
             )}
           </button>
-          <div className="">
-            {AccessToken === null ? (
-              <div className="flex gap-x-4 mr-5">
-                <LogBtn link={"/login"} text={"Log In"} />
-              </div>
-            ) : (
+          <div className="mr-5">
+            {AccessToken  && (
               <div  data-testid="profile-dropdown">
                <ProfileDropDown />
               </div>
