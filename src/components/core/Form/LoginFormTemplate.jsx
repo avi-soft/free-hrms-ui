@@ -67,7 +67,7 @@ const LoginFormTemplate = () => {
                   htmlFor="role"
                   className="block text-sm font-medium"
                 >
-                  Select Role<sup className="text-red-600">*</sup>
+                  Select Role<sup className="text-red-600 ml-1">*</sup>
                 </label>
                 <select
                   id="role"
@@ -89,27 +89,32 @@ const LoginFormTemplate = () => {
               </div>
               <label data-testid="email-label" className="w-full">
                 <p className="text-[0.875rem] mb-1 leading-[1.375rem]">
-                  Email Address<sup className="text-red-600">*</sup>
+                  Email Address<sup className="text-red-600  ml-1">*</sup>
                 </p>
                 <input
-                  type="email"
+                 
                   name="Email"
                   id="Email"
-                  {...register("email")}
+                  {...register('email', {
+                    required: true,
+                    pattern:
+                      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                  })}
                   className={`rounded-[0.5rem] w-full p-[12px] border-b-[1px] ${
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-white"
                       : "bg-white border-gray-300 text-black"
                   }`}
                   data-testid="email-input"
-                  required
+                
                   placeholder="Enter Email Address"
                 />
               </label>
+              {errors.email && <p className="text-red-400 mt-2">Please enter a valid email.</p>}
               <div className="mt-5">
                 <label data-testid="password-label" className="w-full">
                   <p className="text-[0.875rem] mb-1 leading-[1.375rem]">
-                    Password<sup className="text-red-600">*</sup>
+                    Password<sup className="text-red-600  ml-1">*</sup>
                   </p>
                   <div className="relative">
                     <input
@@ -117,8 +122,12 @@ const LoginFormTemplate = () => {
                       type="password"
                       name="password"
                       id="password"
-                      required
-                      {...register("password", { required: true })}
+                      {...register('password', {
+                        required: true,
+                        minLength:5,
+                        maxLength: 20,
+                        
+                        })}
                       className={`rounded-[0.5rem] w-full p-[12px] pr-[36px] border-b-[1px] ${
                         darkMode
                           ? "bg-gray-700 border-gray-600 text-white"
@@ -126,6 +135,7 @@ const LoginFormTemplate = () => {
                       }`}
                       placeholder="Enter Password"
                     />
+                    {errors.password && <p className="text-red-400 mt-2">Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.</p>}
                   </div>
                   <div className="flex items-center justify-end mt-2">
                     <Link
