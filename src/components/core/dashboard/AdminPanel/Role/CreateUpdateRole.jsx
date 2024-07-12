@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import {
   leavePrivileges,
   departmentPrivileges,
@@ -28,9 +29,6 @@ const CreateUpdateRole = () => {
     role: null,
   };
 
-  console.log(role);
-  console.log(selectedPrivileges);
-
   const {
     register,
     handleSubmit,
@@ -49,7 +47,7 @@ const CreateUpdateRole = () => {
   useEffect(() => {
     if (role) {
       setValue("role", role.role);
-      setSelectedPrivileges(role.privileges || []);
+      setSelectedPrivileges(role.privilege || []);
     }
   }, [role, setValue]);
 
@@ -61,12 +59,44 @@ const CreateUpdateRole = () => {
     );
   };
 
+  const handleSelectAll = (group) => {
+    const allPrivileges = group
+      ? privilegeGroups[group].map((priv) => priv.value)
+      : Object.values(privilegeGroups)
+          .flat()
+          .map((priv) => priv.value);
+
+    setSelectedPrivileges((prev) => {
+      const isAllSelected = allPrivileges.every((priv) => prev.includes(priv));
+      return isAllSelected
+        ? prev.filter((priv) => !allPrivileges.includes(priv))
+        : Array.from(new Set([...prev, ...allPrivileges]));
+    });
+  };
+
+  const isGroupAllSelected = (group) => {
+    const groupPrivileges = privilegeGroups[group].map((priv) => priv.value);
+    return groupPrivileges.every((priv) => selectedPrivileges.includes(priv));
+  };
+
+  const isGlobalAllSelected = () => {
+    const allPrivileges = Object.values(privilegeGroups)
+      .flat()
+      .map((priv) => priv.value);
+    return allPrivileges.every((priv) => selectedPrivileges.includes(priv));
+  };
+
   const onSubmit = async (data) => {
+    if (selectedPrivileges.length === 0) {
+      toast.error("Please select at least one privilege.");
+      return;
+    }
+
     const formData = {
       ...data,
-      privileges: selectedPrivileges,
+      privilege: selectedPrivileges,
     };
-    console.log(formData);
+    console.log(formData)
     if (isEditing) {
       await dispatch(updateRole(AccessToken, formData, navigate));
     } else {
@@ -192,12 +222,21 @@ const CreateUpdateRole = () => {
                 <p className="text-red-500 mt-1">{errors.role.message}</p>
               )}
             </div>
-
-            <div className="mb-4">
-              <div className="flex space-x-4 mb-4">
+            <div className=" mb-4 text-orange-600">
+              <label className="flex items-center">
+                <input
+                  type="checkbox"
+                  checked={isGlobalAllSelected()}
+                  onChange={() => handleSelectAll(null)}
+                  className="mr-2"
+                />
+                Select All Privileges
+              </label>
+              <div className="mt-4 mb-4 flex items-center gap-4">
                 {Object.keys(privilegeGroups).map((group) => (
                   <button
                     key={group}
+                    type="button"
                     onClick={() => setActiveTab(group)}
                     className={`px-4 py-2 rounded ${
                       activeTab === group
@@ -211,6 +250,19 @@ const CreateUpdateRole = () => {
                   </button>
                 ))}
               </div>
+            </div>
+            <div className="mb-4 text-orange-400">
+              <label className="flex items-center mb-4">
+                <input
+                  type="checkbox"
+                  checked={isGroupAllSelected(activeTab)}
+                  onChange={() => handleSelectAll(activeTab)}
+                  className="mr-2"
+                />
+                Select All{" "}
+                {activeTab.charAt(0).toUpperCase() + activeTab.slice(1)}{" "}
+                Privileges
+              </label>
               <div className="">
                 {renderPrivileges(privilegeGroups[activeTab])}
               </div>
