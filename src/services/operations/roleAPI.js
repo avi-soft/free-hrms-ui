@@ -10,6 +10,7 @@ export const addRole = (AccessToken, body, navigate) => {
     const toastId = toast.loading("Adding...");
     try {
       console.log(AccessToken);
+      console.log(body)
       const response = await apiConnector("POST", ADD_ROLE_REQUEST, body, {
         Authorization: `Bearer ${AccessToken}`,
       });
@@ -21,18 +22,19 @@ export const addRole = (AccessToken, body, navigate) => {
       }
     } catch (err) {
       console.log(err);
-      toast.error("FAILED ADDING ROLE");
+      toast.error(err.response.data.message);
     } finally {
       toast.dismiss(toastId);
     }
   };
 };
 
-export const updateRole = (AccessToken, body) => {
+export const updateRole = (AccessToken, body,navigate) => {
   return async (dispatch) => {
     const toastId = toast.loading("Updating...");
     try {
       console.log(AccessToken);
+      console.log(body);
       const response = await apiConnector("PATCH", UPDATE_ROLE_REQUEST, body, {
         Authorization: `Bearer ${AccessToken}`,
       });
@@ -44,7 +46,7 @@ export const updateRole = (AccessToken, body) => {
       }
     } catch (err) {
       console.log(err);
-      toast.error("FAILED UPDATINGG ROLE");
+      toast.error("FAILED UPDATING ROLE");
     } finally {
       toast.dismiss(toastId);
     }

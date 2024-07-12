@@ -45,7 +45,7 @@ const RoleList = () => {
   }
 
   return (
-    <div className={`h-lvh mb-2 rounded-md ${darkMode ? "text-white" : ""}`}>
+    <div className={` mb-2 rounded-md ${darkMode ? "text-white" : ""}`}>
       {loading ? (
         <div className="absolute grid place-content-center h-[70%] w-[85%]">
           <Spinner />
