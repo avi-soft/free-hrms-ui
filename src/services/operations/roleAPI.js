@@ -10,7 +10,7 @@ export const addRole = (AccessToken, body, navigate) => {
     const toastId = toast.loading("Adding...");
     try {
       console.log(AccessToken);
-      console.log(body)
+      console.log(body);
       const response = await apiConnector("POST", ADD_ROLE_REQUEST, body, {
         Authorization: `Bearer ${AccessToken}`,
       });
@@ -21,15 +21,19 @@ export const addRole = (AccessToken, body, navigate) => {
         navigate("/role/role-list");
       }
     } catch (err) {
-      console.log(err);
-      toast.error(err.response.data.message);
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
     } finally {
       toast.dismiss(toastId);
     }
   };
 };
 
-export const updateRole = (AccessToken, body,navigate) => {
+export const updateRole = (AccessToken, body, navigate) => {
   return async (dispatch) => {
     const toastId = toast.loading("Updating...");
     try {
@@ -45,8 +49,12 @@ export const updateRole = (AccessToken, body,navigate) => {
         navigate("/role/role-list");
       }
     } catch (err) {
-      console.log(err);
-      toast.error("FAILED UPDATING ROLE");
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
     } finally {
       toast.dismiss(toastId);
     }
@@ -64,8 +72,12 @@ export const getRole = () => {
         return response;
       }
     } catch (err) {
-      console.log(err);
-      toast.error("FAILED UPDATINGG ROLE");
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
     } finally {
       toast.dismiss(toastId);
     }
