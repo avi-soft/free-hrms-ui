@@ -20,12 +20,17 @@ import DeclinedLeaveList from "./components/core/dashboard/Leave/DeclinedLeaveLi
 import RequestedLeaveList from "./components/core/dashboard/Leave/RequestedLeaveList";
 import AllReviews from "./components/core/dashboard/AdminPanel/Performance/AllReviews";
 import { useSelector } from "react-redux";
-import CreateRole from "./components/core/dashboard/AdminPanel/Role/CreateRole";
+import CreateUpdateRole from "./components/core/dashboard/AdminPanel/Role/CreateUpdateRole";
+import RoleList from "./components/core/dashboard/AdminPanel/Role/RoleList";
 
 function App() {
   const { darkMode } = useSelector((state) => state.theme);
   return (
-    <div className={`flex flex-col  min-h-screen ${darkMode ? " bg-slate-600" : "bg-slate-200"}`}>
+    <div
+      className={`flex flex-col  min-h-screen ${
+        darkMode ? " bg-slate-600" : "bg-slate-200"
+      }`}
+    >
       <NavBar />
       <div>
         <Routes>
@@ -52,7 +57,11 @@ function App() {
             />
             <Route
               path="/role/role-create-update"
-              element={<CreateRole/>}
+              element={<CreateUpdateRole />}
+            />
+            <Route 
+            path= "role/role-list"
+            element={<RoleList />}
             />
             <Route
               path="/department/department-create-update"
@@ -96,6 +105,8 @@ function App() {
               path="/leave/leave-list-rejected"
               element={<DeclinedLeaveList />}
             />
+            
+            
           </Route>
           <Route path="/login" element={<Login />} />
         </Routes>
