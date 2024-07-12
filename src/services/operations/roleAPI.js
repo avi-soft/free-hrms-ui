@@ -22,8 +22,9 @@ export const addRole = (AccessToken, body, navigate) => {
     } catch (err) {
       console.log(err);
       toast.error("FAILED ADDING ROLE");
+    } finally {
+      toast.dismiss(toastId);
     }
-    toast.dismiss(toastId);
   };
 };
 
@@ -44,8 +45,9 @@ export const updateRole = (AccessToken, body) => {
     } catch (err) {
       console.log(err);
       toast.error("FAILED UPDATINGG ROLE");
+    } finally {
+      toast.dismiss(toastId);
     }
-    toast.dismiss(toastId);
   };
 };
 
@@ -62,7 +64,8 @@ export const getRole = () => {
     } catch (err) {
       console.log(err);
       toast.error("FAILED UPDATINGG ROLE");
+    } finally {
+      toast.dismiss(toastId);
     }
-    toast.dismiss(toastId);
   };
 };
