@@ -8,18 +8,22 @@ import {
   emergencyContactPrivileges,
   employeePrivileges,
 } from "../../../../../constants/Roles";
+import { addRole } from "../../../../../services/operations/roleAPI";
+import { useNavigate } from "react-router-dom";
 
-const CreateRole = () => {
+const CreateUpdateRole = ({ initialData }) => {
   const [selectedPrivileges, setSelectedPrivileges] = useState([]);
   const [showDialog, setShowDialog] = useState(false);
   const [activeTab, setActiveTab] = useState("leave");
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm();
 
   const privilegeGroups = {
@@ -29,6 +33,13 @@ const CreateRole = () => {
     emergencyContact: emergencyContactPrivileges,
     leave: leavePrivileges,
   };
+
+  useEffect(() => {
+    if (initialData) {
+      setValue("role", initialData.roleName);
+      setSelectedPrivileges(initialData.privileges || []);
+    }
+  }, [initialData, setValue]);
 
   const handlePrivilegeChange = (privilegeValue) => {
     setSelectedPrivileges((prev) =>
@@ -49,8 +60,8 @@ const CreateRole = () => {
       ...data,
       privileges: selectedPrivileges,
     };
-    formData.AccessToken = AccessToken;
-    // await dispatch(addRole(formData));
+    console.log(formData);
+    const response = await dispatch(addRole(AccessToken, formData, navigate));
     setShowDialog(false);
     setSelectedPrivileges([]);
   };
@@ -62,6 +73,7 @@ const CreateRole = () => {
           type="checkbox"
           id={`privilege_${privilege.value}`}
           value={privilege.value}
+          checked={selectedPrivileges.includes(privilege.value)}
           onChange={() => handlePrivilegeChange(privilege.value)}
           className="mr-2"
         />
@@ -219,22 +231,26 @@ const CreateRole = () => {
                   Role Name<sup className="text-red-900 font-bold">*</sup>
                 </label>
                 <input
-                  id="roleName"
+                  id="role"
                   type="text"
                   placeholder="Enter role name..."
-                  {...register("roleName", {
+                  {...register("role", {
                     required: "Role Name is required",
                     minLength: {
-                      value: 3,
-                      message: "Role Name must be at least 3 characters",
+                      value: 2,
+                      message: "Role Name must be at least 2 characters",
+                    },
+                    pattern: {
+                      value: /^[A-Za-z ]+$/,
+                      message: "Role Name must contain only letters",
                     },
                   })}
                   className={`shadow appearance-none border rounded w-full mt-2 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                     darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
                   }`}
                 />
-                {errors.roleName && (
-                  <p className="text-red-500 mt-1">{errors.roleName.message}</p>
+                {errors.role && (
+                  <p className="text-red-500 mt-1">{errors.role.message}</p>
                 )}
               </div>
               <button
@@ -255,4 +271,4 @@ const CreateRole = () => {
   );
 };
 
-export default CreateRole;
+export default CreateUpdateRole;
