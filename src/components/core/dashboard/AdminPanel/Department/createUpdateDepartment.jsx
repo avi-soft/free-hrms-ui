@@ -170,9 +170,7 @@ const CreateUpdateDepartment = () => {
               }`}
             />
             {errors.department && (
-              <p className="text-red-500 mt-1">
-                {errors.department.message}
-              </p>
+              <p className="text-red-500 mt-1">{errors.department.message}</p>
             )}
           </div>
           <div className="mb-4">
@@ -201,9 +199,7 @@ const CreateUpdateDepartment = () => {
               }`}
             />
             {errors.description && (
-              <p className="text-red-500  mt-1">
-                {errors.description.message}
-              </p>
+              <p className="text-red-500  mt-1">{errors.description.message}</p>
             )}
           </div>
           <div className="mb-4">
@@ -253,12 +249,14 @@ const CreateUpdateDepartment = () => {
                 </div>
               ))}
             </div>
-          ) : noSearch && (
-            <div className="mb-4">
-              <p className="text-red-500 text-sm font-semibold">
-                No employees found with the given search term.
-              </p>
-            </div>
+          ) : (
+            noSearch && (
+              <div className="mb-4">
+                <p className="text-red-500 text-sm font-semibold">
+                  No employees found with the given search term.
+                </p>
+              </div>
+            )
           )}
           {selectedManager && (
             <div className="mb-4">

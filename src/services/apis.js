@@ -87,4 +87,5 @@ export const RoleEndpoints = {
   GET_ROLE_REQUEST: BASE_URL + "/role",
   UPDATE_ROLE_REQUEST: BASE_URL + "/role",
   ADD_ROLE_REQUEST: BASE_URL + "/role",
+  DELETE_ROLE_REQUEST: BASE_URL + `/role`,
 };
