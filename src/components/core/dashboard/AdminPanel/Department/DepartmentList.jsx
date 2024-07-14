@@ -85,110 +85,119 @@ const DepartmentList = () => {
             </div>
           </div>
           {/* Section 3 */}
-          <div className="p-5">
-            <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-              <table className="min-w-full text-sm text-left">
-                <thead
-                  className={`${
-                    darkMode
-                      ? "bg-slate-700 text-white"
-                      : "bg-slate-200 text-black"
-                  } text-xs uppercase`}
-                >
-                  <tr>
-                    <th
-                      scope="col"
-                      className="px-6 py-3"
-                      data-testid="Department-Name-header"
-                    >
-                      Department Name
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3"
-                      data-testid="Department-Manager-header"
-                    >
-                      Department Manager
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3"
-                      data-testid="Department-Description-header"
-                    >
-                      Department Description
-                    </th>
-                    <th
-                      scope="col"
-                      className="px-6 py-3"
-                      data-testid="action-header"
-                    >
-                      Action
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {departments?.map((department, index) => (
-                    <tr
-                      key={department.departmentId}
-                      className={
-                        index % 2 === 0
-                          ? darkMode
-                            ? "bg-slate-600 text-white"
-                            : "bg-white text-black"
-                          : darkMode
-                          ? "bg-slate-700 text-white"
-                          : "bg-gray-100 text-black"
-                      }
-                    >
-                      <td className="px-6 py-4">{department.department}</td>
-                      <td className="px-6 py-4">
-                        {department?.managerId
-                          ? `${department.managerFirstName} ${department.managerLastName}`
-                          : "N/A"}
-                      </td>
-                      <td className="px-6 py-4">{department.description}</td>
-                      <td className="px-6 py-4 flex gap-x-2">
-                        <button
-                          className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
-                          onClick={() =>
-                            navigate(`/department/department-create-update`, {
-                              state: { isEditing: true, department },
-                            })
-                          }
-                        >
-                          <FaRegEdit />
-                        </button>
-                        <Link
-                          onClick={() =>
-                            setConfirmationModal({
-                              text1: "Are You Sure?",
-                              text2:
-                                "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
-                              btn1Text: "Delete Department",
-                              btn2Text: "Cancel",
-                              btn1Handler: async () => {
-                                 dispatch(
-                                  deleteDepartment(
-                                    AccessToken,
-                                    department.departmentId
-                                  )
-                                );
-                                refreshPage();
-                              },
-                              btn2Handler: () => setConfirmationModal(null),
-                            })
-                          }
-                          className="text-red-600 text-lg"
-                        >
-                          <RiDeleteBin6Line />
-                        </Link>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
+
+          {departments.length === 0 ? (
+            <div>
+              <h1 className="text-center text-2xl mt-10">
+                No Departments Found
+              </h1>
             </div>
-          </div>
+          ) : (
+            <div className="p-5">
+              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                <table className="min-w-full text-sm text-left">
+                  <thead
+                    className={`${
+                      darkMode
+                        ? "bg-slate-700 text-white"
+                        : "bg-slate-200 text-black"
+                    } text-xs uppercase`}
+                  >
+                    <tr>
+                      <th
+                        scope="col"
+                        className="px-6 py-3"
+                        data-testid="Department-Name-header"
+                      >
+                        Department Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3"
+                        data-testid="Department-Manager-header"
+                      >
+                        Department Manager
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3"
+                        data-testid="Department-Description-header"
+                      >
+                        Department Description
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3"
+                        data-testid="action-header"
+                      >
+                        Action
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {departments?.map((department, index) => (
+                      <tr
+                        key={department.departmentId}
+                        className={
+                          index % 2 === 0
+                            ? darkMode
+                              ? "bg-slate-600 text-white"
+                              : "bg-white text-black"
+                            : darkMode
+                            ? "bg-slate-700 text-white"
+                            : "bg-gray-100 text-black"
+                        }
+                      >
+                        <td className="px-6 py-4">{department.department}</td>
+                        <td className="px-6 py-4">
+                          {department?.managerId
+                            ? `${department.managerFirstName} ${department.managerLastName}`
+                            : "N/A"}
+                        </td>
+                        <td className="px-6 py-4">{department.description}</td>
+                        <td className="px-6 py-4 flex gap-x-2">
+                          <button
+                            className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
+                            onClick={() =>
+                              navigate(`/department/department-create-update`, {
+                                state: { isEditing: true, department },
+                              })
+                            }
+                          >
+                            <FaRegEdit />
+                          </button>
+                          <Link
+                            onClick={() =>
+                              setConfirmationModal({
+                                text1: "Are You Sure?",
+                                text2:
+                                  "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
+                                btn1Text: "Delete Department",
+                                btn2Text: "Cancel",
+                                btn1Handler: async () => {
+                                  dispatch(
+                                    deleteDepartment(
+                                      AccessToken,
+                                      department.departmentId
+                                    )
+                                  );
+                                  refreshPage();
+                                },
+                                btn2Handler: () => setConfirmationModal(null),
+                              })
+                            }
+                            className="text-red-600 text-lg"
+                          >
+                            <RiDeleteBin6Line />
+                          </Link>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
 
           {confirmationModal && (
             <ConfirmationModal modalData={confirmationModal} />
