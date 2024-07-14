@@ -5,7 +5,10 @@ import { Link, useNavigate } from "react-router-dom";
 import ExportDataJSON from "../../../../../utils/ExportFromJson";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
 import Spinner from "../../../../common/Spinner";
-import { getRole } from "../../../../../services/operations/roleAPI";
+import {
+  deleteRole,
+  getRole,
+} from "../../../../../services/operations/roleAPI";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 
@@ -178,8 +181,11 @@ const RoleList = () => {
                                   btn1Text: "Delete Role",
                                   btn2Text: "Cancel",
                                   btn1Handler: async () => {
-                                    // Implement role deletion logic
-                                    refreshPage();
+                                    const response = dispatch(
+                                      deleteRole(AccessToken, role?.role)
+                                    );
+                                    console.log(response);
+                                    // refreshPage();
                                   },
                                   btn2Handler: () => setConfirmationModal(null),
                                 })
