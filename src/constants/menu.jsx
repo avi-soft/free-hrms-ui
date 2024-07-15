@@ -235,7 +235,7 @@ const MenuItems = () => {
         ],
       },
     ];
-  } else if (AccessToken && user?.roles[0].role === "Manager") {
+  } else if (AccessToken && user?.roles[0].role === "Manage") {
     return [
       { key: "navigation", label: t("MANAGER PANEL"), isTitle: true },
       {
