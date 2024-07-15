@@ -93,8 +93,12 @@ const CreateUpdateRole = () => {
       return;
     }
 
+    // Trim and format the role name
+    const formattedRoleName = data.role.trim().replace(/\s+/g, " ");
+
     const formData = {
       ...data,
+      role: formattedRoleName,
       privilege: selectedPrivileges,
     };
     console.log(formData);
@@ -171,15 +175,15 @@ const CreateUpdateRole = () => {
           }`}
         >
           <li>
+            Fill out the role name and submit the form to{" "}
+            {isEditing ? "update" : "create"} the role.
+          </li>
+          <li>
             Select the appropriate tab to view the privileges related to a
             specific group (e.g., Leave, Department).
           </li>
           <li>
             Check the boxes for the privileges you want to assign to the role.
-          </li>
-          <li>
-            Fill out the role name and submit the form to{" "}
-            {isEditing ? "update" : "create"} the role.
           </li>
         </ol>
       </div>
@@ -213,6 +217,13 @@ const CreateUpdateRole = () => {
                   pattern: {
                     value: /^[A-Za-z ]+$/,
                     message: "Role Name must contain only letters",
+                  },
+                  validate: (value) => {
+                    const trimmedValue = value.trim();
+                    return (
+                      /^[A-Za-z]+(\s[A-Za-z]+)*$/.test(trimmedValue) ||
+                      "Role Name must contain only letters and single spaces between words"
+                    );
                   },
                 })}
                 className={`shadow appearance-none border rounded w-full mt-2 py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
