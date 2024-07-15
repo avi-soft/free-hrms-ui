@@ -29,6 +29,7 @@ const CreateUpdateRole = () => {
     role: null,
   };
 
+  console.log(role);
   const {
     register,
     handleSubmit,
@@ -96,9 +97,9 @@ const CreateUpdateRole = () => {
       ...data,
       privilege: selectedPrivileges,
     };
-    console.log(formData)
+    console.log(formData);
     if (isEditing) {
-      await dispatch(updateRole(AccessToken, formData, navigate));
+      await dispatch(updateRole(AccessToken, role?.roleId, formData, navigate));
     } else {
       await dispatch(addRole(AccessToken, formData, navigate));
     }

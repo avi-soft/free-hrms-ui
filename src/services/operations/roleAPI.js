@@ -37,15 +37,20 @@ export const addRole = (AccessToken, body, navigate) => {
   };
 };
 
-export const updateRole = (AccessToken, body, navigate) => {
+export const updateRole = (AccessToken, roleId, body, navigate) => {
   return async (dispatch) => {
     const toastId = toast.loading("Updating...");
     try {
       console.log(AccessToken);
       console.log(body);
-      const response = await apiConnector("PATCH", UPDATE_ROLE_REQUEST, body, {
-        Authorization: `Bearer ${AccessToken}`,
-      });
+      const response = await apiConnector(
+        "PATCH",
+        UPDATE_ROLE_REQUEST(roleId),
+        body,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
       console.log(response);
       if (response?.status != 204) throw new Error(response?.data?.message);
       else {
@@ -93,13 +98,20 @@ export const deleteRole = (AccessToken, body) => {
     const toastId = toast.loading("Deleting...");
     try {
       console.log(AccessToken);
-      const response = await apiConnector("DELETE", DELETE_ROLE_REQUEST, body, {
-        Authorization: `Bearer ${AccessToken}`,
-      });
+      console.log(body);
+      const response = await apiConnector(
+        "DELETE",
+        DELETE_ROLE_REQUEST,
+        {
+          role: body,
+        },
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
       console.log(response);
       if (response?.status != 200) throw new Error(response?.data?.message);
       else {
-        toast.success(response?.data?.message);
         return response;
       }
     } catch (err) {
