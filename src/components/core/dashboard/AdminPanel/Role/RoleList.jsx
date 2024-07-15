@@ -30,7 +30,7 @@ const RoleList = () => {
     try {
       setLoading(true);
       console.log("Fetching roles...");
-      const res = await dispatch(getRole());
+      const res = await dispatch(getRole(AccessToken));
       setRoles(res?.data);
     } catch (error) {
       console.error("Error fetching roles", error);

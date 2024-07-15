@@ -70,11 +70,13 @@ export const updateRole = (AccessToken, roleId, body, navigate) => {
   };
 };
 
-export const getRole = () => {
+export const getRole = (AccessToken) => {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...");
     try {
-      const response = await apiConnector("GET", GET_ROLE_REQUEST);
+      const response = await apiConnector("GET", GET_ROLE_REQUEST,null, {
+        Authorization: `Bearer ${AccessToken}`,
+      });
       console.log(response);
       if (response?.status != 200) throw new Error(response?.data?.message);
       else {
