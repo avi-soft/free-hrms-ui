@@ -183,7 +183,7 @@ const RoleList = () => {
                                   btn2Text: "Cancel",
                                   btn1Handler: async () => {
                                     const response = await dispatch(
-                                      deleteRole(AccessToken, role?.role)
+                                      deleteRole(AccessToken, role?.roleId)
                                     );
                                     console.log(response);
                                     if (response?.status != 200) return null;
