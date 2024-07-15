@@ -10,7 +10,6 @@ const LoginFormTemplate = () => {
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const [selectedRole, setSelectedRole] = useState("");
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { darkMode } = useSelector((state) => state.theme);
@@ -20,7 +19,6 @@ const LoginFormTemplate = () => {
       return;
     }
     data.navigate = navigate;
-    data.role = selectedRole;
     dispatch(login(data));
   };
 
@@ -61,41 +59,15 @@ const LoginFormTemplate = () => {
               onSubmit={handleSubmit(onSubmit)}
               action="#"
             >
-              <div className="mt-3 mb-3">
-                <label
-                  data-testid="role-select-label"
-                  htmlFor="role"
-                  className="block text-sm font-medium"
-                >
-                  Select Role<sup className="text-red-600 ml-1">*</sup>
-                </label>
-                <select
-                  id="role"
-                  name="role"
-                  className={`mt-1 block w-full py-2 px-3 border rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white border-gray-300 text-black"
-                  }`}
-                  value={selectedRole}
-                  onChange={(e) => setSelectedRole(e.target.value)}
-                  data-testid="role-select"
-                >
-                  <option value="">Select Role</option>
-                  <option value="Admin">Admin</option>
-                  <option value="Superadmin">Super Admin</option>
-                  <option value="Employee">Employee</option>
-                </select>
-              </div>
+              <div className="mt-3 mb-3"></div>
               <label data-testid="email-label" className="w-full">
                 <p className="text-[0.875rem] mb-1 leading-[1.375rem]">
                   Email Address<sup className="text-red-600  ml-1">*</sup>
                 </p>
                 <input
-                 
                   name="Email"
                   id="Email"
-                  {...register('email', {
+                  {...register("email", {
                     required: true,
                     pattern:
                       /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
@@ -106,11 +78,12 @@ const LoginFormTemplate = () => {
                       : "bg-white border-gray-300 text-black"
                   }`}
                   data-testid="email-input"
-                
                   placeholder="Enter Email Address"
                 />
               </label>
-              {errors.email && <p className="text-red-400 mt-2">Please enter a valid email.</p>}
+              {errors.email && (
+                <p className="text-red-400 mt-2">Please enter a valid email.</p>
+              )}
               <div className="mt-5">
                 <label data-testid="password-label" className="w-full">
                   <p className="text-[0.875rem] mb-1 leading-[1.375rem]">
@@ -122,12 +95,11 @@ const LoginFormTemplate = () => {
                       type="password"
                       name="password"
                       id="password"
-                      {...register('password', {
+                      {...register("password", {
                         required: true,
-                        minLength:5,
+                        minLength: 5,
                         maxLength: 20,
-                        
-                        })}
+                      })}
                       className={`rounded-[0.5rem] w-full p-[12px] pr-[36px] border-b-[1px] ${
                         darkMode
                           ? "bg-gray-700 border-gray-600 text-white"
@@ -135,7 +107,12 @@ const LoginFormTemplate = () => {
                       }`}
                       placeholder="Enter Password"
                     />
-                    {errors.password && <p className="text-red-400 mt-2">Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character.</p>}
+                    {errors.password && (
+                      <p className="text-red-400 mt-2">
+                        Password must contain at least one uppercase letter, one
+                        lowercase letter, one number, and one special character.
+                      </p>
+                    )}
                   </div>
                   <div className="flex items-center justify-end mt-2">
                     <Link

@@ -11,6 +11,7 @@ import {
 } from "../../../../../services/operations/roleAPI";
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
+import toast from "react-hot-toast";
 
 const RoleList = () => {
   const dispatch = useDispatch();
@@ -181,11 +182,15 @@ const RoleList = () => {
                                   btn1Text: "Delete Role",
                                   btn2Text: "Cancel",
                                   btn1Handler: async () => {
-                                    const response = dispatch(
+                                    const response = await dispatch(
                                       deleteRole(AccessToken, role?.role)
                                     );
                                     console.log(response);
-                                    // refreshPage();
+                                    if (response?.status != 200) return null;
+                                    else {
+                                      refreshPage();
+                                      toast.success(response?.data?.message);
+                                    }
                                   },
                                   btn2Handler: () => setConfirmationModal(null),
                                 })

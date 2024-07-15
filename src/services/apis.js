@@ -85,7 +85,7 @@ export const LeaveEndpoints = {
 // Role Endpoints
 export const RoleEndpoints = {
   GET_ROLE_REQUEST: BASE_URL + "/role",
-  UPDATE_ROLE_REQUEST: BASE_URL + "/role",
+  UPDATE_ROLE_REQUEST: (roleId) => BASE_URL + `/role/${roleId}`,
   ADD_ROLE_REQUEST: BASE_URL + "/role",
   DELETE_ROLE_REQUEST: BASE_URL + `/role`,
 };
