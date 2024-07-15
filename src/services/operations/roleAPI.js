@@ -95,18 +95,15 @@ export const getRole = (AccessToken) => {
   };
 };
 
-export const deleteRole = (AccessToken, body) => {
+export const deleteRole = (AccessToken,roleId) => {
   return async (dispatch) => {
     const toastId = toast.loading("Deleting...");
     try {
       console.log(AccessToken);
-      console.log(body);
       const response = await apiConnector(
         "DELETE",
-        DELETE_ROLE_REQUEST,
-        {
-          role: body,
-        },
+        DELETE_ROLE_REQUEST(roleId),
+        null,
         {
           Authorization: `Bearer ${AccessToken}`,
         }
