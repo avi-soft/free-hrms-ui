@@ -6,6 +6,8 @@ import SidebarLink from "./SidebarLink";
 function Sidebar() {
   const { darkMode } = useSelector((state) => state.theme);
   const menuItems = MenuItems();
+
+  console.log(menuItems);
   const slicedMenuItems = menuItems.slice(1);
 
   return (
