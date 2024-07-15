@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../../services/operations/authAPI";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 const LoginFormTemplate = () => {
   const {
@@ -14,12 +15,18 @@ const LoginFormTemplate = () => {
   const navigate = useNavigate();
   const { darkMode } = useSelector((state) => state.theme);
 
+  const [showPassword, setShowPassword] = useState(false);
+
   const onSubmit = async (data) => {
     if (!data.password) {
       return;
     }
     data.navigate = navigate;
     dispatch(login(data));
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
   return (
@@ -92,7 +99,7 @@ const LoginFormTemplate = () => {
                   <div className="relative">
                     <input
                       data-testid="password-input"
-                      type="password"
+                      type={showPassword ? "text" : "password"}
                       name="password"
                       id="password"
                       {...register("password", {
@@ -107,10 +114,15 @@ const LoginFormTemplate = () => {
                       }`}
                       placeholder="Enter Password"
                     />
+                    <span
+                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                      onClick={togglePasswordVisibility}
+                    >
+                      {showPassword ? <FaEyeSlash /> : <FaEye />}
+                    </span>
                     {errors.password && (
                       <p className="text-red-400 mt-2">
-                        Password must contain at least one uppercase letter, one
-                        lowercase letter, one number, and one special character.
+                        Password must be between 5 and 20 characters.
                       </p>
                     )}
                   </div>

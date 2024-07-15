@@ -1,10 +1,18 @@
-import React from "react";
+import React, { useEffect } from "react";
 import LoginFormTemplate from "../components/core/Form/LoginFormTemplate";
 import { useSelector } from "react-redux";
 import Spinner from "../components/common/Spinner";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const { loading } = useSelector((state) => state.auth);
+  const { loading , AccessToken} = useSelector((state) => state.auth);
+  const navigate  = useNavigate();
+
+  useEffect(()=>{
+    if(AccessToken){
+      navigate("/")
+      }
+  },[]);
 
   return (
     <div className="">
