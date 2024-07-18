@@ -245,7 +245,171 @@ const MenuItems = () => {
         isTitle: false,
         icon: <RiDashboardLine className="side-bar-item-icon" />,
       },
-      {
+      // {
+      //   key: "Department",
+      //   label: t("Department"),
+      //   isTitle: false,
+      //   icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+      //   children: [
+      //     {
+      //       key: "NewDepartment",
+      //       label: t("New Department"),
+      //       url: "/department/department-create-update",
+      //       parentKey: "Department",
+      //       icon: (
+      //         <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+      //       ),
+      //     },
+      //     {
+      //       key: "DepartmentList",
+      //       label: t("Department List"),
+      //       url: "/department/department-list",
+      //       parentKey: "Department",
+      //       icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+      //     },
+      //   ],
+      // },
+      // {
+      //   key: "Department",
+      //   label: t("Department"),
+      //   isTitle: false,
+      //   icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+      //   children: [
+      //     {
+      //       key: "NewDepartment",
+      //       label: t("New Department"),
+      //       url: "/department/department-create-update",
+      //       parentKey: "Department",
+      //       icon: (
+      //         <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+      //       ),
+      //     },
+      //     {
+      //       key: "DepartmentList",
+      //       label: t("Department List"),
+      //       url: "/department/department-list",
+      //       parentKey: "Department",
+      //       icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+      //     },
+      //   ],
+      // },    {
+      //   key: "Department",
+      //   label: t("Department"),
+      //   isTitle: false,
+      //   icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+      //   children: [
+      //     {
+      //       key: "NewDepartment",
+      //       label: t("New Department"),
+      //       url: "/department/department-create-update",
+      //       parentKey: "Department",
+      //       icon: (
+      //         <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+      //       ),
+      //     },
+      //     {
+      //       key: "DepartmentList",
+      //       label: t("Department List"),
+      //       url: "/department/department-list",
+      //       parentKey: "Department",
+      //       icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+      //     },
+      //   ],
+      // },    {
+      //   key: "Department",
+      //   label: t("Department"),
+      //   isTitle: false,
+      //   icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+      //   children: [
+      //     {
+      //       key: "NewDepartment",
+      //       label: t("New Department"),
+      //       url: "/department/department-create-update",
+      //       parentKey: "Department",
+      //       icon: (
+      //         <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+      //       ),
+      //     },
+      //     {
+      //       key: "DepartmentList",
+      //       label: t("Department List"),
+      //       url: "/department/department-list",
+      //       parentKey: "Department",
+      //       icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+      //     },
+      //   ],
+      // },    {
+      //   key: "Department",
+      //   label: t("Department"),
+      //   isTitle: false,
+      //   icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+      //   children: [
+      //     {
+      //       key: "NewDepartment",
+      //       label: t("New Department"),
+      //       url: "/department/department-create-update",
+      //       parentKey: "Department",
+      //       icon: (
+      //         <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+      //       ),
+      //     },
+      //     {
+      //       key: "DepartmentList",
+      //       label: t("Department List"),
+      //       url: "/department/department-list",
+      //       parentKey: "Department",
+      //       icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+      //     },
+      //   ],
+      // },    {
+      //   key: "Department",
+      //   label: t("Department"),
+      //   isTitle: false,
+      //   icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+      //   children: [
+      //     {
+      //       key: "NewDepartment",
+      //       label: t("New Department"),
+      //       url: "/department/department-create-update",
+      //       parentKey: "Department",
+      //       icon: (
+      //         <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+      //       ),
+      //     },
+      //     {
+      //       key: "DepartmentList",
+      //       label: t("Department List"),
+      //       url: "/department/department-list",
+      //       parentKey: "Department",
+      //       icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+      //     },
+      //   ],
+      // },
+      //     {
+      //   key: "Department",
+      //   label: t("Department"),
+      //   isTitle: false,
+      //   icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+      //   children: [
+      //     {
+      //       key: "NewDepartment",
+      //       label: t("New Department"),
+      //       url: "/department/department-create-update",
+      //       parentKey: "Department",
+      //       icon: (
+      //         <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+      //       ),
+      //     },
+      //     {
+      //       key: "DepartmentList",
+      //       label: t("Department List"),
+      //       url: "/department/department-list",
+      //       parentKey: "Department",
+      //       icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+      //     },
+      //   ],
+      // },
+          {
         key: "Department",
         label: t("Department"),
         isTitle: false,

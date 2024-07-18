@@ -11,24 +11,35 @@ import {
   Departmentlist,
 } from "../../../../../services/operations/departmentAPI.js";
 import Spinner from "../../../../common/Spinner.jsx";
+import {
+  setDepartments,
+  setLoading,
+} from "../../../../../slices/departmentSlice.js";
 
 const DepartmentList = () => {
-  const [departments, setDepartments] = useState([]);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
   const dispatch = useDispatch();
-  const [loading, setLoading] = useState(true);
+  const { loading } = useSelector((state) => state.department);
+  const { AllDepartments } = useSelector((state) => state.department);
   const navigate = useNavigate();
+
+  const departments=AllDepartments;
+
+  console.log(departments)
 
   useEffect(() => {
     const fetchEmployeesList = async () => {
       try {
+        dispatch(setLoading(true));
         const res = await dispatch(Departmentlist(AccessToken));
-        setDepartments(res?.data);
-        setLoading(false);
+        dispatch(setDepartments(res?.data));
+        dispatch(setLoading(false));
       } catch (error) {
         console.error("Error fetching departments", error);
+      } finally {
+        dispatch(setLoading(false));
       }
     };
 
