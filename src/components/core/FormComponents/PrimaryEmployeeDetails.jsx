@@ -49,7 +49,7 @@ const PrimaryEmployeeDetails = () => {
           data-testid="create-employee-form"
           className={`p-5 w-[60%] mt-5 ${darkMode ? 'bg-slate-600' : 'bg-slate-200'} shadow-lg rounded`}
           onSubmit={handleSubmit(onSubmit)}
-          style={{ position: 'relative', zIndex: 1 }} // Ensures dropdown options display below
+          style={{ position: 'relative', zIndex: 1 }} 
         >
           <div className="mt-4">
             <label htmlFor="email" className={`block text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>

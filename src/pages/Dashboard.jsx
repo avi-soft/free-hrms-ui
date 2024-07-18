@@ -9,7 +9,7 @@ function Dashboard() {
   const { darkMode } = useSelector((state) => state.theme);
 
   return (
-    <div className={` h-max ${darkMode ? " bg-slate-600" : " bg-slate-200"} `}>
+    <div className={`  ${darkMode ? " bg-slate-600" : " bg-slate-200"} `}>
       <div className=" relative">
         <NavBar backgroundColor={1} />
       </div>
@@ -18,7 +18,7 @@ function Dashboard() {
           <Sidebar />
         </div>
         <div className=" w-[85%] pt-[40px] relative">
-          <div className=" mx-auto w-11/12">
+          <div className={` mx-auto w-11/1 `}>
             <Outlet />
           </div>
         </div>
