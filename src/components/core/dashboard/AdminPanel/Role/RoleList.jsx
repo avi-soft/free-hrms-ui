@@ -80,6 +80,7 @@ const RoleList = () => {
             </div>
           </div>
           <div className="m-5 flex items-center justify-between rounded p-5">
+          <Link to="/role/role-create-update"> 
             <div
               className={`flex items-center ${
                 darkMode ? "primary-gradient" : ""
@@ -89,9 +90,10 @@ const RoleList = () => {
                 <HiOutlinePlusCircle />
               </span>
               <button>
-                <Link to="/role/role-create-update">New Role</Link>
-              </button>
+                New Role
+              </button>           
             </div>
+            </Link>
           </div>
           <div className="p-5">
             {roles?.length > 0 ? (

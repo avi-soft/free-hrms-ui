@@ -10,6 +10,7 @@ const LoginFormTemplate = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -18,16 +19,49 @@ const LoginFormTemplate = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data) => {
-    if (!data.password) {
+    console.log("pressed")
+    console.log(data.password);
+    console.log(data.email)
+    if (!data.password || !data.email) {
       return;
     }
-    data.navigate = navigate;
-    dispatch(login(data));
+
+    try {
+      data.navigate = navigate;
+      await dispatch(login(data));
+    } catch (error) {
+      setError("password", {
+        type: "server",
+        message: "Failed to login. Please check your credentials.",
+      });
+    }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
+
+  const emailPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([a-zA-Z\-]+\.)*[a-zA-Z]{2,})$/;
+
+  const validatePassword = (value) => {
+    if (!/[A-Z]/.test(value)) {
+      return "Password must contain at least one uppercase letter.";
+    }
+    if (!/[a-z]/.test(value)) {
+      return "Password must contain at least one lowercase letter.";
+    }
+    if (!/\d/.test(value)) {
+      return "Password must contain at least one digit.";
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+      return "Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>).";
+    }
+    if (value.length < 8 || value.length > 20) {
+      return "Password must be between 8 and 20 characters.";
+    }
+    return true;
+  };
+  
 
   return (
     <div
@@ -76,8 +110,7 @@ const LoginFormTemplate = () => {
                   id="Email"
                   {...register("email", {
                     required: true,
-                    pattern:
-                      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                    pattern: emailPattern,
                   })}
                   className={`rounded-[0.5rem] w-full p-[12px] border-b-[1px] ${
                     darkMode
@@ -88,8 +121,10 @@ const LoginFormTemplate = () => {
                   placeholder="Enter Email Address"
                 />
               </label>
-              {errors.email && (
-                <p className="text-red-400 mt-2">Please enter a valid email.</p>
+              {errors.email && errors.email.type === "pattern" && (
+                <p className="text-red-400 mt-2">
+                  Please enter a valid email address.
+                </p>
               )}
               <div className="mt-5">
                 <label data-testid="password-label" className="w-full">
@@ -104,8 +139,7 @@ const LoginFormTemplate = () => {
                       id="password"
                       {...register("password", {
                         required: true,
-                        minLength: 5,
-                        maxLength: 20,
+                        validate: validatePassword,
                       })}
                       className={`rounded-[0.5rem] w-full p-[12px] pr-[36px] border-b-[1px] ${
                         darkMode
@@ -115,14 +149,14 @@ const LoginFormTemplate = () => {
                       placeholder="Enter Password"
                     />
                     <span
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
+                      className="relative -top-8 left-80 ml-[20px] inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                       onClick={togglePasswordVisibility}
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
                     {errors.password && (
                       <p className="text-red-400 mt-2">
-                        Password must be between 5 and 20 characters.
+                        {errors.password.message}
                       </p>
                     )}
                   </div>

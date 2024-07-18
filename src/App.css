@@ -44,3 +44,31 @@ html, body{
     
   }
 
+/* For Chrome, Safari, and Opera */
+.scrollbar-dark::-webkit-scrollbar {
+  width: 12px;
+}
+
+.scrollbar-dark::-webkit-scrollbar-track {
+  background: darkslategrey;
+}
+
+.scrollbar-dark::-webkit-scrollbar-thumb {
+  background-color: #334155;
+  border-radius: 10px;
+  border: 3px solid #434c58;
+}
+
+.scrollbar-light::-webkit-scrollbar {
+  width: 12px;
+}
+
+.scrollbar-light::-webkit-scrollbar-track {
+  background: lightgray;
+}
+
+.scrollbar-light::-webkit-scrollbar-thumb {
+  background-color: gray;
+  border-radius: 10px;
+  border: 3px solid lightgray;
+}

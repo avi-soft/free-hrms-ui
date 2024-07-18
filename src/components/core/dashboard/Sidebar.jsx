@@ -7,18 +7,21 @@ function Sidebar() {
   const { darkMode } = useSelector((state) => state.theme);
   const menuItems = MenuItems();
 
-  console.log(menuItems);
   const slicedMenuItems = menuItems.slice(1);
 
   return (
     <div className="relative">
-      <div className=" left-0 scroll-auto">
+      <div className="fixed left-0 h-screen">
         <div
-          className={` flex min-w-[250px]  flex-col border-r-[3px] ${
+          className={`flex min-w-[250px] h-full flex-col border-r-[3px] overflow-y-auto  ${
             darkMode
-              ? "border-r-gray-700 bg-slate-700"
-              : "border-r-richblack-700 bg-white"
+              ? "border-r-gray-700 bg-slate-700 scrollbar-dark"
+              : "border-r-richblack-700 bg-white scrollbar-light"
           } py-10 shadow-xl transition-all duration-300`}
+          style={{
+            scrollbarColor: darkMode ? "#334155 #434c58" : "auto",
+            scrollbarWidth: "thin",
+          }}
         >
           <div className="flex flex-col justify-center">
             <div
