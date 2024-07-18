@@ -12,9 +12,9 @@ function Sidebar() {
 
   return (
     <div className="relative">
-      <div className="fixed left-0">
+      <div className=" left-0 scroll-auto">
         <div
-          className={`flex min-w-[250px] h-screen flex-col border-r-[3px] ${
+          className={` flex min-w-[250px]  flex-col border-r-[3px] ${
             darkMode
               ? "border-r-gray-700 bg-slate-700"
               : "border-r-richblack-700 bg-white"
@@ -36,7 +36,7 @@ function Sidebar() {
           </div>
           <div
             className={`mx-auto my-6 h-[1px] w-10/12 ${
-              darkMode ? "bg-gray-600" : "bg-richblack-600"
+              darkMode ? "bg-gray-600" : "bg-slate-600"
             }`}
           ></div>
         </div>
