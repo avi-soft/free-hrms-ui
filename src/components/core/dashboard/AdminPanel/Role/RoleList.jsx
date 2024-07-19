@@ -62,6 +62,7 @@ const RoleList = () => {
         >
           <div className="p-5 flex items-center justify-between">
             <div
+              data-testid="Role List"
               className={`text-xl ${
                 darkMode ? "text-white" : "text-slate-600"
               } font-semibold`}
@@ -75,24 +76,24 @@ const RoleList = () => {
                 }`}
               >
                 Home / Dashboard /{" "}
-                <span className="text-yellow-700">Role List</span>
+                <span data-testid="side-header" className="text-yellow-700">
+                  Role List
+                </span>
               </p>
             </div>
           </div>
           <div className="m-5 flex items-center justify-between rounded p-5">
-          <Link to="/role/role-create-update"> 
-            <div
-              className={`flex items-center ${
-                darkMode ? "primary-gradient" : ""
-              } text-white gap-x-1 bg-red-600 w-fit p-2 rounded-lg`}
-            >
-              <span>
-                <HiOutlinePlusCircle />
-              </span>
-              <button>
-                New Role
-              </button>           
-            </div>
+            <Link to="/role/role-create-update">
+              <div
+                className={`flex items-center ${
+                  darkMode ? "primary-gradient" : ""
+                } text-white gap-x-1 bg-red-600 w-fit p-2 rounded-lg`}
+              >
+                <span>
+                  <HiOutlinePlusCircle />
+                </span>
+                <button>New Role</button>
+              </div>
             </Link>
           </div>
           <div className="p-5">

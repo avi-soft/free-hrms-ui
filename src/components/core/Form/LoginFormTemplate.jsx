@@ -19,9 +19,9 @@ const LoginFormTemplate = () => {
   const [showPassword, setShowPassword] = useState(false);
 
   const onSubmit = async (data) => {
-    console.log("pressed")
+    console.log("pressed");
     console.log(data.password);
-    console.log(data.email)
+    console.log(data.email);
     if (!data.password || !data.email) {
       return;
     }
@@ -41,7 +41,8 @@ const LoginFormTemplate = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
   };
 
-  const emailPattern = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([a-zA-Z\-]+\.)*[a-zA-Z]{2,})$/;
+  const emailPattern =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([a-zA-Z\-]+\.)*[a-zA-Z]{2,})$/;
 
   const validatePassword = (value) => {
     if (!/[A-Z]/.test(value)) {
@@ -54,14 +55,13 @@ const LoginFormTemplate = () => {
       return "Password must contain at least one digit.";
     }
     if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
-      return "Password must contain at least one special character (!@#$%^&*(),.?\":{}|<>).";
+      return 'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>).';
     }
     if (value.length < 8 || value.length > 20) {
       return "Password must be between 8 and 20 characters.";
     }
     return true;
   };
-  
 
   return (
     <div
@@ -95,11 +95,7 @@ const LoginFormTemplate = () => {
             >
               Sign in to your account
             </h1>
-            <form
-              data-testid="login-form"
-              onSubmit={handleSubmit(onSubmit)}
-              action="#"
-            >
+            <form role="form" onSubmit={handleSubmit(onSubmit)} action="#">
               <div className="mt-3 mb-3"></div>
               <label data-testid="email-label" className="w-full">
                 <p className="text-[0.875rem] mb-1 leading-[1.375rem]">
@@ -122,7 +118,7 @@ const LoginFormTemplate = () => {
                 />
               </label>
               {errors.email && errors.email.type === "pattern" && (
-                <p className="text-red-400 mt-2">
+                <p className="text-red-400 mt-2" role="alert">
                   Please enter a valid email address.
                 </p>
               )}
@@ -155,7 +151,7 @@ const LoginFormTemplate = () => {
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
                     {errors.password && (
-                      <p className="text-red-400 mt-2">
+                      <p role="alert" className="text-red-400 mt-2">
                         {errors.password.message}
                       </p>
                     )}

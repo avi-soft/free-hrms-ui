@@ -25,9 +25,9 @@ const DepartmentList = () => {
   const { AllDepartments } = useSelector((state) => state.department);
   const navigate = useNavigate();
 
-  const departments=AllDepartments;
+  const departments = AllDepartments;
 
-  console.log(departments)
+  console.log(departments);
 
   useEffect(() => {
     const fetchEmployeesList = async () => {
@@ -64,7 +64,10 @@ const DepartmentList = () => {
         <div className="pb-9  mt-3 rounded">
           {/* Section 1 */}
           <div className="p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between">
-            <div className="text-xl font-semibold mb-2 lg:mb-0">
+            <div
+              className="text-xl font-semibold mb-2 lg:mb-0"
+              data-testid="Department List"
+            >
               Department List
             </div>
             <div>
@@ -178,6 +181,7 @@ const DepartmentList = () => {
                             <FaRegEdit />
                           </button>
                           <Link
+                            data-testid="delete-button"
                             onClick={() =>
                               setConfirmationModal({
                                 text1: "Are You Sure?",

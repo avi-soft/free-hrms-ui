@@ -192,9 +192,7 @@ const CreateUpdateRole = () => {
             }`}
           >
             <li>
-              {isEditing
-                ? "Update the role name."
-                : "Fill out the role name."}
+              {isEditing ? "Update the role name." : "Fill out the role name."}
             </li>
             <li>
               Select the appropriate tab to view the privileges related to a
@@ -206,7 +204,7 @@ const CreateUpdateRole = () => {
           </ol>
         </div>
 
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form role="form" onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
             <label
               htmlFor="roleName"
