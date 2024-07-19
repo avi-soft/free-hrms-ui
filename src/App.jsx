@@ -22,6 +22,7 @@ import AllReviews from "./components/core/dashboard/AdminPanel/Performance/AllRe
 import { useSelector } from "react-redux";
 import CreateUpdateRole from "./components/core/dashboard/AdminPanel/Role/CreateUpdateRole";
 import RoleList from "./components/core/dashboard/AdminPanel/Role/RoleList";
+import OrganizationList from "./components/core/dashboard/AdminPanel/Organization/OrganizationList";
 
 function App() {
   const { darkMode } = useSelector((state) => state.theme);
@@ -50,6 +51,8 @@ function App() {
               </PrivateRoute>
             }
           >
+            <Route path="/organization/organization-list" element={<OrganizationList />} />
+
             <Route path="/employee/employee-list" element={<EmployeeList />} />
             <Route
               path="/employee/employee-create-update"
@@ -59,10 +62,7 @@ function App() {
               path="/role/role-create-update"
               element={<CreateUpdateRole />}
             />
-            <Route 
-            path= "role/role-list"
-            element={<RoleList />}
-            />
+            <Route path="role/role-list" element={<RoleList />} />
             <Route
               path="/department/department-create-update"
               element={<CreateUpdateDepartment />}
@@ -105,8 +105,6 @@ function App() {
               path="/leave/leave-list-rejected"
               element={<DeclinedLeaveList />}
             />
-            
-            
           </Route>
           <Route path="/login" element={<Login />} />
         </Routes>

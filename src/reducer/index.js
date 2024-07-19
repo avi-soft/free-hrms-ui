@@ -5,10 +5,12 @@ import employeeReducer from "../slices/employeeSlice";
 import departmentReducer from "../slices/departmentSlice"
 import editingReducer from "../slices/editingSlice";
 import themeReducer from "../slices/themeSlice";
+import OrganisationReducer from "../slices/OrganisationSlice";
 
 const rootReducer=combineReducers({
      auth: authReducer,
      profile : profileReducer,
+     Organisation:OrganisationReducer,
      employee:employeeReducer,
      department:departmentReducer,
      editing:editingReducer,

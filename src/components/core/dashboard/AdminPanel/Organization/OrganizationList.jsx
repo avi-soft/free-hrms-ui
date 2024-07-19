@@ -6,44 +6,36 @@ import { HiOutlinePlusCircle } from "react-icons/hi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteDepartment,
-  Departmentlist,
-} from "../../../../../services/operations/departmentAPI.js";
 import Spinner from "../../../../common/Spinner.jsx";
 import {
-  setDepartments,
   setLoading,
-} from "../../../../../slices/departmentSlice.js";
+  setOrganization,
+} from "../../../../../slices/OrganisationSlice.js";
 
-const DepartmentList = () => {
+const OrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.department);
-  const { AllDepartments } = useSelector((state) => state.department);
+  const { loading } = useSelector((state) => state.organization);
+  const { organizations } = useSelector((state) => state.organization);
   const navigate = useNavigate();
 
-  const departments = AllDepartments;
-
-  console.log(departments);
-
   useEffect(() => {
-    const fetchEmployeesList = async () => {
+    const fetchOrganizationList = async () => {
       try {
         dispatch(setLoading(true));
-        const res = await dispatch(Departmentlist(AccessToken));
-        dispatch(setDepartments(res?.data));
+        const res = await dispatch(getOrganization(AccessToken));
+        dispatch(setOrganization(res?.data));
         dispatch(setLoading(false));
       } catch (error) {
-        console.error("Error fetching departments", error);
+        console.error("Error fetching organizations", error);
       } finally {
         dispatch(setLoading(false));
       }
     };
 
-    fetchEmployeesList();
+    fetchOrganizationList();
   }, [dispatch, AccessToken]);
 
   function refreshPage() {
@@ -52,7 +44,7 @@ const DepartmentList = () => {
 
   return (
     <div
-      className={` h-[600px] mb-10  rounded shadow-lg ${
+      className={`h-[600px] mb-10 rounded shadow-lg ${
         darkMode ? "bg-slate-800 text-white" : "bg-slate-100 text-black"
       }`}
     >
@@ -61,19 +53,16 @@ const DepartmentList = () => {
           <Spinner />
         </div>
       ) : (
-        <div className="pb-9  mt-3 rounded">
+        <div className="pb-9 mt-3 rounded">
           {/* Section 1 */}
           <div className="p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between">
-            <div
-              className="text-xl font-semibold mb-2 lg:mb-0"
-              data-testid="Department List"
-            >
-              Department List
+            <div className="text-xl font-semibold mb-2 lg:mb-0">
+              Organization List
             </div>
             <div>
               <p className="text-xl font-semibold">
                 Home / Dashboard /
-                <span className="text-yellow-700"> Department List</span>
+                <span className="text-yellow-700"> Organization List</span>
               </p>
             </div>
           </div>
@@ -89,21 +78,21 @@ const DepartmentList = () => {
               </span>
               <button
                 onClick={() =>
-                  navigate("/department/department-create-update", {
+                  navigate("/organization/organization-create-update", {
                     state: { isEditing: false },
                   })
                 }
               >
-                Add Department
+                Add Organization
               </button>
             </div>
           </div>
           {/* Section 3 */}
 
-          {departments.length === 0 ? (
+          {organizations.length === 0 ? (
             <div>
               <h1 className="text-center text-2xl mt-10">
-                No Departments Found
+                No Organizations Found
               </h1>
             </div>
           ) : (
@@ -121,23 +110,23 @@ const DepartmentList = () => {
                       <th
                         scope="col"
                         className="px-6 py-3"
-                        data-testid="Department-Name-header"
+                        data-testid="sno-header"
                       >
-                        Department Name
+                        S No.
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3"
-                        data-testid="Department-Manager-header"
+                        data-testid="organization-name-header"
                       >
-                        Department Manager
+                        Organization Name
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3"
-                        data-testid="Department-Description-header"
+                        data-testid="organization-head-header"
                       >
-                        Department Description
+                        Organization Head
                       </th>
                       <th
                         scope="col"
@@ -149,9 +138,9 @@ const DepartmentList = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {departments?.map((department, index) => (
+                    {organizations?.map((organization, index) => (
                       <tr
-                        key={department.departmentId}
+                        key={organization.organizationId}
                         className={
                           index % 2 === 0
                             ? darkMode
@@ -162,40 +151,42 @@ const DepartmentList = () => {
                             : "bg-gray-100 text-black"
                         }
                       >
-                        <td className="px-6 py-4">{department.department}</td>
+                        <td className="px-6 py-4">{index + 1}</td>
                         <td className="px-6 py-4">
-                          {department?.managerId
-                            ? `${department.managerFirstName} ${department.managerLastName}`
+                          {organization.organizationName}
+                        </td>
+                        <td className="px-6 py-4">
+                          {organization.organizationHead
+                            ? `${organization.organizationHead.firstName} ${organization.organizationHead.lastName}`
                             : "N/A"}
                         </td>
-                        <td className="px-6 py-4">{department.description}</td>
                         <td className="px-6 py-4 flex gap-x-2">
                           <button
                             className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
                             onClick={() =>
-                              navigate(`/department/department-create-update`, {
-                                state: { isEditing: true, department },
-                              })
+                              navigate(
+                                `/organization/organization-create-update`,
+                                {
+                                  state: {
+                                    isEditing: true,
+                                    organization,
+                                  },
+                                }
+                              )
                             }
                           >
                             <FaRegEdit />
                           </button>
                           <Link
-                            data-testid="delete-button"
                             onClick={() =>
                               setConfirmationModal({
                                 text1: "Are You Sure?",
                                 text2:
-                                  "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
-                                btn1Text: "Delete Department",
+                                  "You want to Delete this Organization. Deleting this Organization may affect other functionalities. Are you sure you want to proceed?",
+                                btn1Text: "Delete Organization",
                                 btn2Text: "Cancel",
                                 btn1Handler: async () => {
-                                  dispatch(
-                                    deleteDepartment(
-                                      AccessToken,
-                                      department.departmentId
-                                    )
-                                  );
+
                                   refreshPage();
                                 },
                                 btn2Handler: () => setConfirmationModal(null),
@@ -223,4 +214,4 @@ const DepartmentList = () => {
   );
 };
 
-export default DepartmentList;
+export default OrganizationList;
