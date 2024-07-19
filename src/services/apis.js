@@ -89,3 +89,12 @@ export const RoleEndpoints = {
   ADD_ROLE_REQUEST: BASE_URL + "/role",
   DELETE_ROLE_REQUEST:(roleId)=> BASE_URL + `/role/${roleId}`,
 };
+
+
+// Organization Endpoints
+export const  OrganisationEndpoints = {
+  GET_ORGANISATION_REQUEST: BASE_URL + "/organisation",
+  UPDATE_ORGANISATION_REQUEST: (organisationId) => BASE_URL + `/organisation/${organisationId}`,
+  ADD_ORGANISATION_REQUEST: BASE_URL + "/organisation",
+  DELETE_ORGANISATION_REQUEST:(organisationId)=> BASE_URL + `/organisation/${organisationId}`,
+};
