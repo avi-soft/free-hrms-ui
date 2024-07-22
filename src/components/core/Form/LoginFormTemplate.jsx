@@ -4,6 +4,11 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../../services/operations/authAPI";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import ConfirmationModal from "../../common/ConfirmationModal";
+import {
+  setShowOption,
+  toggleShowOption,
+} from "../../../slices/OrganisationSlice";
 
 const LoginFormTemplate = () => {
   const {
@@ -15,20 +20,50 @@ const LoginFormTemplate = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { darkMode } = useSelector((state) => state.theme);
+  const { showOption } = useSelector((state) => state.Organisation);
+  const user = useSelector((state) => state.profile.user);
+
+  console.log(showOption);
 
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState(null);
+
+  console.log(confirmationModal);
 
   const onSubmit = async (data) => {
-    console.log("pressed");
-    console.log(data.password);
-    console.log(data.email);
     if (!data.password || !data.email) {
       return;
     }
 
     try {
       data.navigate = navigate;
-      await dispatch(login(data));
+      const response = await dispatch(login(data));
+      if (response?.status == 200) {
+        if (user?.roles[0]?.role === "Manager") {
+          console.log("hi");
+          if (showOption === false) {
+            console.log("12");
+            console.log("13");
+            setConfirmationModal({
+              text1: "Do you want to create a new Organization?",
+              text2:
+                "This action will redirect you to the organization creation page.",
+              btn1Text: "Yes",
+              btn2Text: "Skip",
+              btn1Handler: () => {
+                navigate("/organization/createupdateorganization");
+                // Set showOption to true after the action
+                setConfirmationModal(null);
+              },
+              btn2Handler: () => {
+                navigate("/"); // Ensure showOption is true to prevent future prompts
+                setConfirmationModal(null);
+                dispatch(setShowOption(true));
+              },
+            });
+          }
+        }
+      }
     } catch (error) {
       setError("password", {
         type: "server",
@@ -99,7 +134,7 @@ const LoginFormTemplate = () => {
               <div className="mt-3 mb-3"></div>
               <label data-testid="email-label" className="w-full">
                 <p className="text-[0.875rem] mb-1 leading-[1.375rem]">
-                  Email Address<sup className="text-red-600  ml-1">*</sup>
+                  Email Address<sup className="text-red-600 ml-1">*</sup>
                 </p>
                 <input
                   name="Email"
@@ -125,69 +160,64 @@ const LoginFormTemplate = () => {
               <div className="mt-5">
                 <label data-testid="password-label" className="w-full">
                   <p className="text-[0.875rem] mb-1 leading-[1.375rem]">
-                    Password<sup className="text-red-600  ml-1">*</sup>
+                    Password<sup className="text-red-600 ml-1">*</sup>
                   </p>
                   <div className="relative">
                     <input
-                      data-testid="password-input"
                       type={showPassword ? "text" : "password"}
-                      name="password"
-                      id="password"
+                      id="Password"
+                      name="Password"
                       {...register("password", {
                         required: true,
                         validate: validatePassword,
                       })}
-                      className={`rounded-[0.5rem] w-full p-[12px] pr-[36px] border-b-[1px] ${
+                      className={`rounded-[0.5rem] w-full p-[12px] border-b-[1px] ${
                         darkMode
                           ? "bg-gray-700 border-gray-600 text-white"
                           : "bg-white border-gray-300 text-black"
                       }`}
                       placeholder="Enter Password"
+                      data-testid="password-input"
                     />
                     <span
-                      className="relative -top-8 left-80 ml-[20px] inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                       onClick={togglePasswordVisibility}
+                      role="button"
+                      data-testid="toggle-password-visibility"
+                      className={`absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer ${
+                        darkMode ? "text-gray-400" : "text-gray-600"
+                      }`}
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
-                    {errors.password && (
-                      <p role="alert" className="text-red-400 mt-2">
-                        {errors.password.message}
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-end mt-2">
-                    <Link
-                      data-testid="forgot-password-link"
-                      to="/forgot-password"
-                    >
-                      <p
-                        className={`text-xs font-medium mt-1 max-w-max ml-auto italic hover:underline ${
-                          darkMode ? "text-white" : "text-black"
-                        }`}
-                      >
-                        Forgot Password?
-                      </p>
-                    </Link>
                   </div>
                 </label>
+                {errors.password && errors.password.type === "validate" && (
+                  <p className="text-red-400 mt-2" role="alert">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
-
+              <div className="flex justify-between my-4">
+                <Link
+                  to="/reset-password"
+                  className="text-sm font-medium text-blue-500 hover:underline"
+                  data-testid="forgot-password-link"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
               <button
-                data-testid="submit-button"
                 type="submit"
-                className={`w-full rounded-[8px] font-medium px-[12px] py-[8px] mt-3 transition-all duration-500 ${
-                  darkMode
-                    ? "primary-gradient text-white hover:bg-yellow-700"
-                    : "bg-slate-900 text-white hover:bg-slate-800"
-                }`}
+                className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none"
+                data-testid="login-button"
               >
-                Sign In
+                Login
               </button>
             </form>
           </div>
         </div>
       </div>
+      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
     </div>
   );
 };
