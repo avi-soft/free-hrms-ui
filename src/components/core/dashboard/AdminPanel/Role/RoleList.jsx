@@ -20,6 +20,7 @@ const RoleList = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false); // Set initial loading to true
   const [confirmationModal, setConfirmationModal] = useState(null);
+  console.log(confirmationModal)
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -191,7 +192,7 @@ const RoleList = () => {
                                     console.log(response);
                                     if (response?.status != 200) return null;
                                     else {
-                                      refreshPage();
+                                      // refreshPage();
                                       toast.success(response?.data?.message);
                                     }
                                   },

@@ -23,6 +23,7 @@ import { useSelector } from "react-redux";
 import CreateUpdateRole from "./components/core/dashboard/AdminPanel/Role/CreateUpdateRole";
 import RoleList from "./components/core/dashboard/AdminPanel/Role/RoleList";
 import OrganizationList from "./components/core/dashboard/AdminPanel/Organization/OrganizationList";
+import CreateUpdateOrganisation from "./components/core/dashboard/AdminPanel/Organization/CreateUpdateOrganization";
 
 function App() {
   const { darkMode } = useSelector((state) => state.theme);
@@ -52,6 +53,7 @@ function App() {
             }
           >
             <Route path="/organization/organization-list" element={<OrganizationList />} />
+            <Route path="/organization/createupdateorganization" element={<CreateUpdateOrganisation/>} />
 
             <Route path="/employee/employee-list" element={<EmployeeList />} />
             <Route
