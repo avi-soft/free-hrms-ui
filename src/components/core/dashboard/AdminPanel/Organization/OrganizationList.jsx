@@ -17,9 +17,12 @@ const OrganizationList = () => {
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.organization);
-  const { organizations } = useSelector((state) => state.organization);
+  const { loading } = useSelector((state) => state.Organisation);
+  const { organizations } = useSelector((state) => state.Organisation);
   const navigate = useNavigate();
+
+  console.log(loading);
+  console.log(organizations);
 
   useEffect(() => {
     const fetchOrganizationList = async () => {
@@ -68,26 +71,24 @@ const OrganizationList = () => {
           </div>
           {/* Section 2 */}
           <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
-            <div
-              className={`flex items-center gap-x-1 ${
-                darkMode ? "primary-gradient " : "bg-red-600"
-              } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
-            >
-              <span>
-                <HiOutlinePlusCircle />
-              </span>
-              <button
-                onClick={() =>
-                  navigate("/organization/organization-create-update", {
-                    state: { isEditing: false },
-                  })
-                }
+            <Link  to="/organization/organization-create-update">
+              <div
+                className={`flex items-center gap-x-1 ${
+                  darkMode ? "primary-gradient " : "bg-red-600"
+                } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
               >
-                Add Organization
-              </button>
-            </div>
+                <span>
+                  <HiOutlinePlusCircle />
+                </span>
+                <button>Add Organization</button>
+              </div>
+            </Link>
           </div>
           {/* Section 3 */}
+
+
+
+           {/* add two numbers */}
 
           {organizations.length === 0 ? (
             <div>
@@ -119,6 +120,13 @@ const OrganizationList = () => {
                         className="px-6 py-3"
                         data-testid="organization-name-header"
                       >
+                        Organization Logo
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3"
+                        data-testid="organization-head-header"
+                      >
                         Organization Name
                       </th>
                       <th
@@ -126,7 +134,7 @@ const OrganizationList = () => {
                         className="px-6 py-3"
                         data-testid="organization-head-header"
                       >
-                        Organization Head
+                        Organization Details
                       </th>
                       <th
                         scope="col"
@@ -153,12 +161,13 @@ const OrganizationList = () => {
                       >
                         <td className="px-6 py-4">{index + 1}</td>
                         <td className="px-6 py-4">
+                          {organization.organizationLogo}
+                        </td>
+                        <td className="px-6 py-4">
                           {organization.organizationName}
                         </td>
                         <td className="px-6 py-4">
-                          {organization.organizationHead
-                            ? `${organization.organizationHead.firstName} ${organization.organizationHead.lastName}`
-                            : "N/A"}
+                          {organization.organizationDetails}
                         </td>
                         <td className="px-6 py-4 flex gap-x-2">
                           <button
@@ -186,7 +195,6 @@ const OrganizationList = () => {
                                 btn1Text: "Delete Organization",
                                 btn2Text: "Cancel",
                                 btn1Handler: async () => {
-
                                   refreshPage();
                                 },
                                 btn2Handler: () => setConfirmationModal(null),

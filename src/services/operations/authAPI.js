@@ -32,6 +32,7 @@ export function login({ email, password, role, navigate }) {
         "AccessToken",
         JSON.stringify(response?.data?.token)
       );
+      
     } catch (err) {
       if (err?.response?.data?.message) {
         toast.error(err?.response?.data?.message);

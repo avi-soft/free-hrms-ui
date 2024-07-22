@@ -21,8 +21,7 @@ export const Departmentlist = (AccessToken) => {
       return response;
     } catch (err) {
       if (err?.response?.data?.message) {
-        toast.error(err?.response?.data?.message);
-        console.log(err);
+        toast.error(err?.response?.data?.message);   
       } else {
         toast.error("Something went wrong.");
       }

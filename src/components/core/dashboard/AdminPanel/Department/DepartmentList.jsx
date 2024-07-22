@@ -34,8 +34,9 @@ const DepartmentList = () => {
       try {
         dispatch(setLoading(true));
         const res = await dispatch(Departmentlist(AccessToken));
+        console.log(res)
         dispatch(setDepartments(res?.data));
-        dispatch(setLoading(false));
+        dispatch(setLoading(false));  
       } catch (error) {
         console.error("Error fetching departments", error);
       } finally {
@@ -79,7 +80,7 @@ const DepartmentList = () => {
           </div>
           {/* Section 2 */}
           <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
-            <div
+            <Link to="/department/department-create-update"
               className={`flex items-center gap-x-1 ${
                 darkMode ? "primary-gradient " : "bg-red-600"
               } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
@@ -88,15 +89,10 @@ const DepartmentList = () => {
                 <HiOutlinePlusCircle />
               </span>
               <button
-                onClick={() =>
-                  navigate("/department/department-create-update", {
-                    state: { isEditing: false },
-                  })
-                }
               >
                 Add Department
               </button>
-            </div>
+            </Link>
           </div>
           {/* Section 3 */}
 

@@ -17,7 +17,7 @@ function Dashboard() {
         <div className=" relative w-[15%]">
           <Sidebar />
         </div>
-        <div className=" w-[85%] pt-[40px] relative">
+        <div className=" p-5 w-[85%] pt-[40px] relative">
           <div className={` mx-auto w-11/1 `}>
             <Outlet />
           </div>
