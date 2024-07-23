@@ -11,7 +11,10 @@ import {
   setLoading,
   setOrganization,
 } from "../../../../../slices/OrganisationSlice.js";
-import { deleteOrganisation, getOrganisation } from "../../../../../services/operations/OrganisationAPI.js";
+import {
+  deleteOrganisation,
+  getOrganisation,
+} from "../../../../../services/operations/OrganisationAPI.js";
 
 const OrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -31,8 +34,8 @@ const OrganizationList = () => {
         dispatch(setLoading(true));
         const res = await dispatch(getOrganisation(AccessToken));
         console.log(res);
-        console.log(JSON.parse(res?.data))
-        dispatch(setOrganization(JSON.parse(res?.data)));
+        console.log(res?.data);
+        dispatch(setOrganization(res?.data));
         dispatch(setLoading(false));
       } catch (error) {
         console.error("Error fetching AllOrganizations", error);
@@ -74,7 +77,7 @@ const OrganizationList = () => {
           </div>
           {/* Section 2 */}
           <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
-            <Link  to="/organization/organization-create-update">
+            <Link to="/organization/organization-create-update">
               <div
                 className={`flex items-center gap-x-1 ${
                   darkMode ? "primary-gradient " : "bg-red-600"
@@ -89,9 +92,7 @@ const OrganizationList = () => {
           </div>
           {/* Section 3 */}
 
-
-
-           {/* add two numbers */}
+          {/* add two numbers */}
 
           {AllOrganizations.length === 0 ? (
             <div>
@@ -198,12 +199,17 @@ const OrganizationList = () => {
                                 btn1Text: "Delete Organization",
                                 btn2Text: "Cancel",
                                 btn1Handler: async () => {
-                                 const response= dispatch(deleteOrganisation(AccessToken,organization?.organizationId));
-                                 if (response?.status != 200) return null;
-                                 else {
-                                   refreshPage();
-                                   toast.success(response?.data?.message);
-                                 }
+                                  const response = dispatch(
+                                    deleteOrganisation(
+                                      AccessToken,
+                                      organization?.organizationId
+                                    )
+                                  );
+                                  if (response?.status != 200) return null;
+                                  else {
+                                    refreshPage();
+                                    toast.success(response?.data?.message);
+                                  }
                                 },
                                 btn2Handler: () => setConfirmationModal(null),
                               })

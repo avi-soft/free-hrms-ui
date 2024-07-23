@@ -87,14 +87,17 @@ export const RoleEndpoints = {
   GET_ROLE_REQUEST: BASE_URL + "/role",
   UPDATE_ROLE_REQUEST: (roleId) => BASE_URL + `/role/${roleId}`,
   ADD_ROLE_REQUEST: BASE_URL + "/role",
-  DELETE_ROLE_REQUEST:(roleId)=> BASE_URL + `/role/${roleId}`,
+  DELETE_ROLE_REQUEST: (roleId) => BASE_URL + `/role/${roleId}`,
 };
 
-
 // Organization Endpoints
-export const  OrganisationEndpoints = {
+export const OrganisationEndpoints = {
   GET_ORGANISATION_REQUEST: BASE_URL + "/organization",
-  UPDATE_ORGANISATION_REQUEST: (organisationId) => BASE_URL + `/organisation/${organisationId}`,
-  ADD_ORGANISATION_REQUEST: BASE_URL + "/organisation",
-  DELETE_ORGANISATION_REQUEST:(organizationId)=> BASE_URL + `/organisation/${organizationId}`,
+  UPDATE_ORGANISATION_REQUEST: (organisationId) =>
+    BASE_URL + `/organization/${organisationId}`,
+  ADD_ORGANISATION_REQUEST: BASE_URL + "/organization",
+  ADD_ORGANISATION_LOGO_REQUEST: (organisationId) =>
+    BASE_URL + `/organization/${organisationId}/uploadImage`,
+  DELETE_ORGANISATION_REQUEST: (organisationId) =>
+    BASE_URL + `/organization/${organisationId}`,
 };
