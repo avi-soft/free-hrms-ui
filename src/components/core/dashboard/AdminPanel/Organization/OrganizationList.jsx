@@ -15,6 +15,7 @@ import {
   deleteOrganisation,
   getOrganisation,
 } from "../../../../../services/operations/OrganisationAPI.js";
+import toast from "react-hot-toast";
 
 const OrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -53,7 +54,7 @@ const OrganizationList = () => {
 
   return (
     <div
-      className={`h-[600px] mb-10 rounded shadow-lg ${
+      className={` mb-10 rounded shadow-lg ${
         darkMode ? "bg-slate-800 text-white" : "bg-slate-100 text-black"
       }`}
     >
@@ -164,15 +165,27 @@ const OrganizationList = () => {
                         }
                       >
                         <td className="px-6 py-4">{index + 1}</td>
-                        <td className="px-6 py-4">
-                          {organization.organizationLogo}
+                        <td scope="row" className="px-6 py-4 ">
+                          <div className="flex justify-start">
+                            <img
+                              className="rounded-full aspect-square w-[30px] h-[30px] object-cover"
+                              src={organization?.organizationImage}
+                              alt={`${organization?.organizationName}`}
+                            />
+                          </div>
                         </td>
                         <td className="px-6 py-4">
                           {organization.organizationName}
                         </td>
                         <td className="px-6 py-4">
-                          {organization.organizationDetails}
+                          {organization.organizationDescription.length > 20
+                            ? `${organization.organizationDescription.slice(
+                                0,
+                                50
+                              )}...`
+                            : organization.organizationDescription}
                         </td>
+
                         <td className="px-6 py-4 flex gap-x-2">
                           <button
                             className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
@@ -199,16 +212,17 @@ const OrganizationList = () => {
                                 btn1Text: "Delete Organization",
                                 btn2Text: "Cancel",
                                 btn1Handler: async () => {
-                                  const response = dispatch(
+                                  const response = await dispatch(
                                     deleteOrganisation(
                                       AccessToken,
                                       organization?.organizationId
                                     )
                                   );
+                                  console.log(response);
                                   if (response?.status != 200) return null;
                                   else {
-                                    refreshPage();
                                     toast.success(response?.data?.message);
+                                    refreshPage();
                                   }
                                 },
                                 btn2Handler: () => setConfirmationModal(null),

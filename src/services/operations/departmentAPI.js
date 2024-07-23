@@ -37,12 +37,13 @@ export const addDepartment = (formData) => {
     const toastId = toast.loading("Adding...");
     try {
       console.log(formData);
-      const { AccessToken, navigate } = formData;
+      const { AccessToken, navigate,organizationId } = formData;
       console.log(AccessToken);
       console.log(navigate);
+      console.log(organizationId)
       const response = await apiConnector(
         "POST",
-        ADD_DEPARTMENT_API,
+        `${ADD_DEPARTMENT_API}/${organizationId}`,
         formData,
         {
           Authorization: `Bearer ${AccessToken}`,
@@ -71,9 +72,13 @@ export const addDepartment = (formData) => {
 export const updateDepartment = (AccessToken, formData, DepartmentId) => {
   return async (dispatch) => {
     const toastId = toast.loading("Updating...");
+
     try {
       console.log(formData);
       const { navigate } = formData;
+      const { organizationId} = formData;
+
+
       console.log(AccessToken);
       console.log(navigate);
       const response = await apiConnector(

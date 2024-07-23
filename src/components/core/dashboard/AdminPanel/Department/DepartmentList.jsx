@@ -35,7 +35,7 @@ const DepartmentList = () => {
       try {
         dispatch(setLoading(true));
         const res = await dispatch(getOrganisation(AccessToken));
-        // dispatch(setOrganization(res?.data));
+        dispatch(setOrganization(res?.data));
         dispatch(setLoading(false));
       } catch (error) {
         console.error("Error fetching AllOrganizations", error);

@@ -30,11 +30,7 @@ export const uploadOrganisationLogo = (
         }
       );
       console.log(response);
-      if (response?.status != 200) throw new Error(response?.data?.message);
-      else {
-        navigate("/organization/organization-list");
-        toast.success(response?.data?.message);
-      }
+      return response;
     } catch (err) {
       if (err?.response?.data?.message) {
         toast.error(err?.response?.data?.message);
@@ -81,7 +77,7 @@ export const addOrganisation = (AccessToken, body) => {
   };
 };
 
-export const updateOrganisation = (AccessToken, data, organisationId) => {
+export const updateOrganisation = (AccessToken, data,navigate, organisationId) => {
   return async (dispatch) => {
     const toastId = toast.loading("Updating...");
     try {
@@ -96,10 +92,10 @@ export const updateOrganisation = (AccessToken, data, organisationId) => {
         }
       );
       console.log(response);
-      if (response?.status != 204) throw new Error(response?.data?.message);
+      if (response?.status != 200) throw new Error(response?.data?.message);
       else {
         toast.success(response?.data?.message);
-        navigate("/organisation/organisation-list");
+        navigate("/organization/organization-list");
       }
     } catch (err) {
       if (err?.response?.data?.message) {
