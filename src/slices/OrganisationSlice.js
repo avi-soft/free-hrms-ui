@@ -1,29 +1,9 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  organizations: [
-  ],
+  organizations: [],
   loading: false,
-  AllOrganizations: [
-    {
-      organizationId: 1,
-      organizationLogo: "https://via.placeholder.com/50",
-      organizationName: "Org One",
-      organizationDetails: "Details about Org One jflkpwekfp,d,f,f;w,;ew,f;f,wefe;w,;f,m;m vmflwemf;lvmsmggmegw;gmsv s;kg,smga;gmpwevmd,e;'gme'wm",
-    },
-    {
-      organizationId: 2,
-      organizationLogo: "https://via.placeholder.com/50",
-      organizationName: "Org Two",
-      organizationDetails: "Details about Org Two",
-    },
-    {
-      organizationId: 3,
-      organizationLogo: "https://via.placeholder.com/50",
-      organizationName: "Org Three",
-      organizationDetails: "Details about Org Three",
-    },
-  ],
+  AllOrganizations: [],
   selectedImage: null,
   existingImage: null,
   showOption: false,
