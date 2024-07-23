@@ -10,11 +10,14 @@ const {
   DEPARTMENT_LIST_API,
 } = DepartmentEndpoints;
 
-export const Departmentlist = (AccessToken) => {
+export const Departmentlist = (AccessToken,selectedOrganization) => {
   return async (dispatch) => {
     try {
       console.log(AccessToken);
-      const response = await apiConnector("GET", DEPARTMENT_LIST_API, null, {
+      const response = await apiConnector("GET",
+         `${DEPARTMENT_LIST_API}/${selectedOrganization}`, 
+         null,
+          {
         Authorization: `Bearer ${AccessToken}`,
       });
 

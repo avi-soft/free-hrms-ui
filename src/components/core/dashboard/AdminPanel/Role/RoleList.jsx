@@ -192,7 +192,7 @@ const RoleList = () => {
                                     console.log(response);
                                     if (response?.status != 200) return null;
                                     else {
-                                      // refreshPage();
+                                      refreshPage();
                                       toast.success(response?.data?.message);
                                     }
                                   },

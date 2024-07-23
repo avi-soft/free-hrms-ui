@@ -15,37 +15,60 @@ import {
   setDepartments,
   setLoading,
 } from "../../../../../slices/departmentSlice.js";
+import { setOrganization } from "../../../../../slices/OrganisationSlice";
+import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
 
 const DepartmentList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
+  const [selectedOrganization, setSelectedOrganization] = useState("");
+
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.department);
-  const { AllDepartments } = useSelector((state) => state.department);
+  const { loading, AllDepartments } = useSelector((state) => state.department);
+  const { AllOrganizations } = useSelector((state) => state.Organisation);
+
   const navigate = useNavigate();
 
-  const departments = AllDepartments;
-
-  console.log(departments);
-
   useEffect(() => {
-    const fetchEmployeesList = async () => {
+    const fetchOrganizationList = async () => {
       try {
         dispatch(setLoading(true));
-        const res = await dispatch(Departmentlist(AccessToken));
-        console.log(res)
-        dispatch(setDepartments(res?.data));
-        dispatch(setLoading(false));  
+        const res = await dispatch(getOrganisation(AccessToken));
+        // dispatch(setOrganization(res?.data));
+        dispatch(setLoading(false));
       } catch (error) {
-        console.error("Error fetching departments", error);
+        console.error("Error fetching AllOrganizations", error);
       } finally {
         dispatch(setLoading(false));
       }
     };
 
-    fetchEmployeesList();
+    fetchOrganizationList();
   }, [dispatch, AccessToken]);
+
+  useEffect(() => {
+    if (selectedOrganization) {
+      console.log(selectedOrganization);
+      const fetchDepartmentsList = async () => {
+        try {
+          dispatch(setLoading(true));
+          const res = await dispatch(
+            Departmentlist(AccessToken, selectedOrganization)
+          );
+          console.log(res);
+          dispatch(setDepartments(res?.data));
+          dispatch(setLoading(false));
+        } catch (error) {
+          console.error("Error fetching departments", error);
+        } finally {
+          dispatch(setLoading(false));
+        }
+      };
+
+      fetchDepartmentsList();
+    }
+  }, [dispatch, AccessToken, selectedOrganization]);
 
   function refreshPage() {
     window.location.reload(false);
@@ -53,7 +76,7 @@ const DepartmentList = () => {
 
   return (
     <div
-      className={` h-[600px] mb-10  rounded shadow-lg ${
+      className={`h-[600px] mb-10 rounded shadow-lg ${
         darkMode ? "bg-slate-800 text-white" : "bg-slate-100 text-black"
       }`}
     >
@@ -62,7 +85,7 @@ const DepartmentList = () => {
           <Spinner />
         </div>
       ) : (
-        <div className="pb-9  mt-3 rounded">
+        <div className="pb-9 mt-3 rounded">
           {/* Section 1 */}
           <div className="p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between">
             <div
@@ -80,7 +103,8 @@ const DepartmentList = () => {
           </div>
           {/* Section 2 */}
           <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
-            <Link to="/department/department-create-update"
+            <Link
+              to="/department/department-create-update"
               className={`flex items-center gap-x-1 ${
                 darkMode ? "primary-gradient " : "bg-red-600"
               } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
@@ -88,15 +112,27 @@ const DepartmentList = () => {
               <span>
                 <HiOutlinePlusCircle />
               </span>
-              <button
-              >
-                Add Department
-              </button>
+              <button>Add Department</button>
             </Link>
           </div>
+          <div className="flex justify-start p-5">
+            <select
+              value={selectedOrganization}
+              onChange={(e) => setSelectedOrganization(e.target.value)}
+              className={`${
+                darkMode ? "bg-slate-700 text-white" : "bg-slate-200 text-black"
+              } p-2 rounded-lg`}
+            >
+              <option value="">Select Organization</option>
+              {AllOrganizations.map((org) => (
+                <option key={org?.organizationId} value={org.organizationId}>
+                  {org.organizationName}
+                </option>
+              ))}
+            </select>
+          </div>
           {/* Section 3 */}
-
-          {departments.length === 0 ? (
+          {AllDepartments?.length === 0 ? (
             <div>
               <h1 className="text-center text-2xl mt-10">
                 No Departments Found
@@ -145,7 +181,7 @@ const DepartmentList = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {departments?.map((department, index) => (
+                    {AllDepartments?.map((department, index) => (
                       <tr
                         key={department.departmentId}
                         className={
@@ -209,7 +245,6 @@ const DepartmentList = () => {
               </div>
             </div>
           )}
-
           {confirmationModal && (
             <ConfirmationModal modalData={confirmationModal} />
           )}

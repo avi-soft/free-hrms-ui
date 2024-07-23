@@ -93,8 +93,8 @@ export const RoleEndpoints = {
 
 // Organization Endpoints
 export const  OrganisationEndpoints = {
-  GET_ORGANISATION_REQUEST: BASE_URL + "/organisation",
+  GET_ORGANISATION_REQUEST: BASE_URL + "/organization",
   UPDATE_ORGANISATION_REQUEST: (organisationId) => BASE_URL + `/organisation/${organisationId}`,
   ADD_ORGANISATION_REQUEST: BASE_URL + "/organisation",
-  DELETE_ORGANISATION_REQUEST:(organisationId)=> BASE_URL + `/organisation/${organisationId}`,
+  DELETE_ORGANISATION_REQUEST:(organizationId)=> BASE_URL + `/organisation/${organizationId}`,
 };

@@ -24,11 +24,12 @@ export function addEmployee(employeeData) {
     dispatch(setLoading(true));
     try {
       console.log(employeeData);
-      const { AccessToken, navigate, email, password, role } = employeeData;
+      const { AccessToken, navigate, email, password, role,organization } = employeeData;
       console.log(AccessToken);
+      console.log(organization)
       const response = await apiConnector(
         "POST",
-        ADD_EMPLOYEE_API,
+        `${ADD_EMPLOYEE_API}/${organization}`,
         {
           email,
           password,

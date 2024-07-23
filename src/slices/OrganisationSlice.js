@@ -2,11 +2,14 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   organizations: [
+  ],
+  loading: false,
+  AllOrganizations: [
     {
       organizationId: 1,
       organizationLogo: "https://via.placeholder.com/50",
       organizationName: "Org One",
-      organizationDetails: "Details about Org One",
+      organizationDetails: "Details about Org One jflkpwekfp,d,f,f;w,;ew,f;f,wefe;w,;f,m;m vmflwemf;lvmsmggmegw;gmsv s;kg,smga;gmpwevmd,e;'gme'wm",
     },
     {
       organizationId: 2,
@@ -21,8 +24,6 @@ const initialState = {
       organizationDetails: "Details about Org Three",
     },
   ],
-  loading: false,
-  AllOrganizations: [],
   selectedImage: null,
   existingImage: null,
   showOption: false,

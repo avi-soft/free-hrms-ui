@@ -102,9 +102,9 @@ const CreateUpdateOrganisation = () => {
               })}
               className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`}
             />
-            {/* {errors.organisation && (
+            {errors.organisation && (
               <p className="text-red-500 mt-1">{errors.organisation.message}</p>
-            )} */}
+            )}
           </div>
           <div className="mb-4">
             <label htmlFor="description" className={`block text-gray-700 text-sm font-bold mb-2 ${darkMode ? "text-white" : ""}`}>
@@ -124,11 +124,11 @@ const CreateUpdateOrganisation = () => {
               value={description}
               onChange={handleDescriptionChange}
               className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`}
-              rows={3} // Set initial rows to 3
+              rows={3} 
             />
-            {/* {errors.description && (
+            {errors.description && (
               <p className="text-red-500 mt-1">{errors.description.message}</p>
-            )} */}
+            )}
           </div>
           <div className="mb-4">
             <label htmlFor="logo" className={`block text-gray-700 text-sm font-bold mb-2 ${darkMode ? "text-white" : ""}`}>

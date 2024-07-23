@@ -11,6 +11,7 @@ import {
   setLoading,
   setOrganization,
 } from "../../../../../slices/OrganisationSlice.js";
+import { deleteOrganisation, getOrganisation } from "../../../../../services/operations/OrganisationAPI.js";
 
 const OrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -18,21 +19,23 @@ const OrganizationList = () => {
   const { darkMode } = useSelector((state) => state.theme);
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.Organisation);
-  const { organizations } = useSelector((state) => state.Organisation);
+  const { AllOrganizations } = useSelector((state) => state.Organisation);
   const navigate = useNavigate();
 
   console.log(loading);
-  console.log(organizations);
+  console.log(AllOrganizations);
 
   useEffect(() => {
     const fetchOrganizationList = async () => {
       try {
         dispatch(setLoading(true));
-        const res = await dispatch(getOrganization(AccessToken));
-        dispatch(setOrganization(res?.data));
+        const res = await dispatch(getOrganisation(AccessToken));
+        console.log(res);
+        console.log(JSON.parse(res?.data))
+        dispatch(setOrganization(JSON.parse(res?.data)));
         dispatch(setLoading(false));
       } catch (error) {
-        console.error("Error fetching organizations", error);
+        console.error("Error fetching AllOrganizations", error);
       } finally {
         dispatch(setLoading(false));
       }
@@ -90,7 +93,7 @@ const OrganizationList = () => {
 
            {/* add two numbers */}
 
-          {organizations.length === 0 ? (
+          {AllOrganizations.length === 0 ? (
             <div>
               <h1 className="text-center text-2xl mt-10">
                 No Organizations Found
@@ -146,7 +149,7 @@ const OrganizationList = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {organizations?.map((organization, index) => (
+                    {AllOrganizations?.map((organization, index) => (
                       <tr
                         key={organization.organizationId}
                         className={
@@ -195,7 +198,12 @@ const OrganizationList = () => {
                                 btn1Text: "Delete Organization",
                                 btn2Text: "Cancel",
                                 btn1Handler: async () => {
-                                  refreshPage();
+                                 const response= dispatch(deleteOrganisation(AccessToken,organization?.organizationId));
+                                 if (response?.status != 200) return null;
+                                 else {
+                                   refreshPage();
+                                   toast.success(response?.data?.message);
+                                 }
                                 },
                                 btn2Handler: () => setConfirmationModal(null),
                               })

@@ -7,9 +7,13 @@ import {
 } from "../../../../../services/operations/departmentAPI";
 import { useNavigate, useLocation } from "react-router-dom";
 import { EmployeeSearch } from "../../../../../services/operations/employeeAPI";
+import { setLoading, setOrganization } from "../../../../../slices/OrganisationSlice";
+import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
+
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
+
   const {
     register,
     handleSubmit,
@@ -18,8 +22,10 @@ const CreateUpdateDepartment = () => {
   } = useForm();
   const [searchResults, setSearchResults] = useState([]);
   const [selectedManager, setSelectedManager] = useState(null);
+  const [selectedOrganization, setSelectedOrganization] = useState('');
   const [showCheckbox, setShowCheckbox] = useState(false);
-  const [loading, setLoading] = useState(false);
+  const { loading } = useSelector((state) => state.Organisation);
+  const { AllOrganizations } = useSelector((state) => state.Organisation);
   const [noSearch, setNoSearch] = useState(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -27,15 +33,34 @@ const CreateUpdateDepartment = () => {
   const { darkMode } = useSelector((state) => state.theme);
   const debounceTimeoutRef = useRef(null);
 
+
   const { isEditing, department } = location.state || {
     isEditing: false,
     department: null,
   };
 
   useEffect(() => {
+    const fetchOrganizationList = async () => {
+      try {
+        dispatch(setLoading(true));
+        const res = await dispatch(getOrganisation(AccessToken));
+        dispatch(setOrganization(res?.data));
+        dispatch(setLoading(false));
+      } catch (error) {
+        console.error("Error fetching organizations", error);
+      } finally {
+        dispatch(setLoading(false));
+      }
+    };
+
+    fetchOrganizationList();
+  }, [dispatch, AccessToken]);
+
+  useEffect(() => {
     if (isEditing && department) {
       setValue("department", department.department);
       setValue("description", department.description);
+      setSelectedOrganization(department.organizationId);
       if (department.manager) {
         setSelectedManager(department.manager);
         setShowCheckbox(true);
@@ -48,6 +73,7 @@ const CreateUpdateDepartment = () => {
     const formData = {
       ...data,
       managerId: selectedManager?.userId,
+      organizationId: selectedOrganization,
     };
 
     formData.navigate = navigate;
@@ -145,6 +171,37 @@ const CreateUpdateDepartment = () => {
             darkMode ? " bg-slate-600" : " bg-white"
           }`}
         >
+          <div className="mb-4">
+            <label
+              htmlFor="organization"
+              className={`block text-gray-700 text-sm font-bold mb-2 ${
+                darkMode ? "text-white" : ""
+              }`}
+            >
+              Select Organization<sup className="text-red-900 font-bold">*</sup>
+            </label>
+            <select
+              id="organization"
+              {...register("organization", {
+                required: "Organization is required",
+              })}
+              value={selectedOrganization}
+              onChange={(e) => setSelectedOrganization(e.target.value)}
+              className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
+              }`}
+            >
+              <option value="">Select Organization</option>
+              {AllOrganizations.map((org) => (
+                <option key={org?.organizationId} value={org?.organizationId}>
+                  {org?.organizationName}
+                </option>
+              ))}
+            </select>
+            {errors.organization && (
+              <p className="text-red-500 mt-1">{errors.organization.message}</p>
+            )}
+          </div>
           <div className={`mb-4 `}>
             <label
               htmlFor="department"

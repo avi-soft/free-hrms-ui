@@ -53,7 +53,7 @@ function App() {
             }
           >
             <Route path="/organization/organization-list" element={<OrganizationList />} />
-            <Route path="/organization/createupdateorganization" element={<CreateUpdateOrganisation/>} />
+            <Route path="/organization/organization-create-update" element={<CreateUpdateOrganisation/>} />
 
             <Route path="/employee/employee-list" element={<EmployeeList />} />
             <Route
