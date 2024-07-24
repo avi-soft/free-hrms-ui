@@ -11,25 +11,35 @@ import {
   setLoading,
   setOrganization,
 } from "../../../../../slices/OrganisationSlice.js";
+import {
+  deleteOrganisation,
+  getOrganisation,
+} from "../../../../../services/operations/OrganisationAPI.js";
+import toast from "react-hot-toast";
 
 const OrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
   const dispatch = useDispatch();
-  const { loading } = useSelector((state) => state.organization);
-  const { organizations } = useSelector((state) => state.organization);
+  const { loading } = useSelector((state) => state.Organisation);
+  const { AllOrganizations } = useSelector((state) => state.Organisation);
   const navigate = useNavigate();
+
+  console.log(loading);
+  console.log(AllOrganizations);
 
   useEffect(() => {
     const fetchOrganizationList = async () => {
       try {
         dispatch(setLoading(true));
-        const res = await dispatch(getOrganization(AccessToken));
+        const res = await dispatch(getOrganisation(AccessToken));
+        console.log(res);
+        console.log(res?.data);
         dispatch(setOrganization(res?.data));
         dispatch(setLoading(false));
       } catch (error) {
-        console.error("Error fetching organizations", error);
+        console.error("Error fetching AllOrganizations", error);
       } finally {
         dispatch(setLoading(false));
       }
@@ -44,7 +54,7 @@ const OrganizationList = () => {
 
   return (
     <div
-      className={`h-[600px] mb-10 rounded shadow-lg ${
+      className={` mb-10 rounded shadow-lg ${
         darkMode ? "bg-slate-800 text-white" : "bg-slate-100 text-black"
       }`}
     >
@@ -68,28 +78,24 @@ const OrganizationList = () => {
           </div>
           {/* Section 2 */}
           <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
-            <div
-              className={`flex items-center gap-x-1 ${
-                darkMode ? "primary-gradient " : "bg-red-600"
-              } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
-            >
-              <span>
-                <HiOutlinePlusCircle />
-              </span>
-              <button
-                onClick={() =>
-                  navigate("/organization/organization-create-update", {
-                    state: { isEditing: false },
-                  })
-                }
+            <Link to="/organization/organization-create-update">
+              <div
+                className={`flex items-center gap-x-1 ${
+                  darkMode ? "primary-gradient " : "bg-red-600"
+                } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
               >
-                Add Organization
-              </button>
-            </div>
+                <span>
+                  <HiOutlinePlusCircle />
+                </span>
+                <button>Add Organization</button>
+              </div>
+            </Link>
           </div>
           {/* Section 3 */}
 
-          {organizations.length === 0 ? (
+          {/* add two numbers */}
+
+          {AllOrganizations.length === 0 ? (
             <div>
               <h1 className="text-center text-2xl mt-10">
                 No Organizations Found
@@ -119,6 +125,13 @@ const OrganizationList = () => {
                         className="px-6 py-3"
                         data-testid="organization-name-header"
                       >
+                        Organization Logo
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3"
+                        data-testid="organization-head-header"
+                      >
                         Organization Name
                       </th>
                       <th
@@ -126,7 +139,7 @@ const OrganizationList = () => {
                         className="px-6 py-3"
                         data-testid="organization-head-header"
                       >
-                        Organization Head
+                        Organization Details
                       </th>
                       <th
                         scope="col"
@@ -138,7 +151,7 @@ const OrganizationList = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {organizations?.map((organization, index) => (
+                    {AllOrganizations?.map((organization, index) => (
                       <tr
                         key={organization.organizationId}
                         className={
@@ -152,14 +165,27 @@ const OrganizationList = () => {
                         }
                       >
                         <td className="px-6 py-4">{index + 1}</td>
+                        <td scope="row" className="px-6 py-4 ">
+                          <div className="flex justify-start">
+                            <img
+                              className="rounded-full aspect-square w-[30px] h-[30px] object-cover"
+                              src={organization?.organizationImage}
+                              alt={`${organization?.organizationName}`}
+                            />
+                          </div>
+                        </td>
                         <td className="px-6 py-4">
                           {organization.organizationName}
                         </td>
                         <td className="px-6 py-4">
-                          {organization.organizationHead
-                            ? `${organization.organizationHead.firstName} ${organization.organizationHead.lastName}`
-                            : "N/A"}
+                          {organization.organizationDescription.length > 20
+                            ? `${organization.organizationDescription.slice(
+                                0,
+                                50
+                              )}...`
+                            : organization.organizationDescription}
                         </td>
+
                         <td className="px-6 py-4 flex gap-x-2">
                           <button
                             className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
@@ -186,8 +212,18 @@ const OrganizationList = () => {
                                 btn1Text: "Delete Organization",
                                 btn2Text: "Cancel",
                                 btn1Handler: async () => {
-
-                                  refreshPage();
+                                  const response = await dispatch(
+                                    deleteOrganisation(
+                                      AccessToken,
+                                      organization?.organizationId
+                                    )
+                                  );
+                                  console.log(response);
+                                  if (response?.status != 200) return null;
+                                  else {
+                                    toast.success(response?.data?.message);
+                                    refreshPage();
+                                  }
                                 },
                                 btn2Handler: () => setConfirmationModal(null),
                               })

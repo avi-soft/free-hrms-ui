@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux';
 import IconBtn from './IconBtn';
 
 function ConfirmationModal({ modalData }) {
+  console.log(modalData)
   const { darkMode } = useSelector((state) => state.theme);
 
   return (

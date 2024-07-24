@@ -409,26 +409,26 @@ const MenuItems = () => {
       //     },
       //   ],
       // },
-          {
-        key: "Department",
-        label: t("Department"),
+      {
+        key: "Organization",
+        label: t("Organization"),
         isTitle: false,
         icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
         children: [
           {
-            key: "NewDepartment",
-            label: t("New Department"),
-            url: "/department/department-create-update",
-            parentKey: "Department",
+            key: "NewOrganization",
+            label: t("Create Organization"),
+            url: "/organization/organization-create-update",
+            parentKey: "Organization",
             icon: (
               <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
             ),
           },
           {
-            key: "DepartmentList",
-            label: t("Department List"),
-            url: "/department/department-list",
-            parentKey: "Department",
+            key: "Organization List",
+            label: t("Organization List"),
+            url: "/Organization/Organization-list",
+            parentKey: "Organization",
             icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
           },
         ],
@@ -457,6 +457,32 @@ const MenuItems = () => {
           },
         ],
       },
+      {
+        key: "Department",
+        label: t("Department"),
+        isTitle: false,
+        icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+        children: [
+          {
+            key: "NewDepartment",
+            label: t("New Department"),
+            url: "/department/department-create-update",
+            parentKey: "Department",
+            icon: (
+              <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+            ),
+          },
+          {
+            key: "DepartmentList",
+            label: t("Department List"),
+            url: "/department/department-list",
+            parentKey: "Department",
+            icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+          },
+        ],
+      },
+
+
       {
         key: "Employee",
         label: t("Employee"),

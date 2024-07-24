@@ -6,6 +6,8 @@ import { FaPlus } from 'react-icons/fa';
 import { addEmployee } from '../../../services/operations/employeeAPI';
 import { getRole } from '../../../services/operations/roleAPI';
 import Spinner from '../../common/Spinner';
+import { setOrganization } from '../../../slices/OrganisationSlice';
+import { getOrganisation } from '../../../services/operations/OrganisationAPI';
 
 const PrimaryEmployeeDetails = () => {
   const { register, handleSubmit, formState: { errors } } = useForm();
@@ -15,22 +17,37 @@ const PrimaryEmployeeDetails = () => {
   const darkMode = useSelector((state) => state.theme?.darkMode) || false;
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false);
+  const { AllOrganizations } = useSelector((state) => state.Organisation);
+
+  console.log(AllOrganizations)
 
   useEffect(() => {
     fetchRoles();
+    fetchOrganizations();
   }, []);
 
   const fetchRoles = async () => {
     try {
       setLoading(true);
-      console.log("Fetching roles...");
       const res = await dispatch(getRole(AccessToken));
       setRoles(res?.data || []);
     } catch (error) {
       console.error("Error fetching roles", error);
     } finally {
       setLoading(false);
-      console.log("Loading state set to false");
+    }
+  };
+
+  const fetchOrganizations = async () => {
+    try {
+      setLoading(true);
+      const res = await dispatch(getOrganisation(AccessToken));
+      console.log(res)
+      dispatch(setOrganization(res?.data));
+    } catch (error) {
+      console.error("Error fetching organizations", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -41,7 +58,7 @@ const PrimaryEmployeeDetails = () => {
   };
 
   return (
-    <div className={`flex flex-col items-center h-[420px] ${darkMode ? 'text-white' : 'text-black'}`}>
+    <div className={`flex flex-col items-center  ${darkMode ? 'text-white' : 'text-black'}`}>
       {loading ? (
         <Spinner />
       ) : (
@@ -51,6 +68,28 @@ const PrimaryEmployeeDetails = () => {
           onSubmit={handleSubmit(onSubmit)}
           style={{ position: 'relative', zIndex: 1 }} 
         >
+          <div className="mt-4">
+            <label htmlFor="organization" className={`block text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
+              Select Organization<sup className="text-red-900">*</sup>
+            </label>
+            <select
+              id="organization"
+              {...register("organization", { required: true })}
+              className={`border ${darkMode ? "bg-gray-500 text-white" : ""} rounded px-3 py-2 mt-2 w-full`}
+              data-testid="organization-select"
+            >
+              <option value="">Select Organization</option>
+              {AllOrganizations?.map((org) => (
+                <option key={org?.organizationId} value={org?.organizationId}>
+                  {org?.organizationName}
+                </option>
+              ))}
+            </select>
+            {errors.organization && (
+              <p className="text-red-500 mt-1">{errors.organization.message}</p>
+            )}
+          </div>
+
           <div className="mt-4">
             <label htmlFor="email" className={`block text-sm font-semibold ${darkMode ? 'text-white' : 'text-slate-900'}`}>
               Email Address<sup className="text-red-900">*</sup>
@@ -90,11 +129,10 @@ const PrimaryEmployeeDetails = () => {
               className={`border ${darkMode ? "bg-gray-500 text-white" : ""} rounded 
               px-3 py-2 mt-2 w-full max-h-40 overflow-y-auto`}
               data-testid="role-select"
-
->
+            >
               <option value="">Select Role</option>
               {roles.map((role) => (
-                <option key={role._id} value={role.role}>
+                <option key={role.roleId} value={role.role}>
                   {role.role}
                 </option>
               ))}

@@ -20,6 +20,7 @@ const RoleList = () => {
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(false); // Set initial loading to true
   const [confirmationModal, setConfirmationModal] = useState(null);
+  console.log(confirmationModal)
   const navigate = useNavigate();
 
   useEffect(() => {
