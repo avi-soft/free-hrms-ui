@@ -6,7 +6,8 @@ const initialState = {
   AllOrganizations: [],
   selectedImage: null,
   existingImage: null,
-  showOption: false,
+  showOption:
+    localStorage.getItem("showOption") && localStorage.getItem("showOption"),
 };
 
 const organizationSlice = createSlice({
@@ -14,7 +15,7 @@ const organizationSlice = createSlice({
   initialState: initialState,
   reducers: {
     AddOrganization(state, action) {
-      state.departments.push(action.payload);
+      state.organizations.push(action.payload); // Corrected from departments to organizations
     },
 
     setOrganization(state, action) {
@@ -32,10 +33,12 @@ const organizationSlice = createSlice({
     setExistingImage(state, action) {
       state.existingImage = action.payload;
     },
+
     setShowOption(state, action) {
-      state.showOption = action.payload;
-      localStorage.setItem("showOption", state.showOption.toString());
+      console.log(action);
+      localStorage.setItem("showOption", action.payload.toString());
     },
+
     toggleShowOption(state) {
       state.showOption = !state.showOption;
       localStorage.setItem("showOption", state.showOption.toString());
@@ -52,4 +55,5 @@ export const {
   setShowOption,
   toggleShowOption,
 } = organizationSlice.actions;
+
 export default organizationSlice.reducer;

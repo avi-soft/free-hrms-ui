@@ -34,9 +34,6 @@ export function login({ email, password, navigate }) {
           "AccessToken",
           JSON.stringify(response?.data?.token)
         );
-        // const showOption = localStorage.getItem("showOption") === "false";
-        // console.log(showOption);
-        // dispatch(setShowOption(showOption));
         return response;
       }
     } catch (err) {
@@ -56,7 +53,9 @@ export function logout(navigate) {
   return (dispatch) => {
     const toastId = toast.loading("Logging Out...");
     dispatch(setToken(null));
-    localStorage.clear();
+    dispatch(setUser(null)); // Clear user data from state
+    localStorage.removeItem("AccessToken");
+    localStorage.removeItem("user");
     toast.success("Logged Out");
     toast.dismiss(toastId);
     navigate("/login");
