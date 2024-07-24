@@ -80,28 +80,6 @@ const CreateUpdateOrganisation = () => {
     }
   };
 
-
-  const validateOrganization = {
-    required: "Organization Name is required",
-    minLength: {
-      value: 2,
-      message: "Organization Name must be at least 2 characters",
-    },
-    maxLength: {
-      value: 20,
-      message: "Organization Name must not exceed 20 characters",
-    },
-    validate: {
-      noNumbers: (value) =>
-        !/\d/.test(value) || "Organisation Name must not contain numbers",
-      minLength: (value) =>
-        value.trim().length >= 3 ||
-        "Organisation Name must not be empty or less than 3 characters",
-      noSpecialChars: (value) =>
-        /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(value) ||
-        "Organisation Name must contain only letters and a single space between words",
-    },
-  };
   const handleLogoUpload = async () => {
     if (!selectedImage || !organisationId) {
       toast.error("Please select an image");
@@ -309,9 +287,23 @@ const CreateUpdateOrganisation = () => {
                   id="organization"
                   type="text"
                   placeholder="Organisation Name..."
-                  {...register("organizationName", validateOrganization )
-                    
-                  }
+                  {...register("organizationName", 
+                    {
+                    required: "Organisation Name is required",
+                    minLength: {
+                      value: 3,
+                      message:
+                        "Organisation Name must be at least 3 characters",
+                    },
+                    validate: {
+                      noNumbers: (value) =>
+                        !/\d/.test(value) ||
+                        "Organisation Name must not contain numbers",
+                      minLength: (value) =>
+                        value.trim().length >= 3 ||
+                        "Organisation Name must not be empty or less than 3 characters",
+                    },
+                  })}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                     darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
                   }`}
@@ -451,7 +443,25 @@ const CreateUpdateOrganisation = () => {
                     id="organization"
                     type="text"
                     placeholder="Organisation Name..."
-                    {...register("organizationName", validateOrganization)}
+                    {...register("organizationName", {
+                      required: "Organisation Name is required",
+                      minLength: {
+                        value: 3,
+                        message:
+                          "Organisation Name must be at least 3 characters",
+                      },
+                      validate: {
+                        noNumbers: (value) =>
+                          !/\d/.test(value) ||
+                          "Organisation Name must not contain numbers",
+                        minLength: (value) =>
+                          value.trim().length >= 3 ||
+                          "Organisation Name must not be empty or less than 3 characters",
+                        },
+                        noSpecialChars: (value) =>
+                          /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(value) ||
+                          "Organisation Name must contain only letters and a single space between words",
+                    })}
                     className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                       darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
                     }`}
