@@ -80,23 +80,28 @@ const CreateUpdateOrganisation = () => {
     }
   };
 
+
   const validateOrganization = {
     required: "Organization Name is required",
     minLength: {
-      value: 3,
-      message: "Organization Name must be at least 3 characters",
+      value: 2,
+      message: "Organization Name must be at least 2 characters",
     },
     maxLength: {
       value: 20,
       message: "Organization Name must not exceed 20 characters",
     },
-    pattern: {
-      value: /^[A-Za-z]+(?: [A-Za-z]+)*$/,
-      message:
-        "Organization Name must contain only letters and a single space between words",
+    validate: {
+      noNumbers: (value) =>
+        !/\d/.test(value) || "Organisation Name must not contain numbers",
+      minLength: (value) =>
+        value.trim().length >= 3 ||
+        "Organisation Name must not be empty or less than 3 characters",
+      noSpecialChars: (value) =>
+        /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(value) ||
+        "Organisation Name must contain only letters and a single space between words",
     },
   };
-
   const handleLogoUpload = async () => {
     if (!selectedImage || !organisationId) {
       toast.error("Please select an image");
@@ -255,6 +260,39 @@ const CreateUpdateOrganisation = () => {
                       </div>
                     </div>
                   </div>
+                  {/* <div className="ml-4">
+                    <input
+                      id="logo"
+                      type="file"
+                      accept="image/*"
+                      onChange={handleFileChange}
+                      className="hidden"
+                      ref={inputRef}
+                    />
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={() => inputRef.current.click()}
+                        className={`py-1 px-3 text-sm font-medium rounded-md ${
+                          darkMode
+                            ? "bg-slate-400 text-black"
+                            : "bg-gray-900 text-white"
+                        } hover:scale-95 transition-all duration-200`}
+                      >
+                        Select
+                      </button>
+                      <button
+                        onClick={handleLogoUpload}
+                        className={` py-2 text-sm font-medium rounded-md ${
+                          darkMode
+                            ? "primary-gradient text-white"
+                            : "bg-green-700 text-white"
+                        } hover:scale-95 transition-all duration-200`}
+                      >
+                        Update Logo
+                      </button>
+                    </div>
+                  </div> */}
                 </div>
               </div>
               <div className={`mb-4`}>
@@ -271,7 +309,9 @@ const CreateUpdateOrganisation = () => {
                   id="organization"
                   type="text"
                   placeholder="Organisation Name..."
-                  {...register("organizationName", validateOrganization)}
+                  {...register("organizationName", validateOrganization )
+                    
+                  }
                   className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                     darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
                   }`}
@@ -290,133 +330,184 @@ const CreateUpdateOrganisation = () => {
                   }`}
                 >
                   Organisation Description
+                  <sup className="text-red-900 font-bold">*</sup>
                 </label>
                 <textarea
                   id="organizationDescription"
                   placeholder="Organisation Description..."
-                  {...register("organizationDescription")}
+                  {...register("organizationDescription", {
+                    required: "Description is required",
+                    minLength: {
+                      value: 5,
+                      message: "Description must be at least 5 characters",
+                    },
+                    validate: (value) =>
+                      value.trim().length >= 5 ||
+                      "Description must not be empty or less than 5 characters",
+                  })}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                     darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
                   }`}
+                  rows={3}
                 />
+                {errors.organizationDescription && (
+                  <p className="text-red-500 mt-1">
+                    {errors.organizationDescription.message}
+                  </p>
+                )}
               </div>
-              <div className="flex items-center justify-center mt-6">
-                <button
-                  type="submit"
-                  className="bg-yellow-500 text-black font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-yellow-600 transition-colors"
-                >
-                  {isEditing ? "Update Organisation" : "Create Organisation"}
-                </button>
-              </div>
+              <button
+                type="submit"
+                className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
+                  darkMode
+                    ? "primary-gradient text-white"
+                    : "bg-blue-700 text-white"
+                } hover:scale-95 transition-all duration-200`}
+              >
+                {isEditing ? "Update Organisation" : "Submit Organisation"}
+              </button>
             </form>
           </div>
         ) : (
-          <div
-            className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
-              darkMode ? "bg-slate-600" : "bg-white"
-            }`}
-          >
-            <form onSubmit={handleSubmit(handleOrganizationSubmit)}>
-              <div className="mb-4">
-                <label
-                  htmlFor="organizationName"
-                  className={`block text-gray-700 text-sm font-bold mb-2 ${
-                    darkMode ? "text-white" : ""
-                  }`}
-                >
-                  Organisation Name
-                  <sup className="text-red-900 font-bold">*</sup>
-                </label>
-                <input
-                  id="organization"
-                  type="text"
-                  placeholder="Organisation Name..."
-                  {...register("organizationName", validateOrganization)}
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
-                  }`}
-                />
-                {errors.organizationName && (
-                  <p className="text-red-500 mt-1">
-                    {errors.organizationName.message}
-                  </p>
-                )}
-              </div>
-              <div className="mb-4">
-                <label
-                  htmlFor="organizationDescription"
-                  className={`block text-gray-700 text-sm font-bold mb-2 ${
-                    darkMode ? "text-white" : ""
-                  }`}
-                >
-                  Organisation Description
-                </label>
-                <textarea
-                  id="organizationDescription"
-                  placeholder="Organisation Description..."
-                  {...register("organizationDescription")}
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                    darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
-                  }`}
-                />
-              </div>
-              <div className="flex items-center justify-center mt-6">
+          <div>
+            {showLogoUploadDialog ? (
+              <div
+                className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
+                  darkMode ? "bg-slate-600" : "bg-white"
+                }`}
+              >
+                <div className="mb-4">
+                  <label
+                    htmlFor="large_size"
+                    className={`block text-gray-700 text-sm font-bold mb-2 ${
+                      darkMode ? "text-white" : ""
+                    }`}
+                  >
+                    Add Organization Logo
+                  </label>
+                  <div className="flex items-center">
+                    <img
+                      src={
+                        selectedImage
+                          ? URL.createObjectURL(selectedImage)
+                          : existingImage || defaultImage
+                      }
+                      alt="Organisation Logo"
+                      className="h-12 w-12 rounded-full object-cover"
+                    />
+                    <div className="ml-4">
+                      <input
+                        id="logo"
+                        type="file"
+                        accept="image/*"
+                        required
+                        onChange={handleFileChange}
+                        className="hidden"
+                        ref={inputRef}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => inputRef.current.click()}
+                        className={`py-1 px-3 text-sm font-medium rounded-md ${
+                          darkMode
+                            ? "bg-slate-400 text-black"
+                            : "bg-gray-900 text-white"
+                        } hover:scale-95 transition-all duration-200`}
+                      >
+                        Select
+                      </button>
+                    </div>
+                  </div>
+                </div>
                 <button
-                  type="submit"
-                  className="bg-yellow-500 text-black font-semibold py-2 px-4 rounded focus:outline-none focus:shadow-outline hover:bg-yellow-600 transition-colors"
+                  onClick={handleLogoUpload}
+                  className={`w-full py-2 text-sm font-medium rounded-md ${
+                    darkMode
+                      ? "primary-gradient text-white"
+                      : "bg-green-700 text-white"
+                  } hover:scale-95 transition-all duration-200`}
                 >
-                  {isEditing ? "Update Organisation" : "Create Organisation"}
+                  Upload Logo
                 </button>
               </div>
-            </form>
-          </div>
-        )}
-        {showLogoUploadDialog && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div
-              className={`bg-white p-6 rounded shadow-md ${
-                darkMode ? "bg-gray-800 text-white" : ""
-              }`}
-            >
-              <h2 className="text-lg font-semibold mb-4">
-                Upload Organisation Logo
-              </h2>
-              <div className="flex flex-col items-center">
-                <img
-                  src={
-                    selectedImage
-                      ? URL.createObjectURL(selectedImage)
-                      : existingImage || defaultImage
-                  }
-                  alt="Organisation Logo"
-                  className="aspect-square rounded-full object-cover h-20 mb-4"
-                />
-                <input
-                  type="file"
-                  accept="image/*"
-                  ref={inputRef}
-                  onChange={handleFileChange}
-                  className="mb-4"
-                />
-                <div className="flex gap-4">
-                  <button
-                    onClick={handleLogoUpload}
-                    className={`py-2 px-4 rounded ${
-                      loading ? "bg-gray-400" : "bg-yellow-500 text-black"
+            ) : (
+              <form
+                onSubmit={handleSubmit(handleOrganizationSubmit)}
+                className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
+                  darkMode ? "bg-slate-600" : "bg-white"
+                }`}
+              >
+                <div className={`mb-4`}>
+                  <label
+                    htmlFor="organizationName"
+                    className={`block text-gray-700 text-sm font-bold mb-2 ${
+                      darkMode ? "text-white" : ""
                     }`}
-                    disabled={loading}
                   >
-                    {loading ? "Uploading..." : "Upload"}
-                  </button>
-                  <button
-                    onClick={() => setShowLogoUploadDialog(false)}
-                    className="py-2 px-4 rounded bg-gray-300 text-black"
-                  >
-                    Cancel
-                  </button>
+                    Organisation Name
+                    <sup className="text-red-900 font-bold">*</sup>
+                  </label>
+                  <input
+                    id="organization"
+                    type="text"
+                    placeholder="Organisation Name..."
+                    {...register("organizationName", validateOrganization)}
+                    className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                      darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
+                    }`}
+                  />
+                  {errors.organizationName && (
+                    <p className="text-red-500 mt-1">
+                      {errors.organizationName.message}
+                    </p>
+                  )}
                 </div>
-              </div>
-            </div>
+                <div className="mb-4">
+                  <label
+                    htmlFor="organizationDescription"
+                    className={`block text-gray-700 text-sm font-bold mb-2 ${
+                      darkMode ? "text-white" : ""
+                    }`}
+                  >
+                    Organisation Description
+                    <sup className="text-red-900 font-bold">*</sup>
+                  </label>
+                  <textarea
+                    id="organizationDescription"
+                    placeholder="Organisation Description..."
+                    {...register("organizationDescription", {
+                      required: "Description is required",
+                      minLength: {
+                        value: 5,
+                        message: "Description must be at least 5 characters",
+                      },
+                      validate: (value) =>
+                        value.trim().length >= 5 ||
+                        "Description must not be empty or less than 5 characters",
+                    })}
+                    className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                      darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
+                    }`}
+                    rows={3}
+                  />
+                  {errors.organizationDescription && (
+                    <p className="text-red-500 mt-1">
+                      {errors.organizationDescription.message}
+                    </p>
+                  )}
+                </div>
+                <button
+                  type="submit"
+                  className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
+                    darkMode
+                      ? "primary-gradient text-white"
+                      : "bg-blue-700 text-white"
+                  } hover:scale-95 transition-all duration-200`}
+                >
+                  {isEditing ? "Update Organisation" : "Submit Organisation"}
+                </button>
+              </form>
+            )}
           </div>
         )}
       </div>
