@@ -13,6 +13,7 @@ import toast from "react-hot-toast";
 import {
   setSelectedImage,
   setExistingImage,
+  setShowOption,
 } from "../../../../../slices/OrganisationSlice";
 
 const CreateUpdateOrganisation = () => {
@@ -28,6 +29,7 @@ const CreateUpdateOrganisation = () => {
   const location = useLocation();
   const inputRef = useRef(null);
   const [loading, setLoading] = useState(false);
+  const { showOption } = useSelector((state) => state.Organisation);
   const { darkMode } = useSelector((state) => state.theme);
   const selectedImage = useSelector(
     (state) => state.Organisation.selectedImage
@@ -58,7 +60,12 @@ const CreateUpdateOrganisation = () => {
       let response;
       if (isEditing) {
         response = await dispatch(
-          updateOrganisation(AccessToken, data,navigate, organization.organizationId)
+          updateOrganisation(
+            AccessToken,
+            data,
+            navigate,
+            organization.organizationId
+          )
         );
       } else {
         response = await dispatch(addOrganisation(AccessToken, data));
@@ -74,7 +81,10 @@ const CreateUpdateOrganisation = () => {
   };
 
   const handleLogoUpload = async () => {
-    if (!selectedImage || !organisationId) return;
+    if (!selectedImage || !organisationId) {
+      toast.error("Please select an image");
+      return;
+    }
 
     const formData = new FormData();
     formData.append("file", selectedImage);
@@ -91,6 +101,9 @@ const CreateUpdateOrganisation = () => {
           toast.success(response?.data?.message);
 
           return null;
+        }
+        if (showOption == "false") {
+          dispatch(setShowOption(true));
         }
         navigate("/organization/organization-list");
         toast.success(response?.data?.message);
@@ -429,9 +442,14 @@ const CreateUpdateOrganisation = () => {
                         message:
                           "Organisation Name must be at least 3 characters",
                       },
-                      validate: (value) =>
-                        value.trim().length >= 3 ||
-                        "Organisation Name must not be empty or less than 3 characters",
+                      validate: {
+                        noNumbers: (value) =>
+                          !/\d/.test(value) ||
+                          "Organisation Name must not contain numbers",
+                        minLength: (value) =>
+                          value.trim().length >= 3 ||
+                          "Organisation Name must not be empty or less than 3 characters",
+                      },
                     })}
                     className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                       darkMode ? "bg-gray-700 border-gray-600 text-white" : ""

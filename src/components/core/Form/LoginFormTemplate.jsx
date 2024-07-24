@@ -39,9 +39,20 @@ const LoginFormTemplate = () => {
       data.navigate = navigate;
       const response = await dispatch(login(data));
       if (response?.status == 200) {
-        if (user?.roles[0]?.role === "Manager") {
+        console.log("999");
+        console.log(response?.data?.loginUser?.roles[0]?.role);
+        if (response?.data?.loginUser?.roles[0]?.role == "Manager") {
           console.log("hi");
-          if (showOption === false) {
+          if (showOption == "true") {
+            console.log("true");
+          } else {
+            console.log("false");
+
+            dispatch(setShowOption(false));
+          }
+
+          console.log("hi2");
+          if (showOption == "false") {
             console.log("12");
             console.log("13");
             setConfirmationModal({
@@ -51,7 +62,7 @@ const LoginFormTemplate = () => {
               btn1Text: "Yes",
               btn2Text: "Skip",
               btn1Handler: () => {
-                navigate("/organization/createupdateorganization");
+                navigate("/organization/organization-create-update");
                 // Set showOption to true after the action
                 setConfirmationModal(null);
               },
@@ -61,6 +72,9 @@ const LoginFormTemplate = () => {
                 dispatch(setShowOption(true));
               },
             });
+          } else {
+            console.log("else");
+            navigate("/");
           }
         }
       }
