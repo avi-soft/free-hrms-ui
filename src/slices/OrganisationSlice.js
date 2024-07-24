@@ -7,7 +7,7 @@ const initialState = {
   selectedImage: null,
   existingImage: null,
   showOption:
-    localStorage.getItem("showOption") && localStorage.getItem("showOption"),
+    localStorage.getItem("showOption")  ? localStorage.getItem("showOption") : "false",
 };
 
 const organizationSlice = createSlice({
@@ -37,6 +37,8 @@ const organizationSlice = createSlice({
     setShowOption(state, action) {
       console.log(action);
       localStorage.setItem("showOption", action.payload.toString());
+      state.showOption=action.payload.toString()
+
     },
 
     toggleShowOption(state) {

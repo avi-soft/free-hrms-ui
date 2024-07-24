@@ -40,11 +40,15 @@ const CreateUpdateDepartment = () => {
     department: null,
   };
 
+
+
+  console.log(AllOrganizations)
   useEffect(() => {
     const fetchOrganizationList = async () => {
       try {
         dispatch(setLoading(true));
         const res = await dispatch(getOrganisation(AccessToken));
+        dispatch(setOrganization(res?.data))
         dispatch(setLoading(false));
       } catch (error) {
         console.error("Error fetching organizations", error);
@@ -187,10 +191,10 @@ const CreateUpdateDepartment = () => {
       </div>
       <div className="container mx-auto mt-8">
         {AllOrganizations.length === 0 ? (
-          <div className="p-5 flex flex-col items-center justify-center">
+          <div className="p-5 mt-32 flex flex-col items-center justify-center">
             <div
               className={`text-xl font-semibold ${
-                darkMode ? "text-white" : "text-slate-600"
+                darkMode ? " text-orange-400" : "text-slate-600"
               }`}
             >
               No Organizations Available
@@ -201,13 +205,13 @@ const CreateUpdateDepartment = () => {
             <div className="flex justify-center">
             <Link
                to={`/organization/organization-create-update`}
-              className={`mt-4 w-1/2 text-sm md:text-base underline font-medium  
+              className={`  text-sm md:text-base underline font-medium  
                 rounded-md py-2 px-5 ${
                 darkMode
-                  ? " text-blue-700"
+                  ? " text-blue-400"
                   : "text-blue-700"
               }`}
-            >
+            > 
               Create Organization
             </Link>
             </div>
