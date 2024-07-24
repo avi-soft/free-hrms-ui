@@ -277,6 +277,14 @@ const CreateUpdateDepartment = () => {
                     value: 3,
                     message: "Department Name must be at least 3 characters",
                   },
+                  validate: {
+                    noNumbers: (value) =>
+                      !/\d/.test(value) ||
+                      "Department Name must not contain numbers",
+                    minLength: (value) =>
+                      value.trim().length >= 3 ||
+                      "Department Name must not be empty or less than 3 characters",
+                  },
                 })}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                   darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"
