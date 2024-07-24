@@ -52,7 +52,7 @@ export const updateRole = (AccessToken, roleId, body, navigate) => {
         }
       );
       console.log(response);
-      if (response?.status != 204) throw new Error(response?.data?.message);
+      if (response?.status != 200) throw new Error(response?.data?.message);
       else {
         toast.success(response?.data?.message);
         navigate("/role/role-list");
