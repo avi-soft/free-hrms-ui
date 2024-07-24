@@ -40,6 +40,27 @@ const CreateUpdateDepartment = () => {
     department: null,
   };
 
+  const validateDepartment = {
+    required: "Department Name is required",
+    minLength: {
+      value: 3,
+      message: "Department Name must be at least 3 characters",
+    },
+    validate: {
+      noNumbers: (value) =>
+        !/\d/.test(value) || "Department Name must not contain numbers",
+      minLength: (value) =>
+        value.trim().length >= 3 ||
+        "Department Name must not be empty or less than 3 characters",
+      noSpecialChars: (value) =>
+        /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(value) ||
+        "Department Name must contain only letters and a single space between words",
+    },
+  };
+  
+  // Replace the existing register validation rules for the department field with this updated version
+  
+  
 
 
   console.log(AllOrganizations)
@@ -271,21 +292,7 @@ const CreateUpdateDepartment = () => {
                 id="department"
                 type="text"
                 placeholder="Department Name..."
-                {...register("department", {
-                  required: "Department Name is required",
-                  minLength: {
-                    value: 3,
-                    message: "Department Name must be at least 3 characters",
-                  },
-                  validate: {
-                    noNumbers: (value) =>
-                      !/\d/.test(value) ||
-                      "Department Name must not contain numbers",
-                    minLength: (value) =>
-                      value.trim().length >= 3 ||
-                      "Department Name must not be empty or less than 3 characters",
-                  },
-                })}
+                {...register("department", validateDepartment)}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                   darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"
                 }`}
