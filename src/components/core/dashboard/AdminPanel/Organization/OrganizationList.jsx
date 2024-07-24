@@ -6,35 +6,36 @@ import { HiOutlinePlusCircle } from "react-icons/hi";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteDepartment,
-  Departmentlist,
-} from "../../../../../services/operations/departmentAPI.js";
 import Spinner from "../../../../common/Spinner.jsx";
 import {
-  setDepartments,
   setLoading,
-} from "../../../../../slices/departmentSlice.js";
-import { setOrganization } from "../../../../../slices/OrganisationSlice";
-import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
+  setOrganization,
+} from "../../../../../slices/OrganisationSlice.js";
+import {
+  deleteOrganisation,
+  getOrganisation,
+} from "../../../../../services/operations/OrganisationAPI.js";
+import toast from "react-hot-toast";
 
-const DepartmentList = () => {
+const OrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
-  const [selectedOrganization, setSelectedOrganization] = useState("");
-
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
   const dispatch = useDispatch();
-  const { loading, AllDepartments } = useSelector((state) => state.department);
+  const { loading } = useSelector((state) => state.Organisation);
   const { AllOrganizations } = useSelector((state) => state.Organisation);
-
   const navigate = useNavigate();
+
+  console.log(loading);
+  console.log(AllOrganizations);
 
   useEffect(() => {
     const fetchOrganizationList = async () => {
       try {
         dispatch(setLoading(true));
         const res = await dispatch(getOrganisation(AccessToken));
+        console.log(res);
+        console.log(res?.data);
         dispatch(setOrganization(res?.data));
         dispatch(setLoading(false));
       } catch (error) {
@@ -47,36 +48,13 @@ const DepartmentList = () => {
     fetchOrganizationList();
   }, [dispatch, AccessToken]);
 
-  useEffect(() => {
-    if (selectedOrganization) {
-      console.log(selectedOrganization);
-      const fetchDepartmentsList = async () => {
-        try {
-          dispatch(setLoading(true));
-          const res = await dispatch(
-            Departmentlist(AccessToken, selectedOrganization)
-          );
-          console.log(res);
-          dispatch(setDepartments(res?.data));
-          dispatch(setLoading(false));
-        } catch (error) {
-          console.error("Error fetching departments", error);
-        } finally {
-          dispatch(setLoading(false));
-        }
-      };
-
-      fetchDepartmentsList();
-    }
-  }, [dispatch, AccessToken, selectedOrganization]);
-
   function refreshPage() {
     window.location.reload(false);
   }
 
   return (
     <div
-      className={`h-[600px] mb-10 rounded shadow-lg ${
+      className={` mb-10 rounded shadow-lg ${
         darkMode ? "bg-slate-800 text-white" : "bg-slate-100 text-black"
       }`}
     >
@@ -88,60 +66,44 @@ const DepartmentList = () => {
         <div className="pb-9 mt-3 rounded">
           {/* Section 1 */}
           <div className="p-5 flex flex-col lg:flex-row items-start lg:items-center justify-between">
-            <div
-              className="text-xl font-semibold mb-2 lg:mb-0"
-              data-testid="Department List"
-            >
-              Department List
+            <div className="text-xl font-semibold mb-2 lg:mb-0">
+              Organization List
             </div>
             <div>
               <p className="text-xl font-semibold">
                 Home / Dashboard /
-                <span className="text-yellow-700"> Department List</span>
+                <span className="text-yellow-700"> Organization List</span>
               </p>
             </div>
           </div>
           {/* Section 2 */}
           <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
-            <Link
-              to="/department/department-create-update"
-              className={`flex items-center gap-x-1 ${
-                darkMode ? "primary-gradient " : "bg-red-600"
-              } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
-            >
-              <span>
-                <HiOutlinePlusCircle />
-              </span>
-              <button>Add Department</button>
+            <Link to="/organization/organization-create-update">
+              <div
+                className={`flex items-center gap-x-1 ${
+                  darkMode ? "primary-gradient " : "bg-red-600"
+                } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
+              >
+                <span>
+                  <HiOutlinePlusCircle />
+                </span>
+                <button>Add Organization</button>
+              </div>
             </Link>
           </div>
-          <div className="flex justify-start p-5">
-            <select
-              value={selectedOrganization}
-              onChange={(e) => setSelectedOrganization(e.target.value)}
-              className={`${
-                darkMode ? "bg-slate-700 text-white" : "bg-slate-200 text-black"
-              } p-2 rounded-lg`}
-            >
-              <option value="">Select Organization</option>
-              {AllOrganizations.map((org) => (
-                <option key={org?.organizationId} value={org.organizationId}>
-                  {org.organizationName}
-                </option>
-              ))}
-            </select>
-          </div>
           {/* Section 3 */}
-          {AllDepartments?.length === 0 ? (
+
+          {/* add two numbers */}
+
+          {AllOrganizations.length === 0 ? (
             <div>
               <h1 className="text-center text-2xl mt-10">
-                No Departments Found
+                No Organizations Found
               </h1>
             </div>
           ) : (
             <div className="p-5">
               <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                
                 <table className="min-w-full text-sm text-left">
                   <thead
                     className={`${
@@ -154,23 +116,30 @@ const DepartmentList = () => {
                       <th
                         scope="col"
                         className="px-6 py-3"
-                        data-testid="Department-Name-header"
+                        data-testid="sno-header"
                       >
-                        Department Name
+                        S No.
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3"
-                        data-testid="Department-Manager-header"
+                        data-testid="organization-name-header"
                       >
-                        Department Manager
+                        Organization Logo
                       </th>
                       <th
                         scope="col"
                         className="px-6 py-3"
-                        data-testid="Department-Description-header"
+                        data-testid="organization-head-header"
                       >
-                        Department Description
+                        Organization Name
+                      </th>
+                      <th
+                        scope="col"
+                        className="px-6 py-3"
+                        data-testid="organization-head-header"
+                      >
+                        Organization Details
                       </th>
                       <th
                         scope="col"
@@ -182,9 +151,9 @@ const DepartmentList = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {AllDepartments?.map((department, index) => (
+                    {AllOrganizations?.map((organization, index) => (
                       <tr
-                        key={department.departmentId}
+                        key={organization.organizationId}
                         className={
                           index % 2 === 0
                             ? darkMode
@@ -195,41 +164,66 @@ const DepartmentList = () => {
                             : "bg-gray-100 text-black"
                         }
                       >
-                        <td className="px-6 py-4">{department.department}</td>
-                        <td className="px-6 py-4">
-                          {department?.managerId
-                            ? `${department.managerFirstName} ${department.managerLastName}`
-                            : "N/A"}
+                        <td className="px-6 py-4">{index + 1}</td>
+                        <td scope="row" className="px-6 py-4 ">
+                          <div className="flex justify-start">
+                            <img
+                              className="rounded-full aspect-square w-[30px] h-[30px] object-cover"
+                              src={organization?.organizationImage}
+                              alt={`${organization?.organizationName}`}
+                            />
+                          </div>
                         </td>
-                        <td className="px-6 py-4">{department.description}</td>
+                        <td className="px-6 py-4">
+                          {organization.organizationName}
+                        </td>
+                        <td className="px-6 py-4">
+                          {organization.organizationDescription.length > 20
+                            ? `${organization.organizationDescription.slice(
+                                0,
+                                50
+                              )}...`
+                            : organization.organizationDescription}
+                        </td>
+
                         <td className="px-6 py-4 flex gap-x-2">
                           <button
                             className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
                             onClick={() =>
-                              navigate(`/department/department-create-update`, {
-                                state: { isEditing: true, department },
-                              })
+                              navigate(
+                                `/organization/organization-create-update`,
+                                {
+                                  state: {
+                                    isEditing: true,
+                                    organization,
+                                  },
+                                }
+                              )
                             }
                           >
                             <FaRegEdit />
                           </button>
                           <Link
-                            data-testid="delete-button"
                             onClick={() =>
                               setConfirmationModal({
                                 text1: "Are You Sure?",
                                 text2:
-                                  "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
-                                btn1Text: "Delete Department",
+                                  "You want to Delete this Organization. Deleting this Organization may affect other functionalities. Are you sure you want to proceed?",
+                                btn1Text: "Delete Organization",
                                 btn2Text: "Cancel",
                                 btn1Handler: async () => {
-                                  dispatch(
-                                    deleteDepartment(
+                                  const response = await dispatch(
+                                    deleteOrganisation(
                                       AccessToken,
-                                      department.departmentId
+                                      organization?.organizationId
                                     )
                                   );
-                                  refreshPage();
+                                  console.log(response);
+                                  if (response?.status != 200) return null;
+                                  else {
+                                    toast.success(response?.data?.message);
+                                    refreshPage();
+                                  }
                                 },
                                 btn2Handler: () => setConfirmationModal(null),
                               })
@@ -246,6 +240,7 @@ const DepartmentList = () => {
               </div>
             </div>
           )}
+
           {confirmationModal && (
             <ConfirmationModal modalData={confirmationModal} />
           )}
@@ -255,4 +250,4 @@ const DepartmentList = () => {
   );
 };
 
-export default DepartmentList;
+export default OrganizationList;

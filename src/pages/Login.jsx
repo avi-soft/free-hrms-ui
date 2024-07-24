@@ -5,25 +5,18 @@ import Spinner from "../components/common/Spinner";
 import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const { loading , AccessToken} = useSelector((state) => state.auth);
-  const navigate  = useNavigate();
+  const { loading, AccessToken } = useSelector((state) => state.auth);
+  const navigate = useNavigate();
 
-  
-  useEffect(()=>{
-    if(AccessToken){
-      navigate("/")
-      }
-  },[]);
+  useEffect(() => {
+    if (AccessToken) {
+      navigate("/");
+    }
+  }, []);
 
   return (
     <div className="">
-      {loading ? (
-        <div className=" absolute grid place-content-center h-screen w-screen">
-          <Spinner />
-        </div>
-      ) : (
-        <LoginFormTemplate />
-      )}
+      <LoginFormTemplate />
     </div>
   );
 };

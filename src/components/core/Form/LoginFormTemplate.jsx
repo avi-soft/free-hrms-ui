@@ -4,29 +4,112 @@ import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { login } from "../../../services/operations/authAPI";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
+import ConfirmationModal from "../../common/ConfirmationModal";
+import {
+  setShowOption,
+  toggleShowOption,
+} from "../../../slices/OrganisationSlice";
 
 const LoginFormTemplate = () => {
   const {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
   } = useForm();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { darkMode } = useSelector((state) => state.theme);
+  const { showOption } = useSelector((state) => state.Organisation);
+  const user = useSelector((state) => state.profile.user);
+
+  console.log(showOption);
 
   const [showPassword, setShowPassword] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState(null);
+
+  console.log(confirmationModal);
 
   const onSubmit = async (data) => {
-    if (!data.password) {
+    if (!data.password || !data.email) {
       return;
     }
-    data.navigate = navigate;
-    dispatch(login(data));
+
+    try {
+      data.navigate = navigate;
+      const response = await dispatch(login(data));
+      if (response?.status == 200) {
+        console.log("999");
+        console.log(response?.data?.loginUser?.roles[0]?.role);
+        if (response?.data?.loginUser?.roles[0]?.role == "Manager") {
+          console.log("hi");
+          if (showOption == "true") {
+            console.log("true");
+          } else {
+            console.log("false");
+
+            dispatch(setShowOption(false));
+          }
+
+          console.log("hi2");
+          if (showOption == "false") {
+            console.log("12");
+            console.log("13");
+            setConfirmationModal({
+              text1: "Do you want to create a new Organization?",
+              text2:
+                "This action will redirect you to the organization creation page.",
+              btn1Text: "Yes",
+              btn2Text: "Skip",
+              btn1Handler: () => {
+                navigate("/organization/organization-create-update");
+                // Set showOption to true after the action
+                setConfirmationModal(null);
+              },
+              btn2Handler: () => {
+                navigate("/"); // Ensure showOption is true to prevent future prompts
+                setConfirmationModal(null);
+                dispatch(setShowOption(true));
+              },
+            });
+          } else {
+            console.log("else");
+            navigate("/");
+          }
+        }
+      }
+    } catch (error) {
+      setError("password", {
+        type: "server",
+        message: "Failed to login. Please check your credentials.",
+      });
+    }
   };
 
   const togglePasswordVisibility = () => {
     setShowPassword((prevShowPassword) => !prevShowPassword);
+  };
+
+  const emailPattern =
+    /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([a-zA-Z\-]+\.)*[a-zA-Z]{2,})$/;
+
+  const validatePassword = (value) => {
+    if (!/[A-Z]/.test(value)) {
+      return "Password must contain at least one uppercase letter.";
+    }
+    if (!/[a-z]/.test(value)) {
+      return "Password must contain at least one lowercase letter.";
+    }
+    if (!/\d/.test(value)) {
+      return "Password must contain at least one digit.";
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
+      return 'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>).';
+    }
+    if (value.length < 8 || value.length > 20) {
+      return "Password must be between 8 and 20 characters.";
+    }
+    return true;
   };
 
   return (
@@ -61,23 +144,18 @@ const LoginFormTemplate = () => {
             >
               Sign in to your account
             </h1>
-            <form
-              data-testid="login-form"
-              onSubmit={handleSubmit(onSubmit)}
-              action="#"
-            >
+            <form role="form" onSubmit={handleSubmit(onSubmit)} action="#">
               <div className="mt-3 mb-3"></div>
               <label data-testid="email-label" className="w-full">
                 <p className="text-[0.875rem] mb-1 leading-[1.375rem]">
-                  Email Address<sup className="text-red-600  ml-1">*</sup>
+                  Email Address<sup className="text-red-600 ml-1">*</sup>
                 </p>
                 <input
                   name="Email"
                   id="Email"
                   {...register("email", {
                     required: true,
-                    pattern:
-                      /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+                    pattern: emailPattern,
                   })}
                   className={`rounded-[0.5rem] w-full p-[12px] border-b-[1px] ${
                     darkMode
@@ -88,76 +166,72 @@ const LoginFormTemplate = () => {
                   placeholder="Enter Email Address"
                 />
               </label>
-              {errors.email && (
-                <p className="text-red-400 mt-2">Please enter a valid email.</p>
+              {errors.email && errors.email.type === "pattern" && (
+                <p className="text-red-400 mt-2" role="alert">
+                  Please enter a valid email address.
+                </p>
               )}
               <div className="mt-5">
                 <label data-testid="password-label" className="w-full">
                   <p className="text-[0.875rem] mb-1 leading-[1.375rem]">
-                    Password<sup className="text-red-600  ml-1">*</sup>
+                    Password<sup className="text-red-600 ml-1">*</sup>
                   </p>
                   <div className="relative">
                     <input
-                      data-testid="password-input"
                       type={showPassword ? "text" : "password"}
-                      name="password"
-                      id="password"
+                      id="Password"
+                      name="Password"
                       {...register("password", {
                         required: true,
-                        minLength: 5,
-                        maxLength: 20,
+                        validate: validatePassword,
                       })}
-                      className={`rounded-[0.5rem] w-full p-[12px] pr-[36px] border-b-[1px] ${
+                      className={`rounded-[0.5rem] w-full p-[12px] border-b-[1px] ${
                         darkMode
                           ? "bg-gray-700 border-gray-600 text-white"
                           : "bg-white border-gray-300 text-black"
                       }`}
                       placeholder="Enter Password"
+                      data-testid="password-input"
                     />
                     <span
-                      className="absolute inset-y-0 right-0 flex items-center pr-3 cursor-pointer"
                       onClick={togglePasswordVisibility}
+                      role="button"
+                      data-testid="toggle-password-visibility"
+                      className={`absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer ${
+                        darkMode ? "text-gray-400" : "text-gray-600"
+                      }`}
                     >
                       {showPassword ? <FaEyeSlash /> : <FaEye />}
                     </span>
-                    {errors.password && (
-                      <p className="text-red-400 mt-2">
-                        Password must be between 5 and 20 characters.
-                      </p>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-end mt-2">
-                    <Link
-                      data-testid="forgot-password-link"
-                      to="/forgot-password"
-                    >
-                      <p
-                        className={`text-xs font-medium mt-1 max-w-max ml-auto italic hover:underline ${
-                          darkMode ? "text-white" : "text-black"
-                        }`}
-                      >
-                        Forgot Password?
-                      </p>
-                    </Link>
                   </div>
                 </label>
+                {errors.password && errors.password.type === "validate" && (
+                  <p className="text-red-400 mt-2" role="alert">
+                    {errors.password.message}
+                  </p>
+                )}
               </div>
-
+              <div className="flex justify-between my-4">
+                <Link
+                  to="/reset-password"
+                  className="text-sm font-medium text-blue-500 hover:underline"
+                  data-testid="forgot-password-link"
+                >
+                  Forgot Password?
+                </Link>
+              </div>
               <button
-                data-testid="submit-button"
                 type="submit"
-                className={`w-full rounded-[8px] font-medium px-[12px] py-[8px] mt-3 transition-all duration-500 ${
-                  darkMode
-                    ? "primary-gradient text-white hover:bg-yellow-700"
-                    : "bg-slate-900 text-white hover:bg-slate-800"
-                }`}
+                className="w-full bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 focus:outline-none"
+                data-testid="login-button"
               >
-                Sign In
+                Login
               </button>
             </form>
           </div>
         </div>
       </div>
+      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
     </div>
   );
 };
