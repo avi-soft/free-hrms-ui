@@ -180,10 +180,9 @@ const LoginFormTemplate = () => {
                     <input
                       type={showPassword ? "text" : "password"}
                       id="Password"
+                      required
                       name="Password"
                       {...register("password", {
-                        required: true,
-                        validate: validatePassword,
                       })}
                       className={`rounded-[0.5rem] w-full p-[12px] border-b-[1px] ${
                         darkMode

@@ -35,33 +35,34 @@ const DepartmentList = () => {
       try {
         dispatch(setLoading(true));
         const res = await dispatch(getOrganisation(AccessToken));
-        dispatch(setOrganization(res?.data));
+        const organizations = res?.data;
+        dispatch(setOrganization(organizations));
+        if (organizations.length > 0) {
+          setSelectedOrganization(organizations[0].organizationId); // Set the first organization as selected
+        }
         dispatch(setLoading(false));
       } catch (error) {
         console.error("Error fetching AllOrganizations", error);
-      } finally {
         dispatch(setLoading(false));
       }
     };
-
+  
     fetchOrganizationList();
   }, [dispatch, AccessToken]);
+  
 
   useEffect(() => {
     if (selectedOrganization) {
-      console.log(selectedOrganization);
       const fetchDepartmentsList = async () => {
         try {
           dispatch(setLoading(true));
           const res = await dispatch(
             Departmentlist(AccessToken, selectedOrganization)
           );
-          console.log(res);
           dispatch(setDepartments(res?.data));
           dispatch(setLoading(false));
         } catch (error) {
           console.error("Error fetching departments", error);
-        } finally {
           dispatch(setLoading(false));
         }
       };
@@ -115,136 +116,168 @@ const DepartmentList = () => {
               <button>Add Department</button>
             </Link>
           </div>
-          <div className="flex justify-start p-5">
-            <select
-              value={selectedOrganization}
-              onChange={(e) => setSelectedOrganization(e.target.value)}
-              className={`${
-                darkMode ? "bg-slate-700 text-white" : "bg-slate-200 text-black"
-              } p-2 rounded-lg`}
-            >
-              <option value="">Select Organization</option>
-              {AllOrganizations.map((org) => (
-                <option key={org?.organizationId} value={org.organizationId}>
-                  {org.organizationName}
-                </option>
-              ))}
-            </select>
-          </div>
-          {/* Section 3 */}
-          {AllDepartments?.length === 0 ? (
-            <div>
-              <h1 className="text-center text-2xl mt-10">
-                No Departments Found
-              </h1>
-            </div>
-          ) : (
-            <div className="p-5">
-              <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                
-                <table className="min-w-full text-sm text-left">
-                  <thead
-                    className={`${
-                      darkMode
-                        ? "bg-slate-700 text-white"
-                        : "bg-slate-200 text-black"
-                    } text-xs uppercase`}
-                  >
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3"
-                        data-testid="Department-Name-header"
-                      >
-                        Department Name
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3"
-                        data-testid="Department-Manager-header"
-                      >
-                        Department Manager
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3"
-                        data-testid="Department-Description-header"
-                      >
-                        Department Description
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3"
-                        data-testid="action-header"
-                      >
-                        Action
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {AllDepartments?.map((department, index) => (
-                      <tr
-                        key={department.departmentId}
-                        className={
-                          index % 2 === 0
-                            ? darkMode
-                              ? "bg-slate-600 text-white"
-                              : "bg-white text-black"
-                            : darkMode
-                            ? "bg-slate-700 text-white"
-                            : "bg-gray-100 text-black"
-                        }
-                      >
-                        <td className="px-6 py-4">{department.department}</td>
-                        <td className="px-6 py-4">
-                          {department?.managerId
-                            ? `${department.managerFirstName} ${department.managerLastName}`
-                            : "N/A"}
-                        </td>
-                        <td className="px-6 py-4">{department.description}</td>
-                        <td className="px-6 py-4 flex gap-x-2">
-                          <button
-                            className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
-                            onClick={() =>
-                              navigate(`/department/department-create-update`, {
-                                state: { isEditing: true, department },
-                              })
-                            }
-                          >
-                            <FaRegEdit />
-                          </button>
-                          <Link
-                            data-testid="delete-button"
-                            onClick={() =>
-                              setConfirmationModal({
-                                text1: "Are You Sure?",
-                                text2:
-                                  "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
-                                btn1Text: "Delete Department",
-                                btn2Text: "Cancel",
-                                btn1Handler: async () => {
-                                  dispatch(
-                                    deleteDepartment(
-                                      AccessToken,
-                                      department.departmentId
-                                    )
-                                  );
-                                  refreshPage();
-                                },
-                                btn2Handler: () => setConfirmationModal(null),
-                              })
-                            }
-                            className="text-red-600 text-lg"
-                          >
-                            <RiDeleteBin6Line />
-                          </Link>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+          {AllOrganizations.length === 0 ? (
+            <div className="p-5 mt-32 flex flex-col items-center justify-center">
+              <div
+                className={`text-xl font-semibold ${
+                  darkMode ? "text-orange-400" : "text-slate-600"
+                }`}
+              >
+                No Organizations Available
+              </div>
+              <p
+                className={`text-center mt-4 ${
+                  darkMode ? "text-white" : "text-gray-700"
+                }`}
+              >
+                You need to create an organization before managing departments.
+              </p>
+              <div className="flex justify-center">
+                <Link
+                  to={`/organization/organization-create-update`}
+                  className={`text-sm md:text-base underline font-medium rounded-md py-2 px-5 ${
+                    darkMode ? "text-blue-400" : "text-blue-700"
+                  }`}
+                >
+                  Create Organization
+                </Link>
               </div>
             </div>
+          ) : (
+            <>
+              <div className="flex justify-start p-5">
+                <select
+                  value={selectedOrganization}
+                  onChange={(e) => setSelectedOrganization(e.target.value)}
+                  className={`${
+                    darkMode
+                      ? "bg-slate-700 text-white"
+                      : "bg-slate-200 text-black"
+                  } p-2 rounded-lg`}
+                >
+                  <option value="">Select Organization</option>
+                  {AllOrganizations.map((org) => (
+                    <option key={org?.organizationId} value={org.organizationId}>
+                      {org.organizationName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              {/* Section 3 */}
+              {AllDepartments?.length === 0 ? (
+                <div>
+                  <h1 className="text-center text-2xl mt-10">
+                    No Departments Found
+                  </h1>
+                </div>
+              ) : (
+                <div className="p-5">
+                  <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                    <table className="min-w-full text-sm text-left">
+                      <thead
+                        className={`${
+                          darkMode
+                            ? "bg-slate-700 text-white"
+                            : "bg-slate-200 text-black"
+                        } text-xs uppercase`}
+                      >
+                        <tr>
+                          <th
+                            scope="col"
+                            className="px-6 py-3"
+                            data-testid="Department-Name-header"
+                          >
+                            Department Name
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3"
+                            data-testid="Department-Manager-header"
+                          >
+                            Department Manager
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3"
+                            data-testid="Department-Description-header"
+                          >
+                            Department Description
+                          </th>
+                          <th
+                            scope="col"
+                            className="px-6 py-3"
+                            data-testid="action-header"
+                          >
+                            Action
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {AllDepartments?.map((department, index) => (
+                          <tr
+                            key={department.departmentId}
+                            className={
+                              index % 2 === 0
+                                ? darkMode
+                                  ? "bg-slate-600 text-white"
+                                  : "bg-white text-black"
+                                : darkMode
+                                ? "bg-slate-700 text-white"
+                                : "bg-gray-100 text-black"
+                            }
+                          >
+                            <td className="px-6 py-4">{department.department}</td>
+                            <td className="px-6 py-4">
+                              {department?.managerId
+                                ? `${department.managerFirstName} ${department.managerLastName}`
+                                : "N/A"}
+                            </td>
+                            <td className="px-6 py-4">{department.description}</td>
+                            <td className="px-6 py-4 flex gap-x-2">
+                              <button
+                                className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
+                                onClick={() =>
+                                  navigate(`/department/department-create-update`, {
+                                    state: { isEditing: true, department },
+                                  })
+                                }
+                              >
+                                <FaRegEdit />
+                              </button>
+                              <Link
+                                data-testid="delete-button"
+                                onClick={() =>
+                                  setConfirmationModal({
+                                    text1: "Are You Sure?",
+                                    text2:
+                                      "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
+                                    btn1Text: "Delete Department",
+                                    btn2Text: "Cancel",
+                                    btn1Handler: async () => {
+                                      dispatch(
+                                        deleteDepartment(
+                                          AccessToken,
+                                          department.departmentId
+                                        )
+                                      );
+                                      refreshPage();
+                                    },
+                                    btn2Handler: () => setConfirmationModal(null),
+                                  })
+                                }
+                                className="text-red-600 text-lg"
+                              >
+                                <RiDeleteBin6Line />
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              )}
+            </>
           )}
           {confirmationModal && (
             <ConfirmationModal modalData={confirmationModal} />
