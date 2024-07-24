@@ -141,6 +141,7 @@ const DepartmentList = () => {
           ) : (
             <div className="p-5">
               <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                
                 <table className="min-w-full text-sm text-left">
                   <thead
                     className={`${
