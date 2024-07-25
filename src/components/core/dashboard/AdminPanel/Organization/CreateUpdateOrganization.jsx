@@ -330,8 +330,8 @@ const CreateUpdateOrganisation = () => {
                 <div className="mb-4">
                   <label
                     htmlFor="large_size"
-                    className={`block text-gray-700 text-sm font-bold mb-2 ${
-                      darkMode ? "text-white" : ""
+                    className={`block text-gray-700 text-lg  font-bold mb-2 ${
+                      darkMode ? " text-blue-300" : ""
                     }`}
                   >
                     Add Organization Logo
@@ -358,10 +358,10 @@ const CreateUpdateOrganisation = () => {
                       <button
                         type="button"
                         onClick={() => inputRef.current.click()}
-                        className={`py-1 px-3 text-sm font-medium rounded-md ${
+                        className={`py-1 px-3 ml-2 text-sm font-medium rounded-md ${
                           darkMode
                             ? "bg-slate-400 text-black"
-                            : "bg-gray-900 text-white"
+                            : "bg-gray-600 text-white"
                         } hover:scale-95 transition-all duration-200`}
                       >
                         Select
@@ -369,26 +369,28 @@ const CreateUpdateOrganisation = () => {
                     </div>
                   </div>
                 </div>
+                <div className="flex items-center justify-between">
                 <button
                   onClick={handleLogoUpload}
-                  className={`w-1/3 py-2 text-sm font-medium rounded-md ${
+                  className={`w-1/2 py-2 text-sm font-medium rounded-md ${
                     darkMode
                       ? "primary-gradient text-white"
-                      : "bg-green-700 text-white"
+                      : " bg-yellow-500 text-white"
                   } hover:scale-95 transition-all duration-200`}
                 >
                   Upload Logo
                 </button>
                 <button
                   onClick={handleSkipp}
-                  className={`w-1/3 ml-7 py-2 text-sm font-medium rounded-md ${
+                  className={`w-1/2 ml-7 py-2 text-sm font-medium rounded-md ${
                     darkMode
                       ? "bg-slate-400 text-black"
-                      : "bg-gray-600 text-white"
+                      : "bg-gray-400 text-white"
                   } hover:scale-95 transition-all duration-200`}
                 >
                   Skip
                 </button>
+                </div>
               </div>
             ) : (
               <form

@@ -17,6 +17,7 @@ import {
 } from "../../../../../slices/departmentSlice.js";
 import { setOrganization } from "../../../../../slices/OrganisationSlice";
 import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
+import toast from "react-hot-toast";
 
 const DepartmentList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -31,41 +32,41 @@ const DepartmentList = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchOrganizationList = async () => {
-      try {
-        dispatch(setLoading(true));
-        const res = await dispatch(getOrganisation(AccessToken));
-        const organizations = res?.data;
-        dispatch(setOrganization(organizations));
-        if (organizations.length > 0) {
-          setSelectedOrganization(organizations[0].organizationId); // Set the first organization as selected
-        }
-        dispatch(setLoading(false));
-      } catch (error) {
-        console.error("Error fetching AllOrganizations", error);
-        dispatch(setLoading(false));
-      }
-    };
-
     fetchOrganizationList();
   }, [dispatch, AccessToken]);
 
+  const fetchOrganizationList = async () => {
+    try {
+      dispatch(setLoading(true));
+      const res = await dispatch(getOrganisation(AccessToken));
+      const organizations = res?.data;
+      dispatch(setOrganization(organizations));
+      if (organizations.length > 0) {
+        setSelectedOrganization(organizations[0].organizationId); // Set the first organization as selected
+      }
+      dispatch(setLoading(false));
+    } catch (error) {
+      console.error("Error fetching AllOrganizations", error);
+      dispatch(setLoading(false));
+    }
+  };
+
+  const fetchDepartmentsList = async () => {
+    try {
+      dispatch(setLoading(true));
+      const res = await dispatch(
+        Departmentlist(AccessToken, selectedOrganization)
+      );
+      dispatch(setDepartments(res?.data));
+      dispatch(setLoading(false));
+    } catch (error) {
+      console.error("Error fetching departments", error);
+      dispatch(setLoading(false));
+    }
+  };
+
   useEffect(() => {
     if (selectedOrganization) {
-      const fetchDepartmentsList = async () => {
-        try {
-          dispatch(setLoading(true));
-          const res = await dispatch(
-            Departmentlist(AccessToken, selectedOrganization)
-          );
-          dispatch(setDepartments(res?.data));
-          dispatch(setLoading(false));
-        } catch (error) {
-          console.error("Error fetching departments", error);
-          dispatch(setLoading(false));
-        }
-      };
-
       fetchDepartmentsList();
     }
   }, [dispatch, AccessToken, selectedOrganization]);
@@ -263,13 +264,16 @@ const DepartmentList = () => {
                                     btn1Text: "Delete Department",
                                     btn2Text: "Cancel",
                                     btn1Handler: async () => {
-                                      await dispatch(
+                                      const response=await dispatch(
                                         deleteDepartment(
                                           AccessToken,
                                           department.departmentId
                                         )
                                       );
-                                      refreshPage();
+                                      if (response?.status !== 200) throw new Error(response.data.message);
+                                       toast.success(response?.data?.message);
+                                       fetchDepartmentsList();
+                                       setConfirmationModal(null)
                                     },
                                     btn2Handler: () =>
                                       setConfirmationModal(null),

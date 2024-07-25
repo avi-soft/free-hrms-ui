@@ -29,22 +29,22 @@ const OrganizationList = () => {
   console.log(loading);
   console.log(AllOrganizations);
 
-  useEffect(() => {
-    const fetchOrganizationList = async () => {
-      try {
-        dispatch(setLoading(true));
-        const res = await dispatch(getOrganisation(AccessToken));
-        console.log(res);
-        console.log(res?.data);
-        dispatch(setOrganization(res?.data));
-        dispatch(setLoading(false));
-      } catch (error) {
-        console.error("Error fetching AllOrganizations", error);
-      } finally {
-        dispatch(setLoading(false));
-      }
-    };
+  const fetchOrganizationList = async () => {
+    try {
+      dispatch(setLoading(true));
+      const res = await dispatch(getOrganisation(AccessToken));
+      console.log(res);
+      console.log(res?.data);
+      dispatch(setOrganization(res?.data));
+      dispatch(setLoading(false));
+    } catch (error) {
+      console.error("Error fetching AllOrganizations", error);
+    } finally {
+      dispatch(setLoading(false));
+    }
+  };
 
+  useEffect(() => {
     fetchOrganizationList();
   }, [dispatch, AccessToken]);
 
@@ -222,7 +222,8 @@ const OrganizationList = () => {
                                   if (response?.status != 200) return null;
                                   else {
                                     toast.success(response?.data?.message);
-                                    refreshPage();
+                                    fetchOrganizationList();
+                                    setConfirmationModal(null);
                                   }
                                 },
                                 btn2Handler: () => setConfirmationModal(null),

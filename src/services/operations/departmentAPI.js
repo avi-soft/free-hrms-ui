@@ -119,6 +119,7 @@ export const deleteDepartment = (AccessToken, DepartmentId) => {
         }
       );
       console.log(response);
+      return response
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success("DEPARTMENT DELETED SUCCESSFULLY");
     } catch (err) {
@@ -128,7 +129,9 @@ export const deleteDepartment = (AccessToken, DepartmentId) => {
       } else {
         toast.error("Something went wrong.");
       }
+    }finally{
+      toast.dismiss(toastId);
     }
-    toast.dismiss(toastId);
+    
   };
 };

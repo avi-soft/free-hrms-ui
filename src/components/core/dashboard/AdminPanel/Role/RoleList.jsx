@@ -194,8 +194,9 @@ const RoleList = () => {
                                     console.log(response);
                                     if (response?.status != 200) return null;
                                     else {
-                                      refreshPage();
+                                      fetchRoles();
                                       toast.success(response?.data?.message);
+                                      setConfirmationModal(null);
                                     }
                                   },
                                   btn2Handler: () => setConfirmationModal(null),
