@@ -10,21 +10,23 @@ const {
   DEPARTMENT_LIST_API,
 } = DepartmentEndpoints;
 
-export const Departmentlist = (AccessToken,selectedOrganization) => {
+export const Departmentlist = (AccessToken, selectedOrganization) => {
   return async (dispatch) => {
     try {
       console.log(AccessToken);
-      const response = await apiConnector("GET",
-         `${DEPARTMENT_LIST_API}/${selectedOrganization}`, 
-         null,
-          {
-        Authorization: `Bearer ${AccessToken}`,
-      });
+      const response = await apiConnector(
+        "GET",
+        `${DEPARTMENT_LIST_API}/${selectedOrganization}`,
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
 
       return response;
     } catch (err) {
       if (err?.response?.data?.message) {
-        toast.error(err?.response?.data?.message);   
+        toast.error(err?.response?.data?.message);
       } else {
         toast.error("Something went wrong.");
       }
@@ -37,10 +39,10 @@ export const addDepartment = (formData) => {
     const toastId = toast.loading("Adding...");
     try {
       console.log(formData);
-      const { AccessToken, navigate,organizationId } = formData;
+      const { AccessToken, navigate, organizationId } = formData;
       console.log(AccessToken);
       console.log(navigate);
-      console.log(organizationId)
+      console.log(organizationId);
       const response = await apiConnector(
         "POST",
         `${ADD_DEPARTMENT_API}/${organizationId}`,
@@ -76,8 +78,7 @@ export const updateDepartment = (AccessToken, formData, DepartmentId) => {
     try {
       console.log(formData);
       const { navigate } = formData;
-      const { organizationId} = formData;
-
+      const { organizationId } = formData;
 
       console.log(AccessToken);
       console.log(navigate);
@@ -88,7 +89,7 @@ export const updateDepartment = (AccessToken, formData, DepartmentId) => {
         { Authorization: `Bearer ${AccessToken}` }
       );
       console.log(response);
-      if (response?.status != "204") throw new Error(response.data.message);
+      if (response?.status != "200") throw new Error(response.data.message);
       else {
         toast.success("Updated Department Successfully");
         navigate("/department/department-list");
@@ -118,7 +119,7 @@ export const deleteDepartment = (AccessToken, DepartmentId) => {
         }
       );
       console.log(response);
-      if (response?.status !== 204) throw new Error(response.data.message);
+      if (response?.status !== 200) throw new Error(response.data.message);
       toast.success("DEPARTMENT DELETED SUCCESSFULLY");
     } catch (err) {
       if (err?.response?.data?.message) {

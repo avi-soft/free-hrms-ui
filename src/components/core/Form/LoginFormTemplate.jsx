@@ -52,6 +52,7 @@ const LoginFormTemplate = () => {
           }
 
           console.log("hi2");
+          console.log(typeof showOption);
           if (showOption == "false") {
             console.log("12");
             console.log("13");
@@ -180,9 +181,9 @@ const LoginFormTemplate = () => {
                     <input
                       type={showPassword ? "text" : "password"}
                       id="Password"
-                      required
                       name="Password"
                       {...register("password", {
+                        required: true,
                       })}
                       className={`rounded-[0.5rem] w-full p-[12px] border-b-[1px] ${
                         darkMode
