@@ -66,8 +66,13 @@ const CreateUpdateOrganisation = () => {
       } else {
         response = await dispatch(addOrganisation(AccessToken, data));
       }
-      setOrganisationId(response?.data?.data?.organizationId);
-      setShowLogoUploadDialog(true);
+      if (response?.status != 201) throw new Error(response?.data?.message);
+      else {
+        toast.success(response?.data?.message);
+        setOrganisationId(response?.data?.data?.organizationId);
+        setShowLogoUploadDialog(true);
+      }
+
     } catch (error) {
       console.error("Error submitting organisation details:", error);
     }
@@ -330,8 +335,8 @@ const CreateUpdateOrganisation = () => {
                 <div className="mb-4">
                   <label
                     htmlFor="large_size"
-                    className={`block text-gray-700 text-lg  font-bold mb-2 ${
-                      darkMode ? " text-blue-300" : ""
+                    className={`block  text-lg  font-bold mb-2 ${
+                      darkMode ? " text-blue-300" : "text-blue-300"
                     }`}
                   >
                     Add Organization Logo

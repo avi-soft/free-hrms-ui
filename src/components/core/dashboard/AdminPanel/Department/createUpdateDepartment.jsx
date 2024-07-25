@@ -362,7 +362,6 @@ const CreateUpdateDepartment = () => {
               </label>
               <input
                 data-testid="employeeSearch"
-                required
                 type="text"
                 id="employeeSearch"
                 placeholder="Search employee for adding as manager.."
