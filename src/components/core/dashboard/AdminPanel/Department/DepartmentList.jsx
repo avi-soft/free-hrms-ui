@@ -46,10 +46,9 @@ const DepartmentList = () => {
         dispatch(setLoading(false));
       }
     };
-  
+
     fetchOrganizationList();
   }, [dispatch, AccessToken]);
-  
 
   useEffect(() => {
     if (selectedOrganization) {
@@ -157,7 +156,10 @@ const DepartmentList = () => {
                 >
                   <option value="">Select Organization</option>
                   {AllOrganizations.map((org) => (
-                    <option key={org?.organizationId} value={org.organizationId}>
+                    <option
+                      key={org?.organizationId}
+                      value={org.organizationId}
+                    >
                       {org.organizationName}
                     </option>
                   ))}
@@ -226,20 +228,27 @@ const DepartmentList = () => {
                                 : "bg-gray-100 text-black"
                             }
                           >
-                            <td className="px-6 py-4">{department.department}</td>
+                            <td className="px-6 py-4">
+                              {department.department}
+                            </td>
                             <td className="px-6 py-4">
                               {department?.managerId
                                 ? `${department.managerFirstName} ${department.managerLastName}`
                                 : "N/A"}
                             </td>
-                            <td className="px-6 py-4">{department.description}</td>
+                            <td className="px-6 py-4">
+                              {department.description}
+                            </td>
                             <td className="px-6 py-4 flex gap-x-2">
                               <button
                                 className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
                                 onClick={() =>
-                                  navigate(`/department/department-create-update`, {
-                                    state: { isEditing: true, department },
-                                  })
+                                  navigate(
+                                    `/department/department-create-update`,
+                                    {
+                                      state: { isEditing: true, department },
+                                    }
+                                  )
                                 }
                               >
                                 <FaRegEdit />
@@ -254,7 +263,7 @@ const DepartmentList = () => {
                                     btn1Text: "Delete Department",
                                     btn2Text: "Cancel",
                                     btn1Handler: async () => {
-                                      dispatch(
+                                      await dispatch(
                                         deleteDepartment(
                                           AccessToken,
                                           department.departmentId
@@ -262,7 +271,8 @@ const DepartmentList = () => {
                                       );
                                       refreshPage();
                                     },
-                                    btn2Handler: () => setConfirmationModal(null),
+                                    btn2Handler: () =>
+                                      setConfirmationModal(null),
                                   })
                                 }
                                 className="text-red-600 text-lg"
