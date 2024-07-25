@@ -10,8 +10,6 @@ import { toggleDarkMode } from "../../slices/themeSlice";
 import LogBtn from "../core/Navbar/LogBtn";
 import ProfileDropDown from "../core/Navbar/ProfileDropDown";
 
-
-
 const NavBar = () => {
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
@@ -76,17 +74,21 @@ const NavBar = () => {
         }
 
         <div className="flex justify-between items-center gap-2">
-          <button onClick={handleThemeToggle} className="mt-1">
+          <button
+            onClick={handleThemeToggle}
+            className="mt-1"
+            data-testid="themeToggle"
+          >
             {darkMode ? (
-              <img className="active-theme" src={Sun} height={30} width={30} />
+              <img className="active-theme" src={Sun} height={30} width={30} alt="Sun" />
             ) : (
-              <img className="active-theme" src={Moon} height={30} width={30} />
+              <img className="active-theme" src={Moon} height={30} width={30} alt="Moon" />
             )}
           </button>
           <div className="mr-5">
             {AccessToken  && (
-              <div  data-testid="profile-dropdown">
-               <ProfileDropDown />
+              <div data-testid="profile-dropdown">
+                <ProfileDropDown />
               </div>
             )}
           </div>

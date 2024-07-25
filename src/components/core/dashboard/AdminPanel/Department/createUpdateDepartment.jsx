@@ -26,7 +26,7 @@ const CreateUpdateDepartment = () => {
   const [selectedManager, setSelectedManager] = useState(null);
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const [showCheckbox, setShowCheckbox] = useState(false);
-  const { loading } = useSelector((state) => state.Organisation);
+  const { loading } = useSelector((state) => state.department);
   const { AllOrganizations } = useSelector((state) => state.Organisation);
   const [noSearch, setNoSearch] = useState(false);
   const dispatch = useDispatch();
@@ -57,8 +57,11 @@ const CreateUpdateDepartment = () => {
         "Organisation Name must not contain special characters",
     },
   };
+<<<<<<< Updated upstream
 
   // Replace the existing register validation rules for the department field with this updated version
+=======
+>>>>>>> Stashed changes
 
   console.log(AllOrganizations);
   useEffect(() => {
@@ -188,6 +191,7 @@ const CreateUpdateDepartment = () => {
     >
       <div className="p-5 flex items-center justify-between">
         <div
+          data-testid="heading-1"
           className={`text-xl font-semibold ${
             darkMode ? "text-white" : "text-slate-600"
           }`}
@@ -196,6 +200,7 @@ const CreateUpdateDepartment = () => {
         </div>
         <div>
           <p
+            data-testid="heading-2"
             className={`text-xl font-semibold ${
               darkMode ? "text-white" : "text-slate-950"
             }`}
@@ -238,6 +243,7 @@ const CreateUpdateDepartment = () => {
           </div>
         ) : (
           <form
+            role="form"
             onSubmit={handleSubmit(onSubmit)}
             className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
               darkMode ? "bg-slate-600" : "bg-white"
@@ -291,6 +297,7 @@ const CreateUpdateDepartment = () => {
               <input
                 id="department"
                 type="text"
+                data-testid="departmentName"
                 placeholder="Department Name..."
                 {...register("department", validateDepartment)}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
@@ -316,6 +323,7 @@ const CreateUpdateDepartment = () => {
               <input
                 id="description"
                 type="text"
+                data-testid="deptDescError"
                 placeholder="Department Description..."
                 {...register("description", {
                   required: "Description is required",

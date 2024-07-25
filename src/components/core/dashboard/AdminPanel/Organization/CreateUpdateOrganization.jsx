@@ -154,7 +154,7 @@ const CreateUpdateOrganisation = () => {
               darkMode ? "bg-slate-600" : "bg-white"
             }`}
           >
-            <form onSubmit={handleSubmit(handleOrganizationSubmit)}>
+            <form role="form" onSubmit={handleSubmit(handleOrganizationSubmit)}>
               <div className="mb-4">
                 <div className="flex items-center">
                   <img
@@ -237,39 +237,7 @@ const CreateUpdateOrganisation = () => {
                       </div>
                     </div>
                   </div>
-                  {/* <div className="ml-4">
-                    <input
-                      id="logo"
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
-                      className="hidden"
-                      ref={inputRef}
-                    />
-                    <div className="flex flex-col gap-2">
-                      <button
-                        type="button"
-                        onClick={() => inputRef.current.click()}
-                        className={`py-1 px-3 text-sm font-medium rounded-md ${
-                          darkMode
-                            ? "bg-slate-400 text-black"
-                            : "bg-gray-900 text-white"
-                        } hover:scale-95 transition-all duration-200`}
-                      >
-                        Select
-                      </button>
-                      <button
-                        onClick={handleLogoUpload}
-                        className={` py-2 text-sm font-medium rounded-md ${
-                          darkMode
-                            ? "primary-gradient text-white"
-                            : "bg-green-700 text-white"
-                        } hover:scale-95 transition-all duration-200`}
-                      >
-                        Update Logo
-                      </button>
-                    </div>
-                  </div> */}
+                 
                 </div>
               </div>
               <div className={`mb-4`}>
@@ -422,6 +390,7 @@ const CreateUpdateOrganisation = () => {
               </div>
             ) : (
               <form
+               role="form"
                 onSubmit={handleSubmit(handleOrganizationSubmit)}
                 className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
                   darkMode ? "bg-slate-600" : "bg-white"
