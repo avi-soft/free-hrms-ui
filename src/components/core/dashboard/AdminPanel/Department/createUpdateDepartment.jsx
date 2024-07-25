@@ -57,11 +57,7 @@ const CreateUpdateDepartment = () => {
         "Organisation Name must not contain special characters",
     },
   };
-<<<<<<< Updated upstream
 
-  // Replace the existing register validation rules for the department field with this updated version
-=======
->>>>>>> Stashed changes
 
   console.log(AllOrganizations);
   useEffect(() => {
