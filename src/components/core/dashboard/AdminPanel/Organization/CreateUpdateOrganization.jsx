@@ -31,12 +31,8 @@ const CreateUpdateOrganisation = () => {
   const [loading, setLoading] = useState(false);
   const { showOption } = useSelector((state) => state.Organisation);
   const { darkMode } = useSelector((state) => state.theme);
-  const selectedImage = useSelector(
-    (state) => state.Organisation.selectedImage
-  );
-  const existingImage = useSelector(
-    (state) => state.Organisation.existingImage
-  );
+  const [selectedImage, setSelectedImage] = useState(null); // Local state for selected image
+  const [existingImage, setExistingImage] = useState(null); // Local state for existing image
 
   const { isEditing, organization } = location.state || {
     isEditing: false,
@@ -50,10 +46,10 @@ const CreateUpdateOrganisation = () => {
     if (isEditing && organization) {
       setValue("organizationName", organization.organizationName);
       setValue("organizationDescription", organization.organizationDescription);
-      dispatch(setExistingImage(organization.organizationImage));
+      setExistingImage(organization.organizationImage); // Update local state for existing image
       setOrganisationId(organization.organizationId);
     }
-  }, [isEditing, organization, setValue, dispatch]);
+  }, [isEditing, organization, setValue]);
 
   const handleOrganizationSubmit = async (data) => {
     try {
@@ -71,9 +67,6 @@ const CreateUpdateOrganisation = () => {
         response = await dispatch(addOrganisation(AccessToken, data));
       }
       setOrganisationId(response?.data?.data?.organizationId);
-      if (isEditing) {
-      }
-      if (response?.status != 201) return null;
       setShowLogoUploadDialog(true);
     } catch (error) {
       console.error("Error submitting organisation details:", error);
@@ -95,19 +88,12 @@ const CreateUpdateOrganisation = () => {
         uploadOrganisationLogo(AccessToken, navigate, organisationId, formData)
       );
       setShowLogoUploadDialog(false);
-      if (response?.status != 200) throw new Error(response?.data?.message);
-      else {
-        if (isEditing) {
-          toast.success(response?.data?.message);
-
-          return null;
-        }
-        if (showOption == "false") {
-          dispatch(setShowOption(true));
-        }
-        navigate("/organization/organization-list");
-        toast.success(response?.data?.message);
+      if (response?.status !== 200) throw new Error(response?.data?.message);
+      toast.success(response?.data?.message);
+      if (!isEditing && showOption === "false") {
+        dispatch(setShowOption(true));
       }
+      navigate("/organization/organization-list");
     } catch (error) {
       console.error("Error uploading logo:", error);
     } finally {
@@ -115,9 +101,13 @@ const CreateUpdateOrganisation = () => {
     }
   };
 
+  const handleSkipp = () => {
+    navigate("/organization/organization-list");
+  };
+
   const handleFileChange = (e) => {
     if (!e.target.files[0]) return;
-    dispatch(setSelectedImage(e.target.files[0]));
+    setSelectedImage(e.target.files[0]); // Update local state for selected image
   };
 
   return (
@@ -237,7 +227,6 @@ const CreateUpdateOrganisation = () => {
                       </div>
                     </div>
                   </div>
-                 
                 </div>
               </div>
               <div className={`mb-4`}>
@@ -269,6 +258,9 @@ const CreateUpdateOrganisation = () => {
                       noSpecialChars: (value) =>
                         /^[a-zA-Z0-9 ]*$/.test(value) ||
                         "Organisation Name must not contain special characters",
+                      noExtraSpaces: (value) =>
+                        !/\s{2,}/.test(value) ||
+                        "Organisation Name must not contain consecutive spaces",
                     },
                   })}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
@@ -379,7 +371,7 @@ const CreateUpdateOrganisation = () => {
                 </div>
                 <button
                   onClick={handleLogoUpload}
-                  className={`w-full py-2 text-sm font-medium rounded-md ${
+                  className={`w-1/3 py-2 text-sm font-medium rounded-md ${
                     darkMode
                       ? "primary-gradient text-white"
                       : "bg-green-700 text-white"
@@ -387,10 +379,20 @@ const CreateUpdateOrganisation = () => {
                 >
                   Upload Logo
                 </button>
+                <button
+                  onClick={handleSkipp}
+                  className={`w-1/3 ml-7 py-2 text-sm font-medium rounded-md ${
+                    darkMode
+                      ? "bg-slate-400 text-black"
+                      : "bg-gray-600 text-white"
+                  } hover:scale-95 transition-all duration-200`}
+                >
+                  Skip
+                </button>
               </div>
             ) : (
               <form
-               role="form"
+                role="form"
                 onSubmit={handleSubmit(handleOrganizationSubmit)}
                 className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
                   darkMode ? "bg-slate-600" : "bg-white"
@@ -421,12 +423,13 @@ const CreateUpdateOrganisation = () => {
                         noNumbers: (value) =>
                           !/\d/.test(value) ||
                           "Organisation Name must not contain numbers",
-                        minLength: (value) =>
-                          value.trim().length >= 3 ||
-                          "Organisation Name must not be empty or less than 3 characters",
+
                         noSpecialChars: (value) =>
                           /^[a-zA-Z0-9 ]*$/.test(value) ||
                           "Organisation Name must not contain special characters",
+                        noExtraSpaces: (value) =>
+                          !/\s{2,}/.test(value) ||
+                          "Organisation Name must not contain consecutive spaces",
                       },
                     })}
                     className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${

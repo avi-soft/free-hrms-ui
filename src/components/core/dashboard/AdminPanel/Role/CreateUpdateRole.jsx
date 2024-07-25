@@ -192,7 +192,7 @@ const CreateUpdateRole = () => {
             }`}
           >
             <li>
-              {isEditing ? "Update the role name." : "Fill out the role name."}
+              {isEditing ? "Update the role name, if required." : "Fill out the role name."}
             </li>
             <li>
               Select the appropriate tab to view the privileges related to a

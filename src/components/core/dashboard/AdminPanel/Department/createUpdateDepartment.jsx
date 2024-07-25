@@ -55,9 +55,11 @@ const CreateUpdateDepartment = () => {
       noSpecialChars: (value) =>
         /^[a-zA-Z0-9 ]*$/.test(value) ||
         "Organisation Name must not contain special characters",
+      noExtraSpaces: (value) =>
+        !/\s{2,}/.test(value) ||
+        "Organisation Name must not contain consecutive spaces",
     },
   };
-
 
   console.log(AllOrganizations);
   useEffect(() => {
