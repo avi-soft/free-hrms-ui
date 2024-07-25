@@ -43,12 +43,6 @@ const LoginFormTemplate = () => {
 
             dispatch(setShowOption(false));
           }
-
-<<<<<<< Updated upstream
-          console.log("hi2");
-          console.log(typeof showOption);
-=======
->>>>>>> Stashed changes
           if (showOption == "false") {
             setConfirmationModal({
               text1: "Do you want to create a new Organization?",
