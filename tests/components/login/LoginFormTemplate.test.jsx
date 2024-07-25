@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import LoginFormTemplate from "../../../src/components/core/Form/LoginFormTemplate";
 import { Provider } from "react-redux";
@@ -9,6 +9,8 @@ import { Toaster } from "react-hot-toast";
 const mockStore = configureMockStore();
 const store = mockStore({
   theme: { darkMode: false },
+  Organisation: { showOption: "false" },
+  profile: { user: null },
 });
 
 describe("LoginFormTemplate", () => {
@@ -37,13 +39,13 @@ describe("LoginFormTemplate", () => {
       waitForFormToLoad: async () => {
         await screen.findByRole("form");
 
-        const emailInput = screen.getByPlaceholderText(/email/i);
-        const passwordInput = screen.getByPlaceholderText(/password/i);
-        const submitButton = screen.getByRole("button");
+        const emailInput = screen.getByPlaceholderText(/enter email address/i);
+        const passwordInput = screen.getByPlaceholderText(/enter password/i);
+        const submitButton = screen.getByRole("button", { name: /login/i });
 
         const validData = {
           email: "test@example.com",
-          password: "validpassword",
+          password: "ValidPassword1!",
         };
 
         const fill = async (data) => {
@@ -108,5 +110,27 @@ describe("LoginFormTemplate", () => {
     await form.fill(form.validData);
 
     expect(form.submitButton).not.toBeDisabled();
+  });
+
+  it("should toggle password visibility", async () => {
+    const { waitForFormToLoad } = renderComponent();
+    const form = await waitForFormToLoad();
+
+    const toggleButton = screen.getByTestId("toggle-password-visibility");
+
+    // Initially, the password input should be of type password
+    expect(form.passwordInput).toHaveAttribute("type", "password");
+
+    // Click to show the password
+    userEvent.click(toggleButton);
+    await waitFor(() => {
+      expect(form.passwordInput).toHaveAttribute("type", "text");
+    });
+
+    // Click to hide the password again
+    userEvent.click(toggleButton);
+    await waitFor(() => {
+      expect(form.passwordInput).toHaveAttribute("type", "password");
+    });
   });
 });

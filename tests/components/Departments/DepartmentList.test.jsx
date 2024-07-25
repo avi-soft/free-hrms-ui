@@ -6,17 +6,23 @@ import { configureStore } from "@reduxjs/toolkit";
 import departmentReducer from "../../../src/slices/departmentSlice.js";
 import themeReducer from "../../../src/slices/themeSlice.js";
 import authReducer from "../../../src/slices/authSlice.js";
+import organisationReducer from "../../../src/slices/OrganisationSlice";
 import { vi } from "vitest";
 import DepartmentList from "../../../src/components/core/dashboard/AdminPanel/Department/DepartmentList.jsx";
 import {
   Departmentlist,
   deleteDepartment,
 } from "../../../src/services/operations/departmentAPI.js";
+import { getOrganisation } from "../../../src/services/operations/OrganisationAPI.js";
 
 // Mock the modules
 vi.mock("../../../src/services/operations/departmentAPI.js", () => ({
   Departmentlist: vi.fn(),
   deleteDepartment: vi.fn(),
+}));
+
+vi.mock("../../../src/services/operations/OrganisationAPI.js", () => ({
+  getOrganisation: vi.fn(),
 }));
 
 describe("DepartmentList Component", () => {
@@ -26,6 +32,7 @@ describe("DepartmentList Component", () => {
         department: departmentReducer,
         theme: themeReducer,
         auth: authReducer,
+        Organisation: organisationReducer,
       },
       preloadedState: initialState,
     });
@@ -42,6 +49,7 @@ describe("DepartmentList Component", () => {
   beforeEach(() => {
     Departmentlist.mockResolvedValue({ data: [] });
     deleteDepartment.mockResolvedValue({});
+    getOrganisation.mockResolvedValue({ data: [] });
   });
 
   it("renders the Department List title", async () => {
@@ -52,6 +60,7 @@ describe("DepartmentList Component", () => {
       },
       theme: { darkMode: false },
       auth: { AccessToken: "dummy-token" },
+      Organisation: { AllOrganizations: [] },
     });
 
     await waitFor(() => {
@@ -59,17 +68,19 @@ describe("DepartmentList Component", () => {
     });
   });
 
-  //   it("displays loading spinner when loading", () => {
-  //     setup({
-  //       department: {
-  //         AllDepartments: [],
-  //         loading: true,
-  //       },
-  //       theme: { darkMode: false },
-  //       auth: { AccessToken: "dummy-token" },
-  //     });
-  //     expect(screen.getByTestId("loading-spinner")).toBeInTheDocument();
+  // it("displays loading spinner when loading", () => {
+  //   setup({
+  //     department: {
+  //       AllDepartments: [],
+  //       loading: true,
+  //     },
+  //     theme: { darkMode: false },
+  //     auth: { AccessToken: "dummy-token" },
+  //     Organisation: { AllOrganizations: [] },
   //   });
+
+  //   expect(screen.getByText("Loading...")).toBeInTheDocument();
+  // });
 
   it("renders department data", async () => {
     const departments = [
@@ -91,6 +102,7 @@ describe("DepartmentList Component", () => {
       },
       theme: { darkMode: false },
       auth: { AccessToken: "dummy-token" },
+      Organisation: { AllOrganizations: ["TEST ORG 1", " TEST ORG 2"] },
     });
 
     await waitFor(() => {
@@ -98,6 +110,7 @@ describe("DepartmentList Component", () => {
       expect(screen.getByText("Human Resources")).toBeInTheDocument();
     });
   });
+
   it("opens confirmation modal on delete", async () => {
     const departments = [
       {
@@ -118,6 +131,9 @@ describe("DepartmentList Component", () => {
       },
       theme: { darkMode: false },
       auth: { AccessToken: "dummy-token" },
+      Organisation: { AllOrganizations: [
+        "test org 1", "test org 2"
+      ] },
     });
 
     fireEvent.click(screen.getByTestId("delete-button"));
@@ -125,5 +141,56 @@ describe("DepartmentList Component", () => {
     await waitFor(() => {
       expect(screen.getByText("Are You Sure?")).toBeInTheDocument();
     });
+  });
+
+  // it("renders and updates organization selection", async () => {
+  //   const organizations = [
+  //     {
+  //       organizationId: "1",
+  //       organizationName: "Org1",
+  //     },
+  //     {
+  //       organizationId: "2",
+  //       organizationName: "Org2",
+  //     },
+  //   ];
+
+  //   getOrganisation.mockResolvedValueOnce({ data: organizations });
+
+  //   setup({
+  //     department: {
+  //       AllDepartments: [],
+  //       loading: false,
+  //     },
+  //     theme: { darkMode: false },
+  //     auth: { AccessToken: "dummy-token" },
+  //     Organisation: { AllOrganizations: organizations },
+  //   });
+
+  //   await waitFor(() => {
+  //     const selectElement = screen.getByRole("combobox");
+  //     expect(selectElement).toBeInTheDocument();
+  //     expect(selectElement.value).toBe("1"); // Default to the first organization
+
+  //     fireEvent.change(selectElement, { target: { value: "2" } });
+  //     expect(selectElement.value).toBe("2");
+  //   });
+  // });
+
+  it("navigates to add department page on button click", () => {
+    setup({
+      department: {
+        AllDepartments: [],
+        loading: false,
+      },
+      theme: { darkMode: false },
+      auth: { AccessToken: "dummy-token" },
+      Organisation: { AllOrganizations: [] },
+    });
+
+    const addButton = screen.getByText("Add Department");
+    expect(addButton).toBeInTheDocument();
+    fireEvent.click(addButton);
+    expect(window.location.pathname).toBe("/department/department-create-update");
   });
 });

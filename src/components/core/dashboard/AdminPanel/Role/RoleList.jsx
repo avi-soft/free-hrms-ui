@@ -12,13 +12,14 @@ import {
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import toast from "react-hot-toast";
+import { setRoles,setLoading } from "../../../../../slices/roleSlice";
 
 const RoleList = () => {
   const dispatch = useDispatch();
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
-  const [roles, setRoles] = useState([]);
-  const [loading, setLoading] = useState(false); // Set initial loading to true
+  const { loading,roles } = useSelector((state) => state.role);
+
   const [confirmationModal, setConfirmationModal] = useState(null);
   console.log(confirmationModal)
   const navigate = useNavigate();
@@ -29,14 +30,14 @@ const RoleList = () => {
 
   const fetchRoles = async () => {
     try {
-      setLoading(true);
+      dispatch(setLoading(true));
       console.log("Fetching roles...");
       const res = await dispatch(getRole(AccessToken));
-      setRoles(res?.data);
+      dispatch(setRoles(res?.data));
     } catch (error) {
       console.error("Error fetching roles", error);
     } finally {
-      setLoading(false);
+      dispatch(setLoading(false));
       console.log("Loading state set to false");
     }
   };
@@ -175,6 +176,7 @@ const RoleList = () => {
                               />
                             </button>
                             <button
+                               data-testid="deleteBtn"
                               className={`${
                                 darkMode ? "text-red-400" : "text-red-600"
                               } text-lg`}
@@ -216,7 +218,10 @@ const RoleList = () => {
             )}
           </div>
           {confirmationModal && (
-            <ConfirmationModal modalData={confirmationModal} />
+            <div data-testid="ConfirmationModal">
+            <ConfirmationModal  modalData={confirmationModal} />
+
+            </div>
           )}
         </div>
       )}

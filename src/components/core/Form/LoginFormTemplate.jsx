@@ -23,12 +23,10 @@ const LoginFormTemplate = () => {
   const { showOption } = useSelector((state) => state.Organisation);
   const user = useSelector((state) => state.profile.user);
 
-  console.log(showOption);
 
   const [showPassword, setShowPassword] = useState(false);
   const [confirmationModal, setConfirmationModal] = useState(null);
 
-  console.log(confirmationModal);
 
   const onSubmit = async (data) => {
     if (!data.password || !data.email) {
@@ -39,23 +37,13 @@ const LoginFormTemplate = () => {
       data.navigate = navigate;
       const response = await dispatch(login(data));
       if (response?.status == 200) {
-        console.log("999");
-        console.log(response?.data?.loginUser?.roles[0]?.role);
         if (response?.data?.loginUser?.roles[0]?.role == "Manager") {
-          console.log("hi");
           if (showOption == "true") {
-            console.log("true");
           } else {
-            console.log("false");
 
             dispatch(setShowOption(false));
           }
-
-          console.log("hi2");
-          console.log(typeof showOption);
           if (showOption == "false") {
-            console.log("12");
-            console.log("13");
             setConfirmationModal({
               text1: "Do you want to create a new Organization?",
               text2:
@@ -74,7 +62,6 @@ const LoginFormTemplate = () => {
               },
             });
           } else {
-            console.log("else");
             navigate("/");
           }
         }

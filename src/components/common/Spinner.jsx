@@ -2,7 +2,7 @@ import React from 'react'
 
 function Spinner() {
   return (
-    <div className="custom-loader"></div>
+    <div data-testid="spinner" className="custom-loader"></div>
   )
 }
 
