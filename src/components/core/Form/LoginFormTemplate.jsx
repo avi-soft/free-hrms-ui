@@ -81,24 +81,7 @@ const LoginFormTemplate = () => {
   const emailPattern =
     /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@(([a-zA-Z\-]+\.)*[a-zA-Z]{2,})$/;
 
-  const validatePassword = (value) => {
-    if (!/[A-Z]/.test(value)) {
-      return "Password must contain at least one uppercase letter.";
-    }
-    if (!/[a-z]/.test(value)) {
-      return "Password must contain at least one lowercase letter.";
-    }
-    if (!/\d/.test(value)) {
-      return "Password must contain at least one digit.";
-    }
-    if (!/[!@#$%^&*(),.?":{}|<>]/.test(value)) {
-      return 'Password must contain at least one special character (!@#$%^&*(),.?":{}|<>).';
-    }
-    if (value.length < 8 || value.length > 20) {
-      return "Password must be between 8 and 20 characters.";
-    }
-    return true;
-  };
+
 
   return (
     <div
@@ -192,11 +175,6 @@ const LoginFormTemplate = () => {
                     </span>
                   </div>
                 </label>
-                {errors.password && errors.password.type === "validate" && (
-                  <p className="text-red-400 mt-2" role="alert">
-                    {errors.password.message}
-                  </p>
-                )}
               </div>
               <div className="flex justify-between my-4">
                 <Link

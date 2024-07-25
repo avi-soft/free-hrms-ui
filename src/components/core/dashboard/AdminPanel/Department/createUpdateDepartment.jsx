@@ -12,6 +12,7 @@ import {
   setOrganization,
 } from "../../../../../slices/OrganisationSlice";
 import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
+import toast from "react-hot-toast";
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -48,16 +49,16 @@ const CreateUpdateDepartment = () => {
     },
     validate: {
       noNumbers: (value) =>
-        !/\d/.test(value) || "Organisation Name must not contain numbers",
+        !/\d/.test(value) || "Department Name must not contain numbers",
       minLength: (value) =>
         value.trim().length >= 3 ||
-        "Organisation Name must not be empty or less than 3 characters",
+        "Department Name must not be empty or less than 3 characters",
       noSpecialChars: (value) =>
         /^[a-zA-Z0-9 ]*$/.test(value) ||
-        "Organisation Name must not contain special characters",
+        "Department Name must not contain special characters",
       noExtraSpaces: (value) =>
         !/\s{2,}/.test(value) ||
-        "Organisation Name must not contain consecutive spaces",
+        "Department Name must not contain consecutive spaces",
     },
   };
 
@@ -114,6 +115,10 @@ const CreateUpdateDepartment = () => {
   }, [selectedOrganization, setValue]);
 
   const onSubmit = async (data) => {
+    if (!selectedManager) {
+      toast.error("Please select a manager before submitting.");
+      return;
+    }
     const formData = {
       ...data,
       managerId: selectedManager?.userId || null,
