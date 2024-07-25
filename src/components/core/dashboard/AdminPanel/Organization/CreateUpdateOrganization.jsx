@@ -293,9 +293,15 @@ const CreateUpdateOrganisation = () => {
                       message:
                         "Organisation Name must be at least 3 characters",
                     },
-                    validate: (value) =>
-                      value.trim().length >= 3 ||
-                      "Organisation Name must not be empty or less than 3 characters",
+                    validate: {
+                      noNumbers: (value) =>
+                        !/\d/.test(value) ||
+                        "Organisation Name must not contain numbers",
+
+                      noSpecialChars: (value) =>
+                        /^[a-zA-Z0-9 ]*$/.test(value) ||
+                        "Organisation Name must not contain special characters",
+                    },
                   })}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
                     darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
@@ -449,6 +455,9 @@ const CreateUpdateOrganisation = () => {
                         minLength: (value) =>
                           value.trim().length >= 3 ||
                           "Organisation Name must not be empty or less than 3 characters",
+                        noSpecialChars: (value) =>
+                          /^[a-zA-Z0-9 ]*$/.test(value) ||
+                          "Organisation Name must not contain special characters",
                       },
                     })}
                     className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${

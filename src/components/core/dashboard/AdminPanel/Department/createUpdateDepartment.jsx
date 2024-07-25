@@ -48,28 +48,25 @@ const CreateUpdateDepartment = () => {
     },
     validate: {
       noNumbers: (value) =>
-        !/\d/.test(value) || "Department Name must not contain numbers",
+        !/\d/.test(value) || "Organisation Name must not contain numbers",
       minLength: (value) =>
         value.trim().length >= 3 ||
-        "Department Name must not be empty or less than 3 characters",
+        "Organisation Name must not be empty or less than 3 characters",
       noSpecialChars: (value) =>
-        /^[A-Za-z]+(?: [A-Za-z]+)*$/.test(value) ||
-        "Department Name must contain only letters and a single space between words",
+        /^[a-zA-Z0-9 ]*$/.test(value) ||
+        "Organisation Name must not contain special characters",
     },
   };
-  
+
   // Replace the existing register validation rules for the department field with this updated version
-  
-  
 
-
-  console.log(AllOrganizations)
+  console.log(AllOrganizations);
   useEffect(() => {
     const fetchOrganizationList = async () => {
       try {
         dispatch(setLoading(true));
         const res = await dispatch(getOrganisation(AccessToken));
-        dispatch(setOrganization(res?.data))
+        dispatch(setOrganization(res?.data));
         dispatch(setLoading(false));
       } catch (error) {
         console.error("Error fetching organizations", error);
@@ -220,23 +217,24 @@ const CreateUpdateDepartment = () => {
             >
               No Organizations Available
             </div>
-            <p className={`text-center mt-4 ${darkMode ? "text-white" : "text-gray-700"}`}>
+            <p
+              className={`text-center mt-4 ${
+                darkMode ? "text-white" : "text-gray-700"
+              }`}
+            >
               You need to create an organization before adding a department.
             </p>
             <div className="flex justify-center">
-            <Link
-               to={`/organization/organization-create-update`}
-              className={`  text-sm md:text-base underline font-medium  
+              <Link
+                to={`/organization/organization-create-update`}
+                className={`  text-sm md:text-base underline font-medium  
                 rounded-md py-2 px-5 ${
-                darkMode
-                  ? " text-blue-400"
-                  : "text-blue-700"
-              }`}
-            > 
-              Create Organization
-            </Link>
+                  darkMode ? " text-blue-400" : "text-blue-700"
+                }`}
+              >
+                Create Organization
+              </Link>
             </div>
-
           </div>
         ) : (
           <form
@@ -263,7 +261,9 @@ const CreateUpdateDepartment = () => {
                 value={selectedOrganization}
                 onChange={(e) => setSelectedOrganization(e.target.value)}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                  darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white text-gray-700"
                 }`}
               >
                 <option value="">Select Organization</option>
@@ -294,7 +294,9 @@ const CreateUpdateDepartment = () => {
                 placeholder="Department Name..."
                 {...register("department", validateDepartment)}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                  darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white text-gray-700"
                 }`}
               />
               {errors.department && (
@@ -321,9 +323,15 @@ const CreateUpdateDepartment = () => {
                     value: 5,
                     message: "Description must be at least 5 characters",
                   },
+                  maxLength: {
+                    value: 50,
+                    message: "Description must be less than 50 characters",
+                  },
                 })}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                  darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white text-gray-700"
                 }`}
               />
               {errors.description && (
@@ -349,7 +357,9 @@ const CreateUpdateDepartment = () => {
                 placeholder="Search employee for adding as manager.."
                 onChange={handleInputChange}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                  darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white text-gray-700"
                 }`}
                 defaultValue={
                   isEditing && department?.managerFirstName
@@ -414,7 +424,9 @@ const CreateUpdateDepartment = () => {
               type="submit"
               className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${
                 loading ? "bg-slate-900" : "bg-blue-700"
-              } ${darkMode ? "text-white" : "text-white"} hover:scale-95 transition-all duration-200`}
+              } ${
+                darkMode ? "text-white" : "text-white"
+              } hover:scale-95 transition-all duration-200`}
             >
               {isEditing ? "Update Department" : "Create Department"}
             </button>
