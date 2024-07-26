@@ -40,17 +40,26 @@ const CreateUpdateRole = () => {
   const validateRoleName = {
     required: "Role Name is required",
     minLength: {
-      value: 2,
-      message: "Role Name must be at least 2 characters",
+      value: 3,
+      message: "Role Name must be at least 3 characters",
     },
-    maxLength: {
-      value: 20,
-      message: "Role Name must not exceed 20 characters",
-    },
-    pattern: {
-      value: /^[A-Za-z]+(?: [A-Za-z]+)*$/,
-      message:
-        "Role Name must contain only letters and a single space between words",
+    validate: {
+      minLength: (value) =>
+        value.trim().length >= 3 ||
+        "Role Name must not be empty or less than 3 characters",
+      noNumbers: (value) =>
+        !/\d/.test(value) || "Role Name must not contain numbers",
+
+      noSpecialChars: (value) =>
+        /^[a-zA-Z0-9 ]*$/.test(value) ||
+        "Role Name must not contain special characters",
+      noExtraSpaces: (value) => {
+        const trimmedValue = value.trim();
+        return (
+          !/\s{2,}/.test(trimmedValue) ||
+          "Role Name must not contain consecutive spaces"
+        );
+      },
     },
   };
 
@@ -192,7 +201,9 @@ const CreateUpdateRole = () => {
             }`}
           >
             <li>
-              {isEditing ? "Update the role name, if required." : "Fill out the role name."}
+              {isEditing
+                ? "Update the role name, if required."
+                : "Fill out the role name."}
             </li>
             <li>
               Select the appropriate tab to view the privileges related to a
@@ -229,7 +240,7 @@ const CreateUpdateRole = () => {
           </div>
 
           <div className=" mb-4 text-orange-600">
-            <label className="flex items-center">
+            <label className="flex items-center w-fit">
               <input
                 type="checkbox"
                 checked={isGlobalAllSelected()}
@@ -258,7 +269,7 @@ const CreateUpdateRole = () => {
             </div>
           </div>
           <div className="mb-4 text-orange-400">
-            <label className="flex items-center mb-4">
+            <label className="flex items-center mb-4 w-fit">
               <input
                 type="checkbox"
                 checked={isGroupAllSelected(activeTab)}

@@ -48,17 +48,22 @@ const CreateUpdateDepartment = () => {
       message: "Department Name must be at least 3 characters",
     },
     validate: {
-      noNumbers: (value) =>
-        !/\d/.test(value) || "Department Name must not contain numbers",
       minLength: (value) =>
         value.trim().length >= 3 ||
         "Department Name must not be empty or less than 3 characters",
+      noNumbers: (value) =>
+        !/\d/.test(value) || "Department Name must not contain numbers",
+
       noSpecialChars: (value) =>
         /^[a-zA-Z0-9 ]*$/.test(value) ||
         "Department Name must not contain special characters",
-      noExtraSpaces: (value) =>
-        !/\s{2,}/.test(value) ||
-        "Department Name must not contain consecutive spaces",
+      noExtraSpaces: (value) => {
+        const trimmedValue = value.trim();
+        return (
+          !/\s{2,}/.test(trimmedValue) ||
+          "Department Name must not contain consecutive spaces"
+        );
+      },
     },
   };
 
@@ -116,15 +121,20 @@ const CreateUpdateDepartment = () => {
 
   const onSubmit = async (data) => {
     if (!selectedManager) {
-      toast.error("Please select a manager before submitting.");
+      toast.error("Please enter a valid Manager Name.");
       return;
     }
+    const trimmedDepartmentName = data.department?.trim() || "";
+    const trimmedDescription = data.description?.trim() || "";
+
     const formData = {
-      ...data,
+      department: trimmedDepartmentName,
+      description: trimmedDescription,
       managerId: selectedManager?.userId || null,
       organizationId: selectedOrganization,
+      navigate,
+      AccessToken,
     };
-
     formData.navigate = navigate;
     formData.AccessToken = AccessToken;
 

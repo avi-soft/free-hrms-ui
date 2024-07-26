@@ -77,7 +77,7 @@ const DepartmentList = () => {
 
   return (
     <div
-      className={`h-[600px] mb-10 rounded shadow-lg ${
+      className={` mb-10 rounded shadow-lg ${
         darkMode ? "bg-slate-800 text-white" : "bg-slate-100 text-black"
       }`}
     >
@@ -264,16 +264,17 @@ const DepartmentList = () => {
                                     btn1Text: "Delete Department",
                                     btn2Text: "Cancel",
                                     btn1Handler: async () => {
-                                      const response=await dispatch(
+                                      const response = await dispatch(
                                         deleteDepartment(
                                           AccessToken,
                                           department.departmentId
                                         )
                                       );
-                                      if (response?.status !== 200) throw new Error(response.data.message);
-                                       toast.success(response?.data?.message);
-                                       fetchDepartmentsList();
-                                       setConfirmationModal(null)
+                                      if (response?.status !== 200)
+                                        throw new Error(response.data.message);
+                                      toast.success(response?.data?.message);
+                                      fetchDepartmentsList();
+                                      setConfirmationModal(null);
                                     },
                                     btn2Handler: () =>
                                       setConfirmationModal(null),
