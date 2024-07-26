@@ -21,13 +21,11 @@ export default function SidebarLink({ link }) {
     <div>
       <div
         className={`flex items-center cursor-pointer rounded ml-2 p-2 ${
-          darkMode
-            ? "hover:bg-slate-800"
-            : "hover:bg-slate-50 hover:text-black"
+          darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50 hover:text-black"
         } `}
         onClick={toggleChildren}
       >
-        <div className="flex items-center gap-x-2">
+        <div className="flex items-center  gap-x-2">
           <div
             className={`text-xl mt-3 ${
               darkMode ? "text-white" : "text-black"
@@ -53,7 +51,7 @@ export default function SidebarLink({ link }) {
         )}
       </div>
       {showChildren && link.children && (
-        <div className=" ml-2 rounded-full">
+        <div className=" ml-8 rounded-full">
           {link.children.map((childLink) => (
             <NavLink
               key={childLink.key}
@@ -81,7 +79,7 @@ export default function SidebarLink({ link }) {
                 {childLink.icon}
               </div>
               <span
-                className={`block py-2 font-light text-lg ${
+                className={`block py-2 font-light text-md ${
                   darkMode ? "" : ""
                 } hover:text-white ${
                   matchRoute(childLink.url)

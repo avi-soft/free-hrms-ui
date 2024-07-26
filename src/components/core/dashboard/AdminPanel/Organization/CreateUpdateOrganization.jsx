@@ -52,6 +52,8 @@ const CreateUpdateOrganisation = () => {
   }, [isEditing, organization, setValue]);
 
   const handleOrganizationSubmit = async (data) => {
+    data.organizationName = data.organizationName.trim();
+    data.organizationDescription = data.organizationDescription.trim();
     try {
       let response;
       if (isEditing) {
@@ -72,7 +74,6 @@ const CreateUpdateOrganisation = () => {
         setOrganisationId(response?.data?.data?.organizationId);
         setShowLogoUploadDialog(true);
       }
-
     } catch (error) {
       console.error("Error submitting organisation details:", error);
     }
@@ -98,7 +99,11 @@ const CreateUpdateOrganisation = () => {
       if (!isEditing && showOption === "false") {
         dispatch(setShowOption(true));
       }
-      navigate("/organization/organization-list");
+      if (isEditing) {
+        return null;
+      } else {
+        navigate("/organization/organization-list");
+      }
     } catch (error) {
       console.error("Error uploading logo:", error);
     } finally {
@@ -167,7 +172,7 @@ const CreateUpdateOrganisation = () => {
                         darkMode ? "text-white" : "text-zinc-800"
                       }`}
                     >
-                      Add Organization Logo
+                      Edit Organization Logo
                     </p>
                     <div className="flex items-center gap-4">
                       {!loading && (
@@ -210,12 +215,13 @@ const CreateUpdateOrganisation = () => {
                               ? "bg-yellow-400 text-black"
                               : "bg-yellow-500 text-black"
                           } py-1 px-5`}
-                          onClick={handleSubmit(handleLogoUpload)}
+                          onClick={handleLogoUpload}
                           style={{
                             cursor: loading ? "not-allowed" : "pointer",
                           }}
                         >
                           <button
+                            type="button"
                             className="flex place-items-center gap-2"
                             disabled={loading}
                           >
@@ -263,9 +269,13 @@ const CreateUpdateOrganisation = () => {
                       noSpecialChars: (value) =>
                         /^[a-zA-Z0-9 ]*$/.test(value) ||
                         "Organisation Name must not contain special characters",
-                      noExtraSpaces: (value) =>
-                        !/\s{2,}/.test(value) ||
-                        "Organisation Name must not contain consecutive spaces",
+                      noExtraSpaces: (value) => {
+                        const trimmedValue = value.trim();
+                        return (
+                          !/\s{2,}/.test(trimmedValue) ||
+                          "Organisation Name must not contain consecutive spaces"
+                        );
+                      },
                     },
                   })}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
@@ -375,26 +385,26 @@ const CreateUpdateOrganisation = () => {
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
-                <button
-                  onClick={handleLogoUpload}
-                  className={`w-1/2 py-2 text-sm font-medium rounded-md ${
-                    darkMode
-                      ? "primary-gradient text-white"
-                      : " bg-yellow-500 text-white"
-                  } hover:scale-95 transition-all duration-200`}
-                >
-                  Upload Logo
-                </button>
-                <button
-                  onClick={handleSkipp}
-                  className={`w-1/2 ml-7 py-2 text-sm font-medium rounded-md ${
-                    darkMode
-                      ? "bg-slate-400 text-black"
-                      : "bg-gray-400 text-white"
-                  } hover:scale-95 transition-all duration-200`}
-                >
-                  Skip
-                </button>
+                  <button
+                    onClick={handleLogoUpload}
+                    className={`w-1/2 py-2 text-sm font-medium rounded-md ${
+                      darkMode
+                        ? "primary-gradient text-white"
+                        : " bg-yellow-500 text-white"
+                    } hover:scale-95 transition-all duration-200`}
+                  >
+                    Upload Logo
+                  </button>
+                  <button
+                    onClick={handleSkipp}
+                    className={`w-1/2 ml-7 py-2 text-sm font-medium rounded-md ${
+                      darkMode
+                        ? "bg-slate-400 text-black"
+                        : "bg-gray-400 text-white"
+                    } hover:scale-95 transition-all duration-200`}
+                  >
+                    Skip
+                  </button>
                 </div>
               </div>
             ) : (
@@ -434,9 +444,13 @@ const CreateUpdateOrganisation = () => {
                         noSpecialChars: (value) =>
                           /^[a-zA-Z0-9 ]*$/.test(value) ||
                           "Organisation Name must not contain special characters",
-                        noExtraSpaces: (value) =>
-                          !/\s{2,}/.test(value) ||
-                          "Organisation Name must not contain consecutive spaces",
+                        noExtraSpaces: (value) => {
+                          const trimmedValue = value.trim();
+                          return (
+                            !/\s{2,}/.test(trimmedValue) ||
+                            "Organisation Name must not contain consecutive spaces"
+                          );
+                        },
                       },
                     })}
                     className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
