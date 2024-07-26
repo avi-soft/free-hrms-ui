@@ -40,8 +40,8 @@ const CreateUpdateRole = () => {
   const validateRoleName = {
     required: "Role Name is required",
     minLength: {
-      value: 3,
-      message: "Role Name must be at least 3 characters",
+      value: 2,
+      message: "Role Name must be at least 2 characters",
     },
     validate: {
       minLength: (value) =>
