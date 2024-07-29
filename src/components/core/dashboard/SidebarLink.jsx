@@ -3,7 +3,7 @@ import * as Icons from "react-icons/vsc";
 import { useSelector } from "react-redux";
 import { matchPath, NavLink, useLocation } from "react-router-dom";
 
-export default function SidebarLink({ link }) {
+export default function SidebarLink({ link ,setIsOpen}) {
   const Icon = Icons[link.icon];
   const location = useLocation();
   const darkMode = useSelector((state) => state.theme?.darkMode) || false;
@@ -61,6 +61,7 @@ export default function SidebarLink({ link }) {
                   ? "hover:bg-slate-800 hover:text-white text-white"
                   : "hover:bg-slate-200 "
               }`}
+              onClick={()=>setIsOpen(false)}
             >
               <span
                 className={`absolute left-0 top-0 h-full w-[0.2rem] bg-black ${
@@ -79,7 +80,7 @@ export default function SidebarLink({ link }) {
                 {childLink.icon}
               </div>
               <span
-                className={`block py-2 font-light text-md ${
+                className={`block py-2 font-light text-base ${
                   darkMode ? "" : ""
                 } hover:text-white ${
                   matchRoute(childLink.url)

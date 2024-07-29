@@ -3,14 +3,14 @@ import { useSelector } from "react-redux";
 import MenuItems from "../../../constants/menu";
 import SidebarLink from "./SidebarLink";
 
-function Sidebar() {
+function Sidebar({setIsOpen}) {
   const { darkMode } = useSelector((state) => state.theme);
   const menuItems = MenuItems();
-
+ 
   const slicedMenuItems = menuItems.slice(1);
 
   return (
-    <div className="relative">
+    <div className="relative ">
       <div className="fixed left-0 h-screen">
         <div
           className={`flex min-w-[250px] h-full flex-col border-r-[3px] overflow-y-auto  ${
@@ -34,7 +34,7 @@ function Sidebar() {
               {menuItems[0]?.label}
             </div>
             {slicedMenuItems.map((link) => (
-              <SidebarLink key={link.key} link={link} darkMode={darkMode} />
+              <SidebarLink key={link.key} link={link} darkMode={darkMode} setIsOpen={setIsOpen} />
             ))}
           </div>
           <div

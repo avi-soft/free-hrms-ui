@@ -14,7 +14,7 @@ function Dashboard() {
         <NavBar backgroundColor={1} />
       </div>
       <div className="flex pt-[50px]">
-        <div className=" relative w-[15%]">
+        <div className="max-lg:hidden relative w-[15%]">
           <Sidebar />
         </div>
         <div className=" p-5 w-[85%] pt-[40px] relative">
