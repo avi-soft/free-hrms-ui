@@ -143,39 +143,56 @@ describe("DepartmentList Component", () => {
     });
   });
 
-  // it("renders and updates organization selection", async () => {
-  //   const organizations = [
-  //     {
-  //       organizationId: "1",
-  //       organizationName: "Org1",
-  //     },
-  //     {
-  //       organizationId: "2",
-  //       organizationName: "Org2",
-  //     },
-  //   ];
+  it("navigates to edit department page on edit button click", async () => {
+    const departments = [
+      {
+        departmentId: "1",
+        department: "HR",
+        managerFirstName: "John",
+        managerLastName: "Doe",
+        description: "Human Resources",
+      },
+    ];
+  
+    Departmentlist.mockResolvedValueOnce({ data: departments });
+  
+    setup({
+      department: {
+        AllDepartments: departments,
+        loading: false,
+      },
+      theme: { darkMode: false },
+      auth: { AccessToken: "dummy-token" },
+      Organisation: { AllOrganizations: [{ organizationId: "1", organizationName: "Org1" }] },
+    });
+  
+    fireEvent.click(screen.getByTestId("editButton"));
+  
+    expect(window.location.pathname).toBe("/department/department-create-update");
+  });
+  
+  
 
-  //   getOrganisation.mockResolvedValueOnce({ data: organizations });
-
-  //   setup({
-  //     department: {
-  //       AllDepartments: [],
-  //       loading: false,
-  //     },
-  //     theme: { darkMode: false },
-  //     auth: { AccessToken: "dummy-token" },
-  //     Organisation: { AllOrganizations: organizations },
-  //   });
-
-  //   await waitFor(() => {
-  //     const selectElement = screen.getByRole("combobox");
-  //     expect(selectElement).toBeInTheDocument();
-  //     expect(selectElement.value).toBe("1"); // Default to the first organization
-
-  //     fireEvent.change(selectElement, { target: { value: "2" } });
-  //     expect(selectElement.value).toBe("2");
-  //   });
-  // });
+  it("displays 'No Departments Found' when department list is empty", async () => {
+    const organizations = [
+      { organizationId: "1", organizationName: "Org1" },
+    ];
+  
+    setup({
+      department: {
+        AllDepartments: [],
+        loading: false,
+      },
+      theme: { darkMode: false },
+      auth: { AccessToken: "dummy-token" },
+      Organisation: { AllOrganizations: organizations },
+    });
+  
+    await waitFor(() => {
+      expect(screen.getByTestId("No Departments Found")).toBeInTheDocument();
+    });
+  });
+  
 
   it("navigates to add department page on button click", () => {
     setup({

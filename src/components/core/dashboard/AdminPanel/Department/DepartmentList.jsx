@@ -1,10 +1,9 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { FaRegEdit } from "react-icons/fa";
 import ConfirmationModal from "../../../../common/ConfirmationModal.jsx";
 import { HiOutlinePlusCircle } from "react-icons/hi";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   deleteDepartment,
@@ -22,6 +21,7 @@ import toast from "react-hot-toast";
 const DepartmentList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [selectedOrganization, setSelectedOrganization] = useState("");
+  const [updatedOrganization, setUpdatedOrganization] = useState("");
 
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
@@ -30,10 +30,7 @@ const DepartmentList = () => {
   const { AllOrganizations } = useSelector((state) => state.Organisation);
 
   const navigate = useNavigate();
-
-  useEffect(() => {
-    fetchOrganizationList();
-  }, [dispatch, AccessToken]);
+  const location = useLocation();
 
   const fetchOrganizationList = async () => {
     try {
@@ -42,7 +39,10 @@ const DepartmentList = () => {
       const organizations = res?.data;
       dispatch(setOrganization(organizations));
       if (organizations.length > 0) {
-        setSelectedOrganization(organizations[0].organizationId); // Set the first organization as selected
+        // Set the updated organization if available
+        const orgId = updatedOrganization || organizations[0].organizationId;
+        setSelectedOrganization(orgId);
+        fetchDepartmentsList(orgId);
       }
       dispatch(setLoading(false));
     } catch (error) {
@@ -51,12 +51,10 @@ const DepartmentList = () => {
     }
   };
 
-  const fetchDepartmentsList = async () => {
+  const fetchDepartmentsList = async (orgId) => {
     try {
       dispatch(setLoading(true));
-      const res = await dispatch(
-        Departmentlist(AccessToken, selectedOrganization)
-      );
+      const res = await dispatch(Departmentlist(AccessToken, orgId));
       dispatch(setDepartments(res?.data));
       dispatch(setLoading(false));
     } catch (error) {
@@ -66,23 +64,33 @@ const DepartmentList = () => {
   };
 
   useEffect(() => {
-    if (selectedOrganization) {
-      fetchDepartmentsList();
+    if (location.state?.updatedDepartment) {
+      setUpdatedOrganization(location.state.organizationId || "");
     }
-  }, [dispatch, AccessToken, selectedOrganization]);
+     else if (location.state?.updatedDepartment !== undefined) {
+      setUpdatedOrganization(location.state.organizationId || "");
+      // Reload departments or show updated message
+    }
+    fetchOrganizationList();
+  }, [dispatch, AccessToken, location.state, updatedOrganization]);
 
-  function refreshPage() {
-    window.location.reload(false);
-  }
+  useEffect(() => {
+    if (selectedOrganization) {
+      fetchDepartmentsList(selectedOrganization);
+    }
+  }, [selectedOrganization]);
 
   return (
     <div
-      className={` mb-10 rounded shadow-lg ${
+      className={`mb-10 rounded shadow-lg ${
         darkMode ? "bg-slate-800 text-white" : "bg-slate-100 text-black"
       }`}
     >
       {loading ? (
-        <div className="absolute grid place-content-center mt-60 w-[85%]">
+        <div
+          data-testid="spinner"
+          className="absolute grid place-content-center mt-60 w-[85%]"
+        >
           <Spinner />
         </div>
       ) : (
@@ -155,11 +163,10 @@ const DepartmentList = () => {
                       : "bg-slate-200 text-black"
                   } p-2 rounded-lg`}
                 >
-                  <option value="">Select Organization</option>
                   {AllOrganizations.map((org) => (
                     <option
                       key={org?.organizationId}
-                      value={org.organizationId}
+                      value={org?.organizationId}
                     >
                       {org.organizationName}
                     </option>
@@ -169,7 +176,10 @@ const DepartmentList = () => {
               {/* Section 3 */}
               {AllDepartments?.length === 0 ? (
                 <div>
-                  <h1 className="text-center text-2xl mt-10">
+                  <h1
+                    data-testid="No Departments Found"
+                    className="text-center text-2xl mt-10"
+                  >
                     No Departments Found
                   </h1>
                 </div>
@@ -242,12 +252,17 @@ const DepartmentList = () => {
                             </td>
                             <td className="px-6 py-4 flex gap-x-2">
                               <button
+                                data-testid="editButton"
                                 className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
                                 onClick={() =>
                                   navigate(
                                     `/department/department-create-update`,
                                     {
-                                      state: { isEditing: true, department },
+                                      state: {
+                                        isEditing: true,
+                                        department,
+                                        organizationId: selectedOrganization,
+                                      },
                                     }
                                   )
                                 }
@@ -256,31 +271,14 @@ const DepartmentList = () => {
                               </button>
                               <Link
                                 data-testid="delete-button"
+                                to="#"
                                 onClick={() =>
                                   setConfirmationModal({
-                                    text1: "Are You Sure?",
-                                    text2:
-                                      "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
-                                    btn1Text: "Delete Department",
-                                    btn2Text: "Cancel",
-                                    btn1Handler: async () => {
-                                      const response = await dispatch(
-                                        deleteDepartment(
-                                          AccessToken,
-                                          department.departmentId
-                                        )
-                                      );
-                                      if (response?.status !== 200)
-                                        throw new Error(response.data.message);
-                                      toast.success(response?.data?.message);
-                                      fetchDepartmentsList();
-                                      setConfirmationModal(null);
-                                    },
-                                    btn2Handler: () =>
-                                      setConfirmationModal(null),
+                                    type: "delete",
+                                    department,
                                   })
                                 }
-                                className="text-red-600 text-lg"
+                                className="text-lg text-red-600 dark:text-red-500 hover:underline"
                               >
                                 <RiDeleteBin6Line />
                               </Link>
@@ -294,10 +292,24 @@ const DepartmentList = () => {
               )}
             </>
           )}
-          {confirmationModal && (
-            <ConfirmationModal modalData={confirmationModal} />
-          )}
         </div>
+      )}
+      {confirmationModal && (
+        <ConfirmationModal
+          type={confirmationModal.type}
+          department={confirmationModal.department}
+          onClose={() => setConfirmationModal(null)}
+          onConfirm={async () => {
+            try {
+              await dispatch(deleteDepartment(AccessToken, confirmationModal.department.departmentId));
+              toast.success("Department deleted successfully");
+              fetchDepartmentsList(selectedOrganization);
+            } catch (error) {
+              toast.error("Failed to delete department");
+            }
+            setConfirmationModal(null);
+          }}
+        />
       )}
     </div>
   );

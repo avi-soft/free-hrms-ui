@@ -43,10 +43,14 @@ const CreateUpdateRole = () => {
       value: 2,
       message: "Role Name must be at least 2 characters",
     },
+    maxLength: {
+      value: 20,
+      message: "Role Name must not exceed 20 characters",
+    },
     validate: {
       minLength: (value) =>
         value.trim().length >= 2 ||
-        "Role Name must not be empty or less than 3 characters",
+        "Role Name must not be empty or less than 2 characters",
       noNumbers: (value) =>
         !/\d/.test(value) || "Role Name must not contain numbers",
 
