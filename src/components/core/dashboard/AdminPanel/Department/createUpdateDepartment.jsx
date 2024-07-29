@@ -121,32 +121,40 @@ const CreateUpdateDepartment = () => {
 
   const onSubmit = async (data) => {
     if (!selectedManager) {
-      toast.error("Please enter a valid Manager Name.");
+      toast.error("Please select a valid Manager.");
       return;
     }
     const trimmedDepartmentName = data.department?.trim() || "";
     const trimmedDescription = data.description?.trim() || "";
-
+  
     const formData = {
       department: trimmedDepartmentName,
       description: trimmedDescription,
       managerId: selectedManager?.userId || null,
       organizationId: selectedOrganization,
-      navigate,
       AccessToken,
     };
-    formData.navigate = navigate;
-    formData.AccessToken = AccessToken;
-
-    if (isEditing) {
-      await dispatch(
-        updateDepartment(AccessToken, formData, department.departmentId)
-      );
-    } else {
-      await dispatch(addDepartment(formData));
+  
+    try {
+      if (isEditing) {
+        await dispatch(
+          updateDepartment(AccessToken, formData, department.departmentId)
+        );
+        navigate('/department/department-list', {
+          state: { updatedDepartment: true, organizationId: selectedOrganization }
+        });
+      } else {
+        await dispatch(addDepartment(formData));
+        navigate('/department/department-list', {
+          state: { updatedDepartment: false, organizationId: selectedOrganization }
+        });
+      }
+    } catch (error) {
+      console.error("Error during department submission:", error);
+      toast.error("An error occurred. Please try again.");
     }
   };
-
+  
   const handleSearch = async (searchTerm) => {
     try {
       const response = await dispatch(EmployeeSearch(AccessToken, searchTerm));

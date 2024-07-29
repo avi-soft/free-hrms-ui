@@ -11,8 +11,7 @@ import { FiUpload } from "react-icons/fi";
 import defaultImage from "../../../../../assets/Images/placeholder.jpg";
 import toast from "react-hot-toast";
 import {
-  setSelectedImage,
-  setExistingImage,
+
   setShowOption,
 } from "../../../../../slices/OrganisationSlice";
 
@@ -22,6 +21,7 @@ const CreateUpdateOrganisation = () => {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm();
   const dispatch = useDispatch();
@@ -38,7 +38,6 @@ const CreateUpdateOrganisation = () => {
     isEditing: false,
     organization: null,
   };
-
   const [organisationId, setOrganisationId] = useState(null);
   const [showLogoUploadDialog, setShowLogoUploadDialog] = useState(false);
 
@@ -48,8 +47,16 @@ const CreateUpdateOrganisation = () => {
       setValue("organizationDescription", organization.organizationDescription);
       setExistingImage(organization.organizationImage); // Update local state for existing image
       setOrganisationId(organization.organizationId);
+    } else {
+      reset(); // Reset form values if not in editing mode
+      setSelectedImage(null); // Reset selected image
+      setExistingImage(null); // Reset existing image
     }
-  }, [isEditing, organization, setValue]);
+  }, [isEditing]);
+
+  console.log(isEditing)
+  console.log(organization)
+
 
   const handleOrganizationSubmit = async (data) => {
     data.organizationName = data.organizationName.trim();

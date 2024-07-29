@@ -41,7 +41,6 @@ export const addDepartment = (formData) => {
       console.log(formData);
       const { AccessToken, navigate, organizationId } = formData;
       console.log(AccessToken);
-      console.log(navigate);
       console.log(organizationId);
       const response = await apiConnector(
         "POST",
@@ -52,11 +51,12 @@ export const addDepartment = (formData) => {
         }
       );
       console.log(response);
-      if (!response?.data?.success === "true")
+      if (!response?.data?.success == "true"){
+        console.log("error")
         throw new Error(response.data.message);
-      else {
+      }else {
+        console.log("Success");
         toast.success(response?.data?.message);
-        navigate("/department/department-list");
         dispatch(AddDepartment(response?.data?.Department));
       }
     } catch (err) {

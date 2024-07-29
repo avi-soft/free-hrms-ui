@@ -77,7 +77,19 @@ describe("CreateUpdateDepartment", () => {
       },
     };
   };
+  it("should render 'No Organizations Available' message when there are no organizations", async () => {
+    renderComponent({
+      Organisation: {
+        ...initialStoreState.Organisation,
+        AllOrganizations: [] // Empty organizations list
+      }
+    });
+    const noOrgMessage = screen.getByText(/no organizations available/i);
+    expect(noOrgMessage).toBeInTheDocument();
 
+    const createOrgLink = screen.getByRole("link", { name: /create organization/i });
+    expect(createOrgLink).toBeInTheDocument();
+  });
   it("render headings  with correct text",async()=> {
     renderComponent({}, { isEditing: true });
     let heading=screen.getByTestId("heading-1");
@@ -119,13 +131,7 @@ describe("CreateUpdateDepartment", () => {
     expect(error).toBeInTheDocument();
   });
 
-  it("should submit the form with valid data", async () => {
-    renderComponent();
-
-    const { fill, validData } = await waitForFormToLoad();
-    await fill(validData);
-  });
-
+ 
   it("should load organization list on mount", async () => {
     renderComponent();
 

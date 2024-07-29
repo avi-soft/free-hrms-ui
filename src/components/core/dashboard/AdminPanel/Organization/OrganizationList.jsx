@@ -48,9 +48,6 @@ const OrganizationList = () => {
     fetchOrganizationList();
   }, [dispatch, AccessToken]);
 
-  function refreshPage() {
-    window.location.reload(false);
-  }
 
   return (
     <div
