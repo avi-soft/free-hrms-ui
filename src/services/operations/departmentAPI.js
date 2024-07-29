@@ -81,7 +81,6 @@ export const updateDepartment = (AccessToken, formData, DepartmentId) => {
       const { organizationId } = formData;
 
       console.log(AccessToken);
-      console.log(navigate);
       const response = await apiConnector(
         "PATCH",
         UPDATE_DEPARTMENT_API(DepartmentId),
@@ -92,7 +91,6 @@ export const updateDepartment = (AccessToken, formData, DepartmentId) => {
       if (response?.status != "200") throw new Error(response.data.message);
       else {
         toast.success("Updated Department Successfully");
-        navigate("/department/department-list");
       }
     } catch (err) {
       if (err?.response?.data?.message) {

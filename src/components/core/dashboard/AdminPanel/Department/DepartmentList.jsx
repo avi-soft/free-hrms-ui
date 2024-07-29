@@ -274,8 +274,27 @@ const DepartmentList = () => {
                                 to="#"
                                 onClick={() =>
                                   setConfirmationModal({
-                                    type: "delete",
-                                    department,
+                                    text1: "Are You Sure?",
+                                    text2:
+                                      "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
+                                    btn1Text: "Delete Department",
+                                    btn2Text: "Cancel",
+                                    btn1Handler: async () => {
+                                      const response = await dispatch(
+                                        deleteDepartment(
+                                          AccessToken,
+                                          department.departmentId
+                                        )
+                                      );
+                                      if (response?.status !== 200)
+                                        throw new Error(response.data.message);
+                                      toast.success(response?.data?.message);
+                                      // Fetch departments list based on the current selected organization
+                                      fetchDepartmentsList(selectedOrganization);
+                                      setConfirmationModal(null);
+                                    },
+                                    btn2Handler: () =>
+                                      setConfirmationModal(null),
                                   })
                                 }
                                 className="text-lg text-red-600 dark:text-red-500 hover:underline"
@@ -294,23 +313,9 @@ const DepartmentList = () => {
           )}
         </div>
       )}
-      {confirmationModal && (
-        <ConfirmationModal
-          type={confirmationModal.type}
-          department={confirmationModal.department}
-          onClose={() => setConfirmationModal(null)}
-          onConfirm={async () => {
-            try {
-              await dispatch(deleteDepartment(AccessToken, confirmationModal.department.departmentId));
-              toast.success("Department deleted successfully");
-              fetchDepartmentsList(selectedOrganization);
-            } catch (error) {
-              toast.error("Failed to delete department");
-            }
-            setConfirmationModal(null);
-          }}
-        />
-      )}
+         {confirmationModal && (
+            <ConfirmationModal modalData={confirmationModal} />
+          )}
     </div>
   );
 };
