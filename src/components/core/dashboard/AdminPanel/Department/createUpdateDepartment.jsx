@@ -21,6 +21,7 @@ const CreateUpdateDepartment = () => {
     register,
     handleSubmit,
     setValue,
+    reset,
     formState: { errors },
   } = useForm();
   const [searchResults, setSearchResults] = useState([]);
@@ -104,16 +105,21 @@ const CreateUpdateDepartment = () => {
           },
         ]);
       } else {
+        reset(); // Clear form fields
+        setSelectedOrganization("");
         setSelectedManager(null);
         setShowCheckbox(false);
         setSearchResults([]);
       }
     } else {
+      reset(); // Clear form fields
       setSelectedManager(null);
+      setSelectedOrganization("");
       setShowCheckbox(false);
       setSearchResults([]);
     }
-  }, [isEditing, department, setValue]);
+  }, [isEditing, department, setValue, reset]);
+
 
   useEffect(() => {
     setValue("organization", selectedOrganization);
