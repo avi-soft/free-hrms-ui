@@ -129,13 +129,19 @@ const CreateUpdateOrganisation = () => {
 
   return (
     <div
-      className={`pb-9 h-auto mb-10 mt-5 bg-slate-100 rounded ${
-        darkMode ? "bg-slate-700 text-white" : ""
+      className={`p-2 w-full mt-20 pb-9 h-auto  bg-slate-100 rounded 
+        md:max-lg:w-full
+         lg:min-w-full 
+         lg:max-xl:ml-5 lg:max-xl:pb-[10px] lg:max-xl:p-0  lg:max-xl:mt-[10px]
+         2xl:ml-0 2xl:mt-[30px]  ${
+        darkMode ? "bg-slate-700 text-white" : "" 
       }`}
     >
-      <div className="p-5 flex items-center justify-between">
+      <div className="  sm:p-5
+        flex 
+      md:flex md:justify-between">
         <div
-          className={`text-xl text-slate-600 font-semibold ${
+          className={`md:text-xl text-slate-600 font-semibold ${
             darkMode ? "text-white" : ""
           }`}
         >
@@ -143,7 +149,7 @@ const CreateUpdateOrganisation = () => {
         </div>
         <div>
           <p
-            className={`text-slate-950 text-xl left-6 font-semibold ${
+            className={`text-slate-950 md:text-xl left-6 font-semibold ${
               darkMode ? "text-white" : ""
             }`}
           >
@@ -347,7 +353,7 @@ const CreateUpdateOrganisation = () => {
               <div
                 className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
                   darkMode ? "bg-slate-600" : "bg-white"
-                }`}
+                } `}
               >
                 <div className="mb-4">
                   <label
