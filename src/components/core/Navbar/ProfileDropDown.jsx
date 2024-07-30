@@ -49,7 +49,7 @@ const ProfileDropDown = () => {
           <div
             onClick={(e) => e.stopPropagation()}
             ref={ref}
-            className={`absolute left-[50%] top-[50%] z-[1000] flex max-xl:w-[150px] w-[50px] translate-x-[-50%] translate-y-[2em] flex-col rounded-lg ${
+            className={`absolute left-[50%] top-[50%] z-[1000] flex max-xl:w-[150px] w-[50px] translate-x-[-50%] translate-y-[2em] flex-col rounded-lg shadow-sm ${
               darkMode
                 ? "bg-gray-800 text-white"
                 : "bg-slate-100 text-slate-900"
