@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+const defaultTheme = require('tailwindcss/defaultTheme')
 export default {
   content: [
     "./index.html",
@@ -9,6 +10,11 @@ export default {
       inter: ["Inter", "sans-serif"],
       "edu-sa": ["Edu SA Beginner", "cursive"],
       mono: ["Roboto Mono", "monospace"],
+    },
+    screens: {
+      'xs': '370px',
+      'ipad':'920px',
+      ...defaultTheme.screens,
     },
     // colors: {
     //   white: "#fff",

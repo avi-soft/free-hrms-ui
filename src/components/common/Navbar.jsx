@@ -51,7 +51,7 @@ const NavBar = () => {
     >
       <div className="flex h-30 items-center justify-between flex-wrap">
         <div
-          className={`m-2  pl-3 lg:hidden text-2xl ${
+          className={`m-2  pl-3 ipad:hidden text-2xl ${
             darkMode ? "text-white" : "text-black"
           }`}
         >
@@ -66,7 +66,7 @@ const NavBar = () => {
           )}
         </div>
 
-        <div className="m-2">
+        <div className="m-2 max-xs:mx-0">
           <Link to="/">
             <img src="https://avisoft.io/logo.svg" alt="Logo" />
           </Link>
@@ -74,7 +74,7 @@ const NavBar = () => {
         {AccessToken && (
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="ml-10 flex items-center max-lg:order-3 max-lg:mb-3 max-lg:mx-auto"
+            className="ml-10 flex items-center max-md:order-3 max-md:mb-3 max-md:mx-auto"
           >
             <div className="flex items-center border-[2px] rounded-md">
               <span className="text-gray-500 size-10 p-3">

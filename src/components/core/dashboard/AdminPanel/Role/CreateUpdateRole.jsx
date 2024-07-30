@@ -163,7 +163,7 @@ const CreateUpdateRole = () => {
   };
 
   return (
-    <div className="container mx-auto p-5">
+    <div className="container mx-auto lg:mx-[40px] p-5">
       <div
         className={`mx-auto shadow-md rounded px-8 pt-6 pb-8 pl-5 pr-5 mb-4 ${
           darkMode ? "bg-slate-700" : "bg-white"

@@ -34,7 +34,7 @@ const ProfileDropDown = () => {
             alt={`${user.firstName}`}
           />
         </div>
-        <div className="flex flex-col justify-center max-md:hidden max-md:">
+        <div className="flex flex-col justify-center max-ipad:hidden ">
           <div
             className={`flex gap-1  ${darkMode ? "text-white" : "text-black"}`}
           >
@@ -61,7 +61,7 @@ const ProfileDropDown = () => {
               }`}
             ></div>
             <div>
-            <div className="flex flex-col justify-center md:hidden mt-2">
+            <div className="flex flex-col justify-center ipad:hidden mt-2">
           <div
             className={`flex gap-1 justify-center  ${darkMode ? "text-white" : "text-black"}`}
           >
