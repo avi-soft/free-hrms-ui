@@ -169,9 +169,9 @@ const CreateUpdateRole = () => {
           darkMode ? "bg-slate-700" : "bg-white"
         }`}
       >
-        <div className="p-5 flex items-center justify-between">
+        <div className="p-5 flex items-center justify-between flex-wrap">
           <div
-            className={`text-xl text-slate-600 font-semibold ${
+            className={`text-xl text-slate-600 font-semibold max-md:order-2 max-md:mt-4${
               darkMode ? "text-white" : ""
             }`}
           >
@@ -179,7 +179,7 @@ const CreateUpdateRole = () => {
           </div>
           <div>
             <p
-              className={`text-slate-950 text-xl left-6 font-semibold ${
+              className={`text-slate-950 text-xl left-6 font-semibold   ${
                 darkMode ? "text-white" : ""
               }`}
             >
@@ -253,7 +253,7 @@ const CreateUpdateRole = () => {
               />
               Select All Privileges
             </label>
-            <div className="mt-4 mb-4 flex items-center gap-4">
+            <div className="mt-4 mb-4 flex items-center flex-wrap gap-4">
               {Object.keys(privilegeGroups).map((group) => (
                 <button
                   key={group}
@@ -292,7 +292,7 @@ const CreateUpdateRole = () => {
           <div className="flex items-center justify-center">
             <button
               type="submit"
-              className={`text-center w-1/4 text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
+              className={`text-center w-1/4 max-md:w-3/4 text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
                 darkMode
                   ? "primary-gradient text-white"
                   : "bg-blue-700 text-white"
