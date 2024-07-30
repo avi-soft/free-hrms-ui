@@ -51,7 +51,7 @@ const RoleList = () => {
   }
 
   return (
-    <div className={` mb-2 rounded-md ${darkMode ? "text-white" : ""}`}>
+    <div className={`lg:mx-[80px] mx-auto  mb-2 rounded-md ${darkMode ? "text-white" : ""}`}>
       {loading ? (
         <div
         data-testid="spinner"
@@ -63,12 +63,12 @@ const RoleList = () => {
         <div
           className={`pb-9 ${
             darkMode ? "bg-gray-800" : "bg-slate-100"
-          } rounded mt-10`}
+          } rounded mt-5`}
         >
-          <div className="p-5 flex items-center justify-between">
+          <div className="p-5 flex items-center flex-wrap justify-between">
             <div
               data-testid="Role List"
-              className={`text-xl ${
+              className={`text-xl max-md:order-2 max-sm:ml-2  max-md:mt-5 ${
                 darkMode ? "text-white" : "text-slate-600"
               } font-semibold`}
             >
@@ -76,7 +76,7 @@ const RoleList = () => {
             </div>
             <div>
               <p
-                className={`text-xl left-6 font-semibold ${
+                className={`text-xl  left-6 font-semibold ${
                   darkMode ? "text-white" : "text-slate-950"
                 }`}
               >
@@ -101,11 +101,11 @@ const RoleList = () => {
               </div>
             </Link>
           </div>
-          <div className="p-5">
+          <div className="p-5 max-sm:px-3">
             {roles?.length > 0 ? (
               <div className="relative overflow-x-auto shadow-md rounded-md">
                 <div
-                  className={`p-5 ${
+                  className={`p-5 max-sm:px-3 ${
                     darkMode ? "bg-slate-700" : "bg-slate-200"
                   }`}
                 >

@@ -171,7 +171,7 @@ const CreateUpdateRole = () => {
       >
         <div className="p-5 flex items-center justify-between flex-wrap">
           <div
-            className={`text-xl text-slate-600 font-semibold max-md:order-2 max-md:mt-4${
+            className={`text-xl text-slate-600 font-semibold max-md:order-2 max-md:mt-4 ${
               darkMode ? "text-white" : ""
             }`}
           >
