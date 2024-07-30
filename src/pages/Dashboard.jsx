@@ -17,8 +17,8 @@ function Dashboard() {
         <div className="max-lg:hidden relative w-[15%]">
           <Sidebar />
         </div>
-        <div className=" p-5 max-lg:pt-[80px] w-[85%] max-sm:w-[100%] pt-[40px] relative mx-auto">
-          <div className={` mx-auto w-11/1 `}>
+        <div className=" p-5  pt-[40px] relative lg:max-xl:px-20 2xl:pl-0  md:max-lg:w-full lg:w-[85%] ">
+          <div className={` mx-auto `}>
             <Outlet />
           </div>
         </div>
