@@ -42,6 +42,12 @@ export const DepartmentEndpoints = {
     BASE_URL + `/department/${departmentId}`,
   DELETE_DEPARTMENT_API: (departmentId) =>
     BASE_URL + `/department/${departmentId}`,
+  DEPARTMENT_ATTRIBUTES: BASE_URL + "/departmentAttribute",
+  ADD_DEPARTMENT_ATTRIBUTES:BASE_URL + "/departmentAttribute",
+  UPDATE_DEPARTMENT_ATTRIBUTES_API: (departmentAttributeId) =>
+    BASE_URL + `/departmentAttribute/${departmentAttributeId}`,
+  DELETE_DEPARTMENT_ATTRIBUTES_API: (departmentAttributeId) =>
+    BASE_URL + `/departmentAttribute/${departmentAttributeId}`,
 };
 
 //Performance Endpoints
