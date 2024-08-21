@@ -36,7 +36,7 @@ export const employeeEndpoints = {
 
 //Department Endpoints
 export const DepartmentEndpoints = {
-  DEPARTMENT_LIST_API: BASE_URL + "/department",
+  DEPARTMENT_LIST_API: BASE_URL + "/organization",
   ADD_DEPARTMENT_API: BASE_URL + "/department",
   UPDATE_DEPARTMENT_API: (departmentId) =>
     BASE_URL + `/department/${departmentId}`,
