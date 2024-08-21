@@ -3,6 +3,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
 import {
   addOrganisation,
+  getOrganisationAttributes,
   updateOrganisation,
   uploadOrganisationLogo,
 } from "../../../../../services/operations/OrganisationAPI";
@@ -14,6 +15,9 @@ import {
 
   setShowOption,
 } from "../../../../../slices/OrganisationSlice";
+import ConfirmationModal from "../../../../common/ConfirmationModal";
+import OrganizationAttributes from "./OrganizationAttribute";
+import { DepartmentAttributeslist } from "../../../../../services/operations/departmentAPI";
 
 const CreateUpdateOrganisation = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -33,6 +37,7 @@ const CreateUpdateOrganisation = () => {
   const { darkMode } = useSelector((state) => state.theme);
   const [selectedImage, setSelectedImage] = useState(null); // Local state for selected image
   const [existingImage, setExistingImage] = useState(null); // Local state for existing image
+  const [confirmationModal, setConfirmationModal] = useState(null);
 
   const { isEditing, organization } = location.state || {
     isEditing: false,
@@ -40,6 +45,8 @@ const CreateUpdateOrganisation = () => {
   };
   const [organisationId, setOrganisationId] = useState(null);
   const [showLogoUploadDialog, setShowLogoUploadDialog] = useState(false);
+  const [isAttribute, setIsAttribute] = useState(false);
+  const [organizationAttribute, setOrganizationAttributes] = useState([]);
 
   useEffect(() => {
     if (isEditing && organization) {
@@ -56,7 +63,29 @@ const CreateUpdateOrganisation = () => {
 
   console.log(isEditing)
   console.log(organization)
-
+  async function getRes() {
+    const res = await dispatch(getOrganisationAttributes(AccessToken));
+    setOrganizationAttributes(res?.data);
+  }
+  useEffect(()=>{
+    getRes()
+    setConfirmationModal({
+      text1: "Do you want to add new attributes?",
+      text2:
+        "This action will redirect you to the Attributes creation page.",
+      btn1Text: "Yes",
+      btn2Text: "Skip",
+      btn1Handler: () => {
+        setIsAttribute(true);
+        // Set showOption to true after the action
+        setConfirmationModal(null);
+      },
+      btn2Handler: () => {
+        setIsAttribute(false); // Ensure showOption is true to prevent future prompts
+        setConfirmationModal(null);
+      },
+    });
+  },[])
 
   const handleOrganizationSubmit = async (data) => {
     data.organizationName = data.organizationName.trim();
@@ -329,6 +358,37 @@ const CreateUpdateOrganisation = () => {
                   </p>
                 )}
               </div>
+              {organizationAttribute &&
+              organizationAttribute.map((attribute) => (
+                <div className="mb-4" key={attribute.attributeId}>
+                  <label
+                    htmlFor={attribute.attributeKey}
+                    className={`block text-sm font-bold mb-2 ${
+                      darkMode ? "text-white" : "text-gray-700"
+                    }`}
+                  >
+                    {attribute.attributeKey}
+                    <sup className="text-red-900 font-bold">*</sup>
+                  </label>
+                  <input
+                    id={attribute.attributeKey}
+                    type="text"
+                    data-testid={attribute.attributeKey}
+                    placeholder={`${attribute.attributeKey}...`}
+                    {...register(attribute.attributeKey, {
+                      required: `${attribute.attributeKey} is required`,
+                    })}
+                    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white text-gray-700"
+                    }`}
+                  />
+                  {errors[attribute.attributeKey] && (
+                <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
+              )}
+                </div>
+              ))}
               <button
                 type="submit"
                 className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
@@ -414,7 +474,14 @@ const CreateUpdateOrganisation = () => {
                   </button>
                 </div>
               </div>
-            ) : (
+            ) : isAttribute && !isEditing ? (
+              <OrganizationAttributes
+                NextHandler={() => {
+                  setIsAttribute(false);
+                  getRes();
+                }}
+              />
+            ): (
               <form
                 role="form"
                 onSubmit={handleSubmit(handleOrganizationSubmit)}
@@ -504,6 +571,37 @@ const CreateUpdateOrganisation = () => {
                     </p>
                   )}
                 </div>
+                {organizationAttribute &&
+              organizationAttribute.map((attribute) => (
+                <div className="mb-4" key={attribute.attributeId}>
+                  <label
+                    htmlFor={attribute.attributeKey}
+                    className={`block text-sm font-bold mb-2 ${
+                      darkMode ? "text-white" : "text-gray-700"
+                    }`}
+                  >
+                    {attribute.attributeKey}
+                    <sup className="text-red-900 font-bold">*</sup>
+                  </label>
+                  <input
+                    id={attribute.attributeKey}
+                    type="text"
+                    data-testid={attribute.attributeKey}
+                    placeholder={`${attribute.attributeKey}...`}
+                    {...register(attribute.attributeKey, {
+                      required: `${attribute.attributeKey} is required`,
+                    })}
+                    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white text-gray-700"
+                    }`}
+                  />
+                  {errors[attribute.attributeKey] && (
+                <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
+              )}
+                </div>
+              ))}
                 <button
                   type="submit"
                   className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
@@ -519,6 +617,7 @@ const CreateUpdateOrganisation = () => {
           </div>
         )}
       </div>
+      {(confirmationModal && !isEditing) && <ConfirmationModal modalData={confirmationModal} />}
     </div>
   );
 };

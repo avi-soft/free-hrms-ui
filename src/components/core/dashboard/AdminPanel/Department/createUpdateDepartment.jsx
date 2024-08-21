@@ -141,13 +141,17 @@ const CreateUpdateDepartment = () => {
     }
     const trimmedDepartmentName = data.department?.trim() || "";
     const trimmedDescription = data.description?.trim() || "";
-
+    const attributesObj = departmentAttribute && departmentAttribute.reduce((acc, obj) => {
+      acc[obj.attributeKey] = data[obj.attributeKey];
+      return acc;
+    }, {});
     const formData = {
       department: trimmedDepartmentName,
       description: trimmedDescription,
       managerId: selectedManager?.userId || null,
       organizationId: selectedOrganization,
       AccessToken,
+      attributes:attributesObj
     };
 
     try {
@@ -210,6 +214,22 @@ const CreateUpdateDepartment = () => {
   };
 
   useEffect(() => {
+    setConfirmationModal({
+      text1: "Do you want to add new attributes?",
+      text2:
+        "This action will redirect you to the Attributes creation page.",
+      btn1Text: "Yes",
+      btn2Text: "Skip",
+      btn1Handler: () => {
+        setIsAttribute(true);
+        // Set showOption to true after the action
+        setConfirmationModal(null);
+      },
+      btn2Handler: () => {
+        setIsAttribute(false); // Ensure showOption is true to prevent future prompts
+        setConfirmationModal(null);
+      },
+    });
     return () => {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
@@ -316,22 +336,6 @@ const CreateUpdateDepartment = () => {
                 value={selectedOrganization}
                 onChange={(e) => {
                   setSelectedOrganization(e.target.value);
-                  setConfirmationModal({
-                    text1: "Do you want to add more attributes?",
-                    text2:
-                      "This action will redirect you to the Attributes creation page.",
-                    btn1Text: "Yes",
-                    btn2Text: "Skip",
-                    btn1Handler: () => {
-                      setIsAttribute(true);
-                      // Set showOption to true after the action
-                      setConfirmationModal(null);
-                    },
-                    btn2Handler: () => {
-                      setIsAttribute(false); // Ensure showOption is true to prevent future prompts
-                      setConfirmationModal(null);
-                    },
-                  });
                 }}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                   darkMode
@@ -500,9 +504,9 @@ const CreateUpdateDepartment = () => {
             )}
             {departmentAttribute &&
               departmentAttribute.map((attribute) => (
-                <div className="mb-4">
+                <div className="mb-4" key={attribute.attributeId}>
                   <label
-                    htmlFor="description"
+                    htmlFor={attribute.attributeKey}
                     className={`block text-sm font-bold mb-2 ${
                       darkMode ? "text-white" : "text-gray-700"
                     }`}
@@ -515,12 +519,18 @@ const CreateUpdateDepartment = () => {
                     type="text"
                     data-testid={attribute.attributeKey}
                     placeholder={`${attribute.attributeKey}...`}
+                    {...register(attribute.attributeKey, {
+                      required: `${attribute.attributeKey} is required`,
+                    })}
                     className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                       darkMode
                         ? "bg-gray-700 border-gray-600 text-white"
                         : "bg-white text-gray-700"
                     }`}
                   />
+                  {errors[attribute.attributeKey] && (
+                <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
+              )}
                 </div>
               ))}
             <button

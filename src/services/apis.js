@@ -106,4 +106,10 @@ export const OrganisationEndpoints = {
     BASE_URL + `/organization/${organisationId}/uploadImage`,
   DELETE_ORGANISATION_REQUEST: (organisationId) =>
     BASE_URL + `/organization/${organisationId}`,
+  GET_ORGANIZATION_ATTRIBUTES_REQUEST: BASE_URL + "/organizationAttribute",
+  ADD_ORGANIZATION_ATTRIBUTES_REQUEST:BASE_URL + "/organizationAttribute",
+  UPDATE_ORGANIZATION_ATTRIBUTES_REQUEST: (organizationAttributeId) =>
+    BASE_URL + `/organizationAttribute/${organizationAttributeId}`,
+  DELETE_ORGANIZATION_ATTRIBUTES_REQUEST: (organizationAttributeId) =>
+    BASE_URL + `/organizationAttribute/${organizationAttributeId}`,
 };

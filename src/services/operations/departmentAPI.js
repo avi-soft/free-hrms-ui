@@ -48,7 +48,7 @@ export const addDepartment = (formData) => {
       console.log(organizationId);
       const response = await apiConnector(
         "POST",
-        `${ADD_DEPARTMENT_API}/${organizationId}`,
+        `${ADD_DEPARTMENT_API}`,
         formData,
         {
           Authorization: `Bearer ${AccessToken}`,
