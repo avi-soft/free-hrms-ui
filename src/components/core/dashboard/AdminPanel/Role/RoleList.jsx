@@ -68,7 +68,7 @@ const RoleList = () => {
           <div className="p-5 flex items-center flex-wrap justify-between">
             <div
               data-testid="Role List"
-              className={`text-xl max-md:order-2 max-sm:ml-2  max-md:mt-5 ${
+              className={`text-xl max-md:hidden  max-sm:ml-2  max-md:mt-5 ${
                 darkMode ? "text-white" : "text-slate-600"
               } font-semibold`}
             >
