@@ -88,8 +88,13 @@ const CreateUpdateOrganisation = () => {
   },[])
 
   const handleOrganizationSubmit = async (data) => {
+    const attributesObj = organizationAttribute && organizationAttribute.reduce((acc, obj) => {
+      acc[obj.attributeKey] = data[obj.attributeKey];
+      return acc;
+    }, {});
     data.organizationName = data.organizationName.trim();
     data.organizationDescription = data.organizationDescription.trim();
+    data.attributes=attributesObj
     try {
       let response;
       if (isEditing) {
