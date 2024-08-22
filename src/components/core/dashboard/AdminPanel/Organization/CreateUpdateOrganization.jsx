@@ -169,7 +169,7 @@ const CreateUpdateOrganisation = () => {
     >
       <div className="p-5 flex items-center justify-between">
         <div
-          className={`text-xl text-slate-600 font-semibold ${
+          className={`md:text-xl text-slate-600 font-semibold ${
             darkMode ? "text-white" : ""
           }`}
         >
@@ -177,7 +177,7 @@ const CreateUpdateOrganisation = () => {
         </div>
         <div>
           <p
-            className={`text-slate-950 text-xl left-6 font-semibold ${
+            className={`text-slate-950 md:text-xl left-6 font-semibold ${
               darkMode ? "text-white" : ""
             }`}
           >

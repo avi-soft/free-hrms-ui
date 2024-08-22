@@ -113,3 +113,30 @@ export const OrganisationEndpoints = {
   DELETE_ORGANIZATION_ATTRIBUTES_REQUEST: (organizationAttributeId) =>
     BASE_URL + `/organizationAttribute/${organizationAttributeId}`,
 };
+
+
+// EmployeeAttributes Endpoints
+export const EmployeeAttributesEndpoints = {
+  GET_EmployeeAttributes_Endpoint:BASE_URL + "/employeeAttribute",
+  ADD_EmployeeAttributes_Endpoint:BASE_URL +  "/employeeAttribute",
+  DELETE_EmployeeAttributes_Endpoint:(id)=>BASE_URL + `/employeeAttribute/${id}`,
+  PATCH_EmployeeAttributes_Endpoint:(id)=>BASE_URL + `/employeeAttribute/${id}`,
+}
+
+
+// EmployeeSkills Endpoints
+export const EmployeeSkillsEndpoints = {
+  GET_EmployeeSkills_Endpoint:BASE_URL + "/skill",
+  ADD_EmployeeSkill_Endpoint:BASE_URL +  "/skill",
+  DELETE_EmployeeSkill_Endpoint:(id)=>BASE_URL + `/skill/${id}`,
+  PATCH_EmployeeSkill_Endpoint:(id)=>BASE_URL + `/skill/${id}`,
+}
+
+
+// EmployeeDesignations Endpoints
+export const EmployeeDesignationsEndpoints = {
+  GET_EmployeeDesignations_Endpoint: BASE_URL + "/designation",
+  ADD_EmployeeDesignation_Endpoint: BASE_URL + "/designation",
+  DELETE_EmployeeDesignation_Endpoint: (id) => BASE_URL + `/designation/${id}`,
+  PATCH_EmployeeDesignation_Endpoint: (id) => BASE_URL + `/designation/${id}`,
+}
