@@ -499,6 +499,15 @@ const MenuItems = () => {
             ),
           },
           {
+            key: "EmployeeAttributes",
+            label: t("Employee Attributes"),
+            url: "/employee/employee-attributes",
+            parentKey: "Employee",
+            icon: (
+              <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+            ),
+          },
+          {
             key: "Employee List",
             label: t("Employee List"),
             url: "/employee/employee-list",

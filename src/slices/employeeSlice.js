@@ -4,6 +4,8 @@ const initialState = {
   employees: [],
   loading: false,
   step : 1,
+  currentOrganizationId: null,
+
 };
 
 const employeeSlice = createSlice({
@@ -15,6 +17,9 @@ const employeeSlice = createSlice({
   },
     addEmployees(state, action) {
       state.employees.push(action.payload);
+    },
+    setCurrentOrganizationId(state, action) {
+      state.currentOrganizationId = action.payload;
     },
     updateEmployee(state, action) {
       const { id, updatedEmployeeData } = action.payload;
@@ -34,5 +39,5 @@ const employeeSlice = createSlice({
   },
 });
 
-export const { addEmployees,setStep, updateEmployee, deleteEmployee, setLoading } = employeeSlice.actions;
+export const { addEmployees,setStep, updateEmployee, deleteEmployee, setLoading,setCurrentOrganizationId } = employeeSlice.actions;
 export default employeeSlice.reducer;

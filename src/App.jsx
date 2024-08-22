@@ -24,6 +24,7 @@ import CreateUpdateRole from "./components/core/dashboard/AdminPanel/Role/Create
 import RoleList from "./components/core/dashboard/AdminPanel/Role/RoleList";
 import OrganizationList from "./components/core/dashboard/AdminPanel/Organization/OrganizationList";
 import CreateUpdateOrganisation from "./components/core/dashboard/AdminPanel/Organization/CreateUpdateOrganization";
+import AddEmployeeAttributes from "./components/core/dashboard/AdminPanel/Employee/AddEmployeeAttributes";
 
 function App() {
   const { darkMode } = useSelector((state) => state.theme);
@@ -52,13 +53,23 @@ function App() {
               </PrivateRoute>
             }
           >
-            <Route path="/organization/organization-list" element={<OrganizationList />} />
-            <Route path="/organization/organization-create-update" element={<CreateUpdateOrganisation/>} />
+            <Route
+              path="/organization/organization-list"
+              element={<OrganizationList />}
+            />
+            <Route
+              path="/organization/organization-create-update"
+              element={<CreateUpdateOrganisation />}
+            />
 
             <Route path="/employee/employee-list" element={<EmployeeList />} />
             <Route
               path="/employee/employee-create-update"
               element={<CreateUpdateEmployee />}
+            />
+            <Route
+              path="/employee/employee-attributes"
+              element={<AddEmployeeAttributes />}
             />
             <Route
               path="/role/role-create-update"
