@@ -546,7 +546,7 @@ const CreateUpdateDepartment = () => {
           </form>
         )}
       </div>
-      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
+      {confirmationModal && !isEditing && <ConfirmationModal modalData={confirmationModal} />}
     </div>
   );
 };
