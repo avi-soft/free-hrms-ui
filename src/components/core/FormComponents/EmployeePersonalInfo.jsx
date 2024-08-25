@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
-import UploadEmployeeImage from "../dashboard/AdminPanel/Employee/UploadEmployeeImage";
+import { useForm } from "react-hook-form";
 import { useDispatch, useSelector } from "react-redux";
-import { setStep } from "../../../slices/employeeSlice";
+import UploadEmployeeImage from "../dashboard/AdminPanel/Employee/UploadEmployeeImage";
+import { setDesignations, setStep } from "../../../slices/employeeSlice";
 import {
   addEmployeePersonalDetails,
   UpdateEmployeePersonalDetails,
@@ -25,47 +25,33 @@ const EmployeePersonalInfo = () => {
     handleSubmit,
     setValue,
     formState: { errors },
-    control,
     reset,
     getValues,
   } = useForm();
-  const {
-    fields: skillsFields,
-    append: appendSkill,
-    remove: removeSkill,
-  } = useFieldArray({
-    control,
-    name: "skills",
-  });
-  const {
-    fields: designationFields,
-    append: appendDesignation,
-    remove: removeDesignation,
-  } = useFieldArray({
-    control,
-    name: "designations",
-  });
-
-  const [selectedSkills, setSelectedSkills] = useState(new Set());
-  const [selectedDesignations, setSelectedDesignations] = useState(new Set());
 
   const [editSkillId, setEditSkillId] = useState(null);
   const [editSkillValue, setEditSkillValue] = useState("");
+  const [skills, setSkills] = useState([]);
   const [editDesignationId, setEditDesignationId] = useState(null);
   const [editDesignationValue, setEditDesignationValue] = useState("");
 
+  const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth);
   const { AccessToken } = useSelector((state) => state.auth);
-  const darkMode = useSelector((state) => state.theme?.darkMode) || false;
-  const dispatch = useDispatch();
-  const [departments, setDepartments] = useState([]);
   const [localAttributes, setLocalAttributes] = useState([]);
-  const { employees } = useSelector((state) => state.employee);
+  const darkMode = useSelector((state) => state.theme?.darkMode) || false;
+  const {
+    employees,
+    designations,
+    currentOrganizationId: orgId,
+  } = useSelector((state) => state.employee);
   const isEditing = useSelector((state) => state.editing.isEditing);
   const preEditedEmployeeDetails = useSelector(
     (state) => state.editing.preEditedEmployeeDetails
   );
-  const orgId = useSelector((state) => state?.employee?.currentOrganizationId);
+
+  console.log(skills);
+  console.log(designations);
 
   const onSubmit = (data) => {
     const employeeId = employees[0];
@@ -91,53 +77,49 @@ const EmployeePersonalInfo = () => {
     }
   }
 
-  async function getSkills() {
-    try {
-      const response = await dispatch(GetEmployeeSkills(AccessToken));
-      if (response?.data) {
-        response.data.forEach((skill) =>
-          appendSkill({ skill: skill.skill, id: skill.skillId })
-        );
-      }
-    } catch (error) {
-      console.error("Failed to fetch skills:", error);
-    }
-  }
-
   async function getDesignations() {
     try {
       const response = await dispatch(GetEmployeeDesignations(AccessToken));
-      if (response?.data) {
-        response.data.forEach((designation) =>
-          appendDesignation({
-            designation: designation.designation,
-            id: designation.designationId,
-          })
-        );
+      if (response?.status == 200) {
+        setDesignations(response?.data);
       }
-    } catch (error) {
-      console.error("Failed to fetch designations:", error);
-    }
+    } catch (error) {}
   }
+
+  async function getSkills() {
+    try {
+      const response = await dispatch(GetEmployeeSkills(AccessToken));
+      console.log(response);
+
+      if (response?.status == 200) {
+        setSkills(response?.data);
+      }
+    } catch (error) {}
+  }
+  //   const fetchAttributesAndData = async () => {
+  //     try {
+  //       await dispatch(GetEmployeeAttributes(AccessToken));
+
+  //       const response = await dispatch(GetEmployeeSkills(AccessToken));
+  //       console.log(response);
+
+  //       if (response?.data) {
+  //         setSkills(response?.data);
+  //       }
+  //       const Designationresponse = await dispatch(
+  //         GetEmployeeDesignations(AccessToken)
+  //       );
+  //       console.log(Designationresponse);
+  //     } catch (error) {
+  //       console.error("Failed to fetch data:", error);
+  //     }
+  //   };
 
   useEffect(() => {
     getAttributes();
-    getSkills();
     getDesignations();
+    getSkills();
   }, [AccessToken, dispatch]);
-
-  const fetchDepartments = async () => {
-    try {
-      const response = await dispatch(Departmentlist(AccessToken, orgId));
-      setDepartments(response?.data);
-    } catch (error) {
-      console.error("Failed to fetch departments", error);
-    }
-  };
-
-  useEffect(() => {
-    fetchDepartments();
-  }, [dispatch, AccessToken]);
 
   useEffect(() => {
     if (isEditing && preEditedEmployeeDetails) {
@@ -162,7 +144,7 @@ const EmployeePersonalInfo = () => {
         const response = await dispatch(
           AddEmployeeSkill({ skill: newSkill }, AccessToken)
         );
-        appendSkill({ skill: newSkill, id: response.data.skillId });
+        dispatch(setSkills(response.data));
         setValue("newSkill", ""); // Clear input field
       } catch (error) {
         console.error("Failed to add skill:", error);
@@ -176,11 +158,7 @@ const EmployeePersonalInfo = () => {
         const response = await dispatch(
           EditEmployeeSkill({ skill: editSkillValue }, editSkillId, AccessToken)
         );
-        const updatedSkill = response.data;
-        const index = skillsFields.findIndex((field) => field.id === editSkillId);
-        if (index !== -1) {
-          skillsFields[index] = { ...skillsFields[index], skill: updatedSkill.skill };
-        }
+        dispatch(setSkills(response.data));
         setEditSkillId(null);
         setEditSkillValue("");
       } catch (error) {
@@ -189,15 +167,10 @@ const EmployeePersonalInfo = () => {
     }
   };
 
-  const handleRemoveSkill = async (index, skillId) => {
+  const handleRemoveSkill = async (skillId) => {
     try {
       await dispatch(DeleteEmployeeSkill(skillId, AccessToken));
-      removeSkill(index);
-      setSelectedSkills((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(skillId);
-        return newSet;
-      });
+      dispatch(setSkills(skills.filter((skill) => skill.id !== skillId)));
     } catch (error) {
       console.error("Failed to delete skill:", error);
     }
@@ -210,10 +183,7 @@ const EmployeePersonalInfo = () => {
         const response = await dispatch(
           AddEmployeeDesignation({ designation: newDesignation }, AccessToken)
         );
-        appendDesignation({
-          designation: newDesignation,
-          id: response.data.designationId,
-        });
+        dispatch(setDesignations(response.data));
         setValue("newDesignation", ""); // Clear input field
       } catch (error) {
         console.error("Failed to add designation:", error);
@@ -225,13 +195,13 @@ const EmployeePersonalInfo = () => {
     if (editDesignationId) {
       try {
         const response = await dispatch(
-          EditEmployeeDesignation({ designation: editDesignationValue }, editDesignationId, AccessToken)
+          EditEmployeeDesignation(
+            { designation: editDesignationValue },
+            editDesignationId,
+            AccessToken
+          )
         );
-        const updatedDesignation = response.data;
-        const index = designationFields.findIndex((field) => field.id === editDesignationId);
-        if (index !== -1) {
-          designationFields[index] = { ...designationFields[index], designation: updatedDesignation.designation };
-        }
+        dispatch(setDesignations(response.data));
         setEditDesignationId(null);
         setEditDesignationValue("");
       } catch (error) {
@@ -240,15 +210,14 @@ const EmployeePersonalInfo = () => {
     }
   };
 
-  const handleRemoveDesignation = async (index, designationId) => {
+  const handleRemoveDesignation = async (designationId) => {
     try {
       await dispatch(DeleteEmployeeDesignation(designationId, AccessToken));
-      removeDesignation(index);
-      setSelectedDesignations((prev) => {
-        const newSet = new Set(prev);
-        newSet.delete(designationId);
-        return newSet;
-      });
+      dispatch(
+        setDesignations(
+          designations.filter((designation) => designation.id !== designationId)
+        )
+      );
     } catch (error) {
       console.error("Failed to delete designation:", error);
     }
@@ -256,25 +225,9 @@ const EmployeePersonalInfo = () => {
 
   const toggleSelection = (id, type) => {
     if (type === "skill") {
-      setSelectedSkills((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(id)) {
-          newSet.delete(id);
-        } else {
-          newSet.add(id);
-        }
-        return newSet;
-      });
+      // Handle skill selection logic if needed
     } else if (type === "designation") {
-      setSelectedDesignations((prev) => {
-        const newSet = new Set(prev);
-        if (newSet.has(id)) {
-          newSet.delete(id);
-        } else {
-          newSet.add(id);
-        }
-        return newSet;
-      });
+      // Handle designation selection logic if needed
     }
   };
 
@@ -369,9 +322,9 @@ const EmployeePersonalInfo = () => {
                 </button>
               </div>
               <div className="mt-4">
-                {skillsFields.map((field, index) => (
-                  <div key={field.id} className="flex items-center gap-2 mb-2">
-                    {editSkillId === field.id ? (
+                {skills.map((skill, index) => (
+                  <div key={skill.id} className="flex items-center gap-2 mb-2">
+                    {editSkillId === skill.id ? (
                       <>
                         <input
                           type="text"
@@ -395,13 +348,12 @@ const EmployeePersonalInfo = () => {
                       <>
                         <input
                           type="checkbox"
-                          checked={selectedSkills.has(field.id)}
-                          onChange={() => toggleSelection(field.id, "skill")}
+                          // Add toggle selection logic if needed
                           className="mr-2"
                         />
                         <input
                           type="text"
-                          value={field.skill}
+                          value={skill.skill}
                           readOnly
                           className={`border rounded px-3 py-2 ${
                             darkMode
@@ -412,22 +364,22 @@ const EmployeePersonalInfo = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            setEditSkillId(field.id);
-                            setEditSkillValue(field.skill);
+                            setEditSkillId(skill.id);
+                            setEditSkillValue(skill.skill);
                           }}
-                          className="text-blue-500 ml-2"
+                          className="bg-yellow-500 text-black py-1 px-4 rounded ml-2"
                         >
                           <FaEdit />
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveSkill(index, field.id)}
-                          className="text-red-500 ml-2"
-                        >
-                          <FaTrash />
-                        </button>
                       </>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveSkill(skill.id)}
+                      className="bg-red-500 text-white py-1 px-4 rounded ml-2"
+                    >
+                      <FaTrash />
+                    </button>
                   </div>
                 ))}
               </div>
@@ -464,17 +416,19 @@ const EmployeePersonalInfo = () => {
                 </button>
               </div>
               <div className="mt-4">
-                {designationFields.map((field, index) => (
+                {designations.map((designation, index) => (
                   <div
-                    key={field.id}
-                    className="flex items-center gap-2 mb-2 border p-2 rounded"
+                    key={designation.id}
+                    className="flex items-center gap-2 mb-2"
                   >
-                    {editDesignationId === field.id ? (
+                    {editDesignationId === designation.id ? (
                       <>
                         <input
                           type="text"
                           value={editDesignationValue}
-                          onChange={(e) => setEditDesignationValue(e.target.value)}
+                          onChange={(e) =>
+                            setEditDesignationValue(e.target.value)
+                          }
                           className={`border rounded px-3 py-2 ${
                             darkMode
                               ? "border-slate-300 bg-gray-500 text-white"
@@ -493,13 +447,12 @@ const EmployeePersonalInfo = () => {
                       <>
                         <input
                           type="checkbox"
-                          checked={selectedDesignations.has(field.id)}
-                          onChange={() => toggleSelection(field.id, "designation")}
+                          // Add toggle selection logic if needed
                           className="mr-2"
                         />
                         <input
                           type="text"
-                          value={field.designation}
+                          value={designation.designation}
                           readOnly
                           className={`border rounded px-3 py-2 ${
                             darkMode
@@ -510,49 +463,41 @@ const EmployeePersonalInfo = () => {
                         <button
                           type="button"
                           onClick={() => {
-                            setEditDesignationId(field.id);
-                            setEditDesignationValue(field.designation);
+                            setEditDesignationId(designation.id);
+                            setEditDesignationValue(designation.designation);
                           }}
-                          className="text-blue-500 ml-2"
+                          className="bg-yellow-500 text-black py-1 px-4 rounded ml-2"
                         >
                           <FaEdit />
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveDesignation(index, field.id)}
-                          className="text-red-500 ml-2"
-                        >
-                          <FaTrash />
-                        </button>
                       </>
                     )}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveDesignation(designation.id)}
+                      className="bg-red-500 text-white py-1 px-4 rounded ml-2"
+                    >
+                      <FaTrash />
+                    </button>
                   </div>
                 ))}
               </div>
             </div>
           </div>
 
-          <div className="flex items-center gap-x-3 mt-5">
+          <div className="flex justify-between mt-6">
             <button
-              data-testid="edit-button"
-              type="submit"
-              className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
-                darkMode
-                  ? "bg-yellow-500 text-black"
-                  : "bg-yellow-500 text-black"
-              } py-1 px-5 flex items-center`}
+              type="button"
+              onClick={() => dispatch(setStep(1))}
+              className="bg-yellow-500 text-black py-1 px-4 rounded flex items-center"
             >
-              {isEditing ? (
-                <>
-                  <FaEdit className="mr-2" />
-                  Update
-                </>
-              ) : (
-                <>
-                  <FaPlus className="mr-2" />
-                  Add
-                </>
-              )}
+              <FaArrowRight className="mr-2" /> Next
+            </button>
+            <button
+              type="submit"
+              className="bg-green-500 text-white py-1 px-4 rounded flex items-center"
+            >
+              <FaSave className="mr-2" /> Save
             </button>
           </div>
         </form>
