@@ -20,7 +20,7 @@ export const Departmentlist = (AccessToken, selectedOrganization) => {
       console.log(AccessToken);
       const response = await apiConnector(
         "GET",
-        `${DEPARTMENT_LIST_API}`,
+        `${DEPARTMENT_LIST_API}/${selectedOrganization}`,
         null,
         {
           Authorization: `Bearer ${AccessToken}`,
