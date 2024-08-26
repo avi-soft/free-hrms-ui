@@ -65,6 +65,9 @@ const LoginFormTemplate = () => {
             navigate("/");
           }
         }
+        else{
+          navigate("/");
+        }
       }
     } catch (error) {
       setError("password", {

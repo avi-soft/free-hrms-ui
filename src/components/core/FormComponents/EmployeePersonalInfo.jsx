@@ -6,20 +6,18 @@ import { setStep } from "../../../slices/employeeSlice";
 import {
   addEmployeePersonalDetails,
   UpdateEmployeePersonalDetails,
-  AddEmployeeSkill,
-  DeleteEmployeeSkill,
-  GetEmployeeSkills,
   AddEmployeeDesignation,
   DeleteEmployeeDesignation,
   GetEmployeeDesignations,
-  EditEmployeeSkill,
   EditEmployeeDesignation,
   GetEmployeeAttributes,
 } from "../../../services/operations/employeeAPI";
-import { FaPlus, FaEdit, FaArrowRight, FaTrash, FaSave } from "react-icons/fa";
+import { FaArrowRight, FaSave } from "react-icons/fa";
 import { Departmentlist } from "../../../services/operations/departmentAPI";
 import toast from "react-hot-toast";
 import { setDepartments } from "../../../slices/departmentSlice";
+import SkillsDesignationModal from "../dashboard/AdminPanel/Employee/SkillsDesignationModal";
+import { RxCross2 } from "react-icons/rx";
 
 const EmployeePersonalInfo = () => {
   const {
@@ -31,13 +29,9 @@ const EmployeePersonalInfo = () => {
     getValues,
   } = useForm();
 
-  const [editSkillId, setEditSkillId] = useState(null);
-  const [editSkillValue, setEditSkillValue] = useState("");
-  const [skills, setSkills] = useState([]);
-  const [designations,setDesignations]=useState([])
-  const [editDesignationId, setEditDesignationId] = useState(null);
-  const [editDesignationValue, setEditDesignationValue] = useState("");
-
+  const [skillsDesignationModal, setSkillsDesignationModal] = useState(null);
+  const [selectedSkills, setSelectedSkills] = useState([]);
+  const [selectedDesignations, setSelectedDesignations] = useState([]);
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth);
   const { AccessToken } = useSelector((state) => state.auth);
@@ -45,42 +39,44 @@ const EmployeePersonalInfo = () => {
   const { AllDepartments } = useSelector((state) => state.department);
 
   const darkMode = useSelector((state) => state.theme?.darkMode) || false;
-  const {
-    employees,
-    currentOrganizationId: orgId,
-  } = useSelector((state) => state.employee);
+  const { employees, currentOrganizationId: orgId } = useSelector(
+    (state) => state.employee
+  );
   const isEditing = useSelector((state) => state.editing.isEditing);
   const preEditedEmployeeDetails = useSelector(
     (state) => state.editing.preEditedEmployeeDetails
   );
 
-  console.log(skills);
-  console.log(designations);
   console.log(AllDepartments);
-  
 
   const onSubmit = (data) => {
     const employeeId = employees[0];
+    const submissionData = {
+      ...data,
+      skillList: selectedSkills,
+      designationList: selectedDesignations,
+    };
+
+    console.log(submissionData);
     if (isEditing) {
       dispatch(
         UpdateEmployeePersonalDetails(
           preEditedEmployeeDetails.employeeId,
-          data,
+          submissionData,
           AccessToken
         )
       );
     } else {
-      dispatch(addEmployeePersonalDetails(employeeId, data, AccessToken));
+      dispatch(
+        addEmployeePersonalDetails(employeeId, submissionData, AccessToken)
+      );
     }
   };
-  
-
-
 
   async function getDepartments() {
-    const response=await dispatch(Departmentlist(AccessToken,orgId));
+    const response = await dispatch(Departmentlist(AccessToken, orgId));
     console.log(response);
-    if(response?.status==200) {
+    if (response?.status == 200) {
       dispatch(setDepartments(response?.data?.content));
     }
   }
@@ -93,33 +89,9 @@ const EmployeePersonalInfo = () => {
     }
   }
 
-  async function getDesignations() {
-    try {
-      const response = await dispatch(GetEmployeeDesignations(AccessToken));
-      if (response?.status == 200) {
-        setDesignations(response?.data);
-      }
-    } catch (error) {}
-  }
-
-  async function getSkills() {
-    try {
-      const response = await dispatch(GetEmployeeSkills(AccessToken));
-      console.log(response);
-
-      if (response?.status == 200) {
-        setSkills(response?.data);
-      }
-    } catch (error) {}
-  }
-
-
   useEffect(() => {
     getAttributes();
-    getDesignations();
-    getSkills();
     getDepartments();
-
   }, [AccessToken, dispatch]);
 
   useEffect(() => {
@@ -138,113 +110,58 @@ const EmployeePersonalInfo = () => {
     }
   }, [isEditing, preEditedEmployeeDetails, setValue, reset]);
 
-  const handleAddSkill = async () => {
-    const newSkill = getValues("newSkill");
-    if (newSkill) {
-      try {
-        const response = await dispatch(
-          AddEmployeeSkill({ skill: newSkill }, AccessToken)
+  const handleSkillSelection = (setSelectedSkills, skillId, skillName) => {
+    console.log(skillName);
+
+    setSelectedSkills((prevSkills) => {
+      const existingSkill = prevSkills.find((skill) => skill === skillName);
+      if (existingSkill) {
+        return prevSkills.filter((skill) => skill !== skillName);
+      } else {
+        return [...prevSkills, skillName];
+      }
+    });
+  };
+  const handleDesignationSelection = (
+    setSelectedDesignations,
+    designationId,
+    designationName
+  ) => {
+    setSelectedDesignations((prevDesignations) => {
+      const existingDesignation = prevDesignations.find(
+        (designation) => designation === designationName
+      );
+      if (existingDesignation) {
+        return prevDesignations.filter(
+          (designation) => designation !== designationName
         );
-        console.log(response);
-        if(response?.data?.success==true) {
-          toast.success(response?.data?.message);
-          getSkills();
-          setValue("newSkill", ""); 
-        }
-
-      } catch (error) {
-        console.error("Failed to add skill:", error);
+      } else {
+        return [...prevDesignations, designationName];
       }
-    }
+    });
   };
 
-  const handleEditSkill = async () => {
-    if (editSkillId) {
-      try {
-        const response = await dispatch(
-          EditEmployeeSkill({ skill: editSkillValue }, editSkillId, AccessToken)
-        );
-        if(response?.data?.success==true) {
-          toast.success(response?.data?.message);
-          setEditSkillId(null);
-          setEditSkillValue("");
-          getSkills();
-        }
-
-      } catch (error) {
-        console.error("Failed to edit skill:", error);
-      }
-    }
-  };
-
-  const handleRemoveSkill = async (skillId) => {
-    try {
-     const response= await dispatch(DeleteEmployeeSkill(skillId, AccessToken));
-     if(response?.data?.success==true) {
-      getSkills();
-      toast.success(response?.data?.message)
-     }
-    } catch (error) {
-      console.error("Failed to delete skill:", error);
-    }
-  };
-
-  const handleAddDesignation = async () => {
-    const newDesignation = getValues("newDesignation");
-    if (newDesignation) {
-      try {
-        const response = await dispatch(
-          AddEmployeeDesignation({ designation: newDesignation }, AccessToken)
-        );
-        console.log(response);
-        if(response?.data?.success==true) {
-          getDesignations();
-          toast.success(response?.data?.message);
-          setValue("newDesignation", "");
-        }       // Clear input field
-
-
-      } catch (error) {
-        console.error("Failed to add designation:", error);
-      }
-    }
-  };
-
-  const handleEditDesignation = async () => {
-    if (editDesignationId) {
-      try {
-        const response = await dispatch(
-          EditEmployeeDesignation(
-            { designation: editDesignationValue },
-            editDesignationId,
-            AccessToken
-          )
-        );
-        console.log(response);
-        if(response?.data.success==true) {
-          toast.success(response?.data?.message);
-          getDesignations();
-        }
-        setEditDesignationId(null);
-        setEditDesignationValue("");
-      } catch (error) {
-        console.error("Failed to edit designation:", error);
-      }
-    }
-  };
-
-  const handleRemoveDesignation = async (designationId) => {
-    try {
-      const response=await dispatch(DeleteEmployeeDesignation(designationId, AccessToken));
-      console.log(response);
-      if(response?.data.success==true) {
-        getDesignations();
-        toast.success(response?.data?.message)
-
-      }
-    } catch (error) {
-      console.error("Failed to delete designation:", error);
-    }
+  const handleModal = (type) => {
+    setSkillsDesignationModal({
+      type,
+      register,
+      getValues,
+      setValue,
+      AccessToken,
+      handleSkillSelection,
+      handleDesignationSelection,
+      selectedSkills,
+      selectedDesignations,
+      btn1Text: "Add",
+      btn2Text: "Cancel",
+      btn1Handler: (data) => {
+        type === "skill"
+          ? setSelectedSkills(data)
+          : setSelectedDesignations(data);
+        setSkillsDesignationModal(null);
+      },
+      btn2Handler: () => setSkillsDesignationModal(null),
+    });
   };
 
   const toggleSelection = (id, type) => {
@@ -316,7 +233,7 @@ const EmployeePersonalInfo = () => {
           {/* Skills and Designations Section */}
           <div className="flex gap-6 mt-6">
             {/* Skills Section */}
-            <div className="flex flex-col flex-1">
+            <div className="flex flex-col flex-1  w-1/2 flex-wrap">
               <label
                 htmlFor="skills"
                 className={`block text-sm font-semibold ${
@@ -325,92 +242,42 @@ const EmployeePersonalInfo = () => {
               >
                 Skills
               </label>
-              <div className="flex items-center gap-2">
-                <input
-                  id="skill-input"
-                  type="text"
-                  {...register("newSkill")}
-                  className={`border rounded px-3 py-2 ${
-                    darkMode
-                      ? "border-slate-300 bg-gray-500 text-white"
-                      : "border-slate-300 bg-white text-black"
-                  }`}
-                  placeholder="Enter a skill"
-                />
+              <div className="flex items-center gap-2 flex-wrap">
                 <button
                   type="button"
-                  onClick={handleAddSkill}
+                  onClick={() => handleModal("skill")}
                   className="bg-yellow-500 text-black py-1 px-4 rounded"
                 >
                   Add Skill
                 </button>
               </div>
-              <div className="mt-4">
-                {skills.map((skill, index) => (
-                  <div key={skill?.skillId} className="flex items-center gap-2 mb-2">
-                    {editSkillId === skill?.skillId ? (
-                      <>
-                        <input
-                          type="text"
-                          value={editSkillValue}
-                          onChange={(e) => setEditSkillValue(e.target.value)}
-                          className={`border rounded px-3 py-2 ${
-                            darkMode
-                              ? "border-slate-300 bg-gray-500  text-white"
-                              : "border-slate-300  bg-white  text-black"
-                          }`}
+              <div className="mt-4 flex gap-3 flex-wrap">
+                {selectedSkills.map((skill, index) => (
+                  <div
+                    key={skill?.skillId}
+                    className="flex items-center gap-2 mb-2 flex-wrap"
+                  >
+                    <span className="border rounded-full pl-3 pr-2  flex items-center">
+                      <p className="mb-1">{skill}</p>
+                      <span className="rounded-full border ml-3">
+                        <RxCross2
+                          onClick={() =>
+                            handleSkillSelection(
+                              setSelectedSkills,
+                              skill?.skillId,
+                              skill
+                            )
+                          }
                         />
-                        <button
-                          type="button"
-                          onClick={handleEditSkill}
-                          className="bg-green-500 text-white py-1 px-4 rounded ml-2"
-                        >
-                          <FaSave />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <input
-                          type="checkbox"
-                          // Add toggle selection logic if needed
-                          className="mr-2"
-                        />
-                        <input
-                          type="text"
-                          value={skill?.skill}
-                          readOnly
-                          className={`border rounded px-3 py-2 ${
-                            darkMode
-                              ? "border-slate-300 bg-gray-500 text-white"
-                              : "border-slate-300 bg-white text-black"
-                          }`}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditSkillId(skill?.skillId);
-                            setEditSkillValue(skill.skill);
-                          }}
-                          className="bg-yellow-500 text-black py-1 px-4 rounded ml-2"
-                        >
-                          <FaEdit />
-                        </button>
-                      </>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveSkill(skill?.skillId)}
-                      className="bg-red-500 text-white py-1 px-4 rounded ml-2"
-                    >
-                      <FaTrash />
-                    </button>
+                      </span>
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
             {/* Designations Section */}
-            <div className="flex flex-col flex-1">
+            <div className="flex flex-col flex-1  w-1/2">
               <label
                 htmlFor="designations"
                 className={`block text-sm font-semibold ${
@@ -420,90 +287,34 @@ const EmployeePersonalInfo = () => {
                 Designations
               </label>
               <div className="flex items-center gap-2">
-                <input
-                  id="designation-input"
-                  type="text"
-                  {...register("newDesignation")}
-                  className={`border rounded px-3 py-2 ${
-                    darkMode
-                      ? "border-slate-300 bg-gray-500 text-white"
-                      : "border-slate-300 bg-white text-black"
-                  }`}
-                  placeholder="Enter a designation"
-                />
                 <button
                   type="button"
-                  onClick={handleAddDesignation}
+                  onClick={() => handleModal("designation")}
                   className="bg-yellow-500 text-black py-1 px-4 rounded"
                 >
                   Add Designation
                 </button>
               </div>
-              <div className="mt-4">
-                {designations.map((designation, index) => (
+              <div className="mt-4 flex gap-3 flex-wrap">
+                {selectedDesignations.map((designation, index) => (
                   <div
                     key={designation?.designationId}
-                    className="flex items-center gap-2 mb-2"
+                    className="flex items-center gap-2 mb-2 flex-wrap"
                   >
-                    {editDesignationId === designation?.designationId ? (
-                      <>
-                        <input
-                          type="text"
-                          value={editDesignationValue}
-                          onChange={(e) =>
-                            setEditDesignationValue(e.target.value)
+                    <span className="border rounded-full pl-3 pr-2  flex items-center">
+                      <p className="mb-1">{designation}</p>
+                      <span className="rounded-full border ml-3">
+                        <RxCross2
+                          onClick={() =>
+                            handleDesignationSelection(
+                              setSelectedDesignations,
+                              designation?.designationId,
+                              designation
+                            )
                           }
-                          className={`border rounded px-3 py-2 ${
-                            darkMode
-                              ? "border-slate-300 bg-gray-500 text-white"
-                              : "border-slate-300 bg-white text-black"
-                          }`}
                         />
-                        <button
-                          type="button"
-                          onClick={handleEditDesignation}
-                          className="bg-green-500 text-white py-1 px-4 rounded ml-2"
-                        >
-                          <FaSave />
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <input
-                          type="checkbox"
-                          // Add toggle selection logic if needed
-                          className="mr-2"
-                        />
-                        <input
-                          type="text"
-                          value={designation.designation}
-                          readOnly
-                          className={`border rounded px-3 py-2 ${
-                            darkMode
-                              ? "border-slate-300 bg-gray-500 text-white"
-                              : "border-slate-300 bg-white text-black"
-                          }`}
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditDesignationId(designation?.designationId);
-                            setEditDesignationValue(designation.designation);
-                          }}
-                          className="bg-yellow-500 text-black py-1 px-4 rounded ml-2"
-                        >
-                          <FaEdit />
-                        </button>
-                      </>
-                    )}
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveDesignation(designation?.designationId)}
-
-                      className="bg-red-500 text-white py-1 px-4 rounded ml-2"
-                    >
-                      <FaTrash />
-                    </button>
+                      </span>
+                    </span>
                   </div>
                 ))}
               </div>
@@ -537,6 +348,9 @@ const EmployeePersonalInfo = () => {
           <FaArrowRight className="ml-2" />
         </button>
       </div>
+      {skillsDesignationModal && (
+        <SkillsDesignationModal modalData={skillsDesignationModal} />
+      )}
     </div>
   );
 };

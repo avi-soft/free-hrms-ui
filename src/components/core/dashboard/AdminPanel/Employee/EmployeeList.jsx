@@ -37,7 +37,6 @@ const EmployeeList = () => {
   useEffect(() => {
     fetchEmployeesList(currentPage);
   }, [currentPage]);
-
   const fetchEmployeesList = async (page) => {
     try {
       setLoading(true);
@@ -45,7 +44,7 @@ const EmployeeList = () => {
         EmployeesList(AccessToken, page, employeesPerPage)
       );
       setEmployees(res?.data?.Users);
-      setTotalPages(Math.ceil(res.data.totalCount / employeesPerPage));
+      setTotalPages(res.data.totalPages);
     } catch (error) {
       console.error("Error fetching employees", error);
     }
@@ -307,7 +306,7 @@ const EmployeeList = () => {
                     </button>
                     <button
                       onClick={handleNextPage}
-                      disabled={currentPage === totalPages}
+                      disabled={currentPage === totalPages-1}
                       className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
                         darkMode ? "bg-gray-600" : "bg-slate-400"
                       }`}
