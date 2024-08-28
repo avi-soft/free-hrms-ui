@@ -8,6 +8,10 @@ const {
   ADD_ORGANISATION_LOGO_REQUEST,
   DELETE_ORGANISATION_REQUEST,
   GET_ORGANISATION_REQUEST,
+  GET_ORGANIZATION_ATTRIBUTES_REQUEST,
+  ADD_ORGANIZATION_ATTRIBUTES_REQUEST,
+  UPDATE_ORGANIZATION_ATTRIBUTES_REQUEST,
+  DELETE_ORGANIZATION_ATTRIBUTES_REQUEST
 } = OrganisationEndpoints;
 
 export const uploadOrganisationLogo = (
@@ -144,6 +148,130 @@ export const deleteOrganisation = (AccessToken, organisationId) => {
       const response = await apiConnector(
         "DELETE",
         DELETE_ORGANISATION_REQUEST(organisationId),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      if (response?.status != 200) throw new Error(response?.data?.message);
+      else {
+        return response;
+      }
+    } catch (err) {
+      console.log(err);
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    } finally {
+      toast.dismiss(toastId);
+    }
+  };
+};
+
+export const getOrganisationAttributes = (AccessToken) => {
+  return async (dispatch) => {
+    const toastId = toast.loading("Loading...");
+    try {
+      const response = await apiConnector(
+        "GET",
+        GET_ORGANIZATION_ATTRIBUTES_REQUEST,
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      if (response?.status != 200) throw new Error(response?.data?.message);
+      else {
+        return response;
+      }
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    } finally {
+      toast.dismiss(toastId);
+    }
+  };
+};
+
+export const addOrganisationAttributes = (AccessToken, body) => {
+  return async (dispatch) => {
+    const toastId = toast.loading("Adding...");
+    try {
+      console.log(AccessToken);
+      console.log(body);
+      const response = await apiConnector(
+        "POST",
+        ADD_ORGANIZATION_ATTRIBUTES_REQUEST,
+        body,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    } finally {
+      toast.dismiss(toastId);
+    }
+  };
+};
+
+export const updateOrganisationAttributes = (AccessToken, data,organisationAttributeId) => {
+  return async (dispatch) => {
+    const toastId = toast.loading("Updating...");
+    try {
+      console.log(AccessToken);
+      console.log(data);
+      const response = await apiConnector(
+        "PATCH",
+        UPDATE_ORGANIZATION_ATTRIBUTES_REQUEST(organisationAttributeId),
+        data,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      if (response?.status != 200) throw new Error(response?.data?.message);
+      else {
+        toast.success(response?.data?.message);
+        navigate("/organization/organization-list");
+      }
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    } finally {
+      toast.dismiss(toastId);
+    }
+  };
+};
+
+export const deleteOrganisationAttributes = (AccessToken, organisationId) => {
+  return async (dispatch) => {
+    const toastId = toast.loading("Deleting...");
+    try {
+      console.log(AccessToken);
+      const response = await apiConnector(
+        "DELETE",
+        DELETE_ORGANIZATION_ATTRIBUTES_REQUEST(organisationId),
         null,
         {
           Authorization: `Bearer ${AccessToken}`,

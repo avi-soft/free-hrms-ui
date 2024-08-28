@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   addDepartment,
   updateDepartment,
+  DepartmentAttributeslist,
 } from "../../../../../services/operations/departmentAPI";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { EmployeeSearch } from "../../../../../services/operations/employeeAPI";
@@ -13,6 +14,8 @@ import {
 } from "../../../../../slices/OrganisationSlice";
 import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
 import toast from "react-hot-toast";
+import DepartmentAttributes from "./DepartmentAttributes";
+import ConfirmationModal from "../../../../common/ConfirmationModal";
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -41,7 +44,9 @@ const CreateUpdateDepartment = () => {
     isEditing: false,
     department: null,
   };
-
+  const [isAttribute, setIsAttribute] = useState(false);
+  const [confirmationModal, setConfirmationModal] = useState(null);
+  const [departmentAttribute, setDepartmentAttributes] = useState([]);
   const validateDepartment = {
     required: "Department Name is required",
     minLength: {
@@ -119,10 +124,14 @@ const CreateUpdateDepartment = () => {
       setSearchResults([]);
     }
   }, [isEditing, department, setValue, reset]);
-
+  async function getRes() {
+    const res = await dispatch(DepartmentAttributeslist(AccessToken));
+    setDepartmentAttributes(res?.data);
+  }
 
   useEffect(() => {
     setValue("organization", selectedOrganization);
+    getRes();
   }, [selectedOrganization, setValue]);
 
   const onSubmit = async (data) => {
@@ -132,27 +141,37 @@ const CreateUpdateDepartment = () => {
     }
     const trimmedDepartmentName = data.department?.trim() || "";
     const trimmedDescription = data.description?.trim() || "";
-  
+    const attributesObj = departmentAttribute && departmentAttribute.reduce((acc, obj) => {
+      acc[obj.attributeKey] = data[obj.attributeKey];
+      return acc;
+    }, {});
     const formData = {
       department: trimmedDepartmentName,
       description: trimmedDescription,
       managerId: selectedManager?.userId || null,
       organizationId: selectedOrganization,
       AccessToken,
+      attributes:attributesObj
     };
-  
+
     try {
       if (isEditing) {
         await dispatch(
           updateDepartment(AccessToken, formData, department.departmentId)
         );
-        navigate('/department/department-list', {
-          state: { updatedDepartment: true, organizationId: selectedOrganization }
+        navigate("/department/department-list", {
+          state: {
+            updatedDepartment: true,
+            organizationId: selectedOrganization,
+          },
         });
       } else {
         await dispatch(addDepartment(formData));
-        navigate('/department/department-list', {
-          state: { updatedDepartment: false, organizationId: selectedOrganization }
+        navigate("/department/department-list", {
+          state: {
+            updatedDepartment: false,
+            organizationId: selectedOrganization,
+          },
         });
       }
     } catch (error) {
@@ -160,7 +179,7 @@ const CreateUpdateDepartment = () => {
       toast.error("An error occurred. Please try again.");
     }
   };
-  
+
   const handleSearch = async (searchTerm) => {
     try {
       const response = await dispatch(EmployeeSearch(AccessToken, searchTerm));
@@ -195,6 +214,22 @@ const CreateUpdateDepartment = () => {
   };
 
   useEffect(() => {
+    setConfirmationModal({
+      text1: "Do you want to add new attributes?",
+      text2:
+        "This action will redirect you to the Attributes creation page.",
+      btn1Text: "Yes",
+      btn2Text: "Skip",
+      btn1Handler: () => {
+        setIsAttribute(true);
+        // Set showOption to true after the action
+        setConfirmationModal(null);
+      },
+      btn2Handler: () => {
+        setIsAttribute(false); // Ensure showOption is true to prevent future prompts
+        setConfirmationModal(null);
+      },
+    });
     return () => {
       if (debounceTimeoutRef.current) {
         clearTimeout(debounceTimeoutRef.current);
@@ -240,7 +275,7 @@ const CreateUpdateDepartment = () => {
         </div>
       </div>
       <div className="container mx-auto mt-8">
-        {AllOrganizations.length === 0 ? (
+        {AllOrganizations && AllOrganizations.length === 0 ? (
           <div className="p-5 mt-32 flex flex-col items-center justify-center">
             <div
               className={`text-xl font-semibold ${
@@ -268,6 +303,13 @@ const CreateUpdateDepartment = () => {
               </Link>
             </div>
           </div>
+        ) : isAttribute && !isEditing ? (
+          <DepartmentAttributes
+            NextHandler={() => {
+              setIsAttribute(false);
+              getRes();
+            }}
+          />
         ) : (
           <form
             role="form"
@@ -292,7 +334,9 @@ const CreateUpdateDepartment = () => {
                   required: "Organization is required",
                 })}
                 value={selectedOrganization}
-                onChange={(e) => setSelectedOrganization(e.target.value)}
+                onChange={(e) => {
+                  setSelectedOrganization(e.target.value);
+                }}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 text-white"
@@ -300,11 +344,15 @@ const CreateUpdateDepartment = () => {
                 }`}
               >
                 <option value="">Select Organization</option>
-                {AllOrganizations.map((org) => (
-                  <option key={org?.organizationId} value={org?.organizationId}>
-                    {org?.organizationName}
-                  </option>
-                ))}
+                {AllOrganizations &&
+                  AllOrganizations.map((org) => (
+                    <option
+                      key={org?.organizationId}
+                      value={org?.organizationId}
+                    >
+                      {org?.organizationName}
+                    </option>
+                  ))}
               </select>
               {errors.organization && (
                 <p className="text-red-500 mt-1">
@@ -454,6 +502,37 @@ const CreateUpdateDepartment = () => {
                 </div>
               </div>
             )}
+            {departmentAttribute &&
+              departmentAttribute.map((attribute) => (
+                <div className="mb-4" key={attribute.attributeId}>
+                  <label
+                    htmlFor={attribute.attributeKey}
+                    className={`block text-sm font-bold mb-2 ${
+                      darkMode ? "text-white" : "text-gray-700"
+                    }`}
+                  >
+                    {attribute.attributeKey}
+                    <sup className="text-red-900 font-bold">*</sup>
+                  </label>
+                  <input
+                    id={attribute.attributeKey}
+                    type="text"
+                    data-testid={attribute.attributeKey}
+                    placeholder={`${attribute.attributeKey}...`}
+                    {...register(attribute.attributeKey, {
+                      required: `${attribute.attributeKey} is required`,
+                    })}
+                    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white text-gray-700"
+                    }`}
+                  />
+                  {errors[attribute.attributeKey] && (
+                <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
+              )}
+                </div>
+              ))}
             <button
               type="submit"
               className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${
@@ -467,6 +546,7 @@ const CreateUpdateDepartment = () => {
           </form>
         )}
       </div>
+      {confirmationModal && !isEditing && <ConfirmationModal modalData={confirmationModal} />}
     </div>
   );
 };
