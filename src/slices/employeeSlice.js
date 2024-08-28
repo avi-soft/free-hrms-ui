@@ -1,32 +1,48 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   employees: [],
   loading: false,
-  step : 1,
+  step: 1,
+  currentOrganizationId: null,
+  skills: [],
+  designations: [],
 };
 
 const employeeSlice = createSlice({
-  name: 'employee',
+  name: "employee",
   initialState: initialState,
   reducers: {
     setStep(state, value) {
-      state.step = value.payload
-  },
+      state.step = value.payload;
+    },
     addEmployees(state, action) {
       state.employees.push(action.payload);
     },
+    setCurrentOrganizationId(state, action) {
+      state.currentOrganizationId = action.payload;
+    },
+    setSkills(state, action) {
+      console.log(action);
+      state.skills.push(action);
+    },
+    setDesignations(state, action) {
+      state.designations.push(action);
+    },
     updateEmployee(state, action) {
       const { id, updatedEmployeeData } = action.payload;
-      const index = state.employees.findIndex(emp => emp.id === id);
+      const index = state.employees.findIndex((emp) => emp.id === id);
       if (index !== -1) {
-        state.employees[index] = { ...state.employees[index], ...updatedEmployeeData };
+        state.employees[index] = {
+          ...state.employees[index],
+          ...updatedEmployeeData,
+        };
       }
     },
 
     deleteEmployee(state, action) {
       const idToDelete = action.payload;
-      state.employees = state.employees.filter(emp => emp.id !== idToDelete);
+      state.employees = state.employees.filter((emp) => emp.id !== idToDelete);
     },
     setLoading(state, action) {
       state.loading = action.payload;
@@ -34,5 +50,14 @@ const employeeSlice = createSlice({
   },
 });
 
-export const { addEmployees,setStep, updateEmployee, deleteEmployee, setLoading } = employeeSlice.actions;
+export const {
+  addEmployees,
+  setStep,
+  updateEmployee,
+  deleteEmployee,
+  setLoading,
+  setCurrentOrganizationId,
+  setDesignations,
+  setSkills,
+} = employeeSlice.actions;
 export default employeeSlice.reducer;

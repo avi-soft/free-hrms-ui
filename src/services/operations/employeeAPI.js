@@ -1,6 +1,8 @@
 import toast from "react-hot-toast";
 import { setLoading } from "../../slices/authSlice.js";
-import { employeeEndpoints } from "../apis.js";
+import { EmployeeDesignationsEndpoints, employeeEndpoints } from "../apis.js";
+import { EmployeeAttributesEndpoints } from "../apis.js";
+import { EmployeeSkillsEndpoints } from "../apis.js";
 import { apiConnector } from "../apiconnector.js";
 const {
   ADD_EMPLOYEE_API,
@@ -17,6 +19,13 @@ const {
   EDIT_EMPLOYEE_BANK_DETAILS_API,
   EMPLOYEE_SEARCH_API,
 } = employeeEndpoints;
+const {
+  GET_EmployeeAttributes_Endpoint,
+  ADD_EmployeeAttributes_Endpoint,
+  PATCH_EmployeeAttributes_Endpoint,
+  DELETE_EmployeeAttributes_Endpoint
+}=EmployeeAttributesEndpoints;
+const {ADD_EmployeeSkill_Endpoint,GET_EmployeeSkills_Endpoint,PATCH_EmployeeSkill_Endpoint,DELETE_EmployeeSkill_Endpoint}=EmployeeSkillsEndpoints
 import { addEmployees, setStep } from "../../slices/employeeSlice.js";
 
 export function addEmployee(employeeData) {
@@ -40,9 +49,7 @@ export function addEmployee(employeeData) {
         }
       );
       console.log(response);
-      dispatch(addEmployees(response?.data?.newUser?.employeeId));
-      toast.success("Employee Created Successfully");
-      dispatch(setStep(2));
+      return response;
     } catch (err) {
       if (err?.response?.data?.message) {
         toast.error(err?.response?.data?.message);
@@ -380,6 +387,248 @@ export function EmployeeDelete(userId, AccessToken) {
         }
       );
       console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+}
+
+
+// Employee Attributes functions
+export function GetEmployeeAttributes(AccessToken) {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector(
+        "GET",
+        GET_EmployeeAttributes_Endpoint,
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+}
+
+export function AddEmployeeAttributes(body,AccessToken) {
+  return async () => {
+    try {
+      const response = await apiConnector(
+        "POST",
+        ADD_EmployeeAttributes_Endpoint,
+        body,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message)
+    }
+  };
+}
+
+export function EditEmployeeAttributes(body,id,AccessToken) {
+  return async () => {
+    try {
+      const response = await apiConnector(
+        "PATCH",
+         PATCH_EmployeeAttributes_Endpoint(id),
+        body,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message)
+    }
+  };
+}
+
+export function DeleteEmployeeAttribute(id,AccessToken) {
+  return async () => {
+    try {
+      const response = await apiConnector(
+        "DELETE",
+          DELETE_EmployeeAttributes_Endpoint(id),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message)
+    }
+  };
+}
+
+// Employee Skills functions
+
+// Function to Get Employee Skills
+export function GetEmployeeSkills(AccessToken) {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector(
+        "GET",
+        GET_EmployeeSkills_Endpoint,
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message);
+    }
+  };
+}
+
+// Function to Add Employee Skill
+export function AddEmployeeSkill(body, AccessToken) {
+  return async () => {
+    try {
+      const response = await apiConnector(
+        "POST",
+        ADD_EmployeeSkill_Endpoint,
+        body,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message);
+    }
+  };
+}
+
+// Function to Edit Employee Skill
+export function EditEmployeeSkill(body, id, AccessToken) {
+  return async () => {
+    try {
+      const response = await apiConnector(
+        "PATCH",
+        PATCH_EmployeeSkill_Endpoint(id),
+        body,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message);
+    }
+  };
+}
+
+// Function to Delete Employee Skill
+export function DeleteEmployeeSkill(id, AccessToken) {
+  return async () => {
+    try {
+      const response = await apiConnector(
+        "DELETE",
+        DELETE_EmployeeSkill_Endpoint(id),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message);
+    }
+  };
+}
+
+
+// employee designation functions
+
+export function GetEmployeeDesignations(AccessToken) {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector(
+        "GET",
+        EmployeeDesignationsEndpoints.GET_EmployeeDesignations_Endpoint,
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+}
+
+export function AddEmployeeDesignation(body, AccessToken) {
+  return async () => {
+    try {
+      const response = await apiConnector(
+        "POST",
+        EmployeeDesignationsEndpoints.ADD_EmployeeDesignation_Endpoint,
+        body,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+}
+
+export function EditEmployeeDesignation(body, id, AccessToken) {
+  return async () => {
+    try {
+      const response = await apiConnector(
+        "PATCH",
+        EmployeeDesignationsEndpoints.PATCH_EmployeeDesignation_Endpoint(id),
+        body,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+}
+
+export function DeleteEmployeeDesignation(id, AccessToken) {
+  return async () => {
+    try {
+      const response = await apiConnector(
+        "DELETE",
+        EmployeeDesignationsEndpoints.DELETE_EmployeeDesignation_Endpoint(id),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
       return response;
     } catch (err) {
       console.log(err);
