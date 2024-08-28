@@ -6,7 +6,7 @@ import EmployeeAdditionalDetails from './EmployeeAdditionalDetails';
 import EmployeePersonalInfo from './EmployeePersonalInfo';
 import PrimaryEmployeeDetails from './PrimaryEmployeeDetails';
 import { setStep } from '../../../slices/employeeSlice';
-import { setPreEditedEmployeeDetails } from '../../../slices/editingSlice';
+import { setEditing, setPreEditedEmployeeDetails } from '../../../slices/editingSlice';
 
 function RenderSteps() {
   const { step } = useSelector((state) => state.employee);
@@ -20,12 +20,13 @@ function RenderSteps() {
 useEffect(()=>{
   if(!preEditedEmployeeDetails){
     dispatch(setStep(1));
+    dispatch(setEditing(false))
   }
 
   return ()=>{
     dispatch(setPreEditedEmployeeDetails());
   }
-})
+},[])
   const steps = [
     {
       id: 1,
