@@ -6,10 +6,6 @@ import { setStep } from "../../../slices/employeeSlice";
 import {
   addEmployeePersonalDetails,
   UpdateEmployeePersonalDetails,
-  AddEmployeeDesignation,
-  DeleteEmployeeDesignation,
-  GetEmployeeDesignations,
-  EditEmployeeDesignation,
   GetEmployeeAttributes,
 } from "../../../services/operations/employeeAPI";
 import { FaArrowRight, FaSave } from "react-icons/fa";
@@ -50,11 +46,19 @@ const EmployeePersonalInfo = () => {
   console.log(AllDepartments);
 
   const onSubmit = (data) => {
+    console.log(data)
+    
+    const attributesObj = localAttributes && localAttributes.reduce((acc, obj) => {
+      const attributeName = obj.attributeKey.replace(/ /g, "");
+      acc[obj.attributeKey] = data[attributeName];
+      return acc;
+    }, {});
     const employeeId = employees[0];
     const submissionData = {
       ...data,
       skillList: selectedSkills,
       designationList: selectedDesignations,
+      attributes:attributesObj
     };
 
     console.log(submissionData);
@@ -83,7 +87,9 @@ const EmployeePersonalInfo = () => {
   async function getAttributes() {
     try {
       const response = await dispatch(GetEmployeeAttributes(AccessToken));
+      console.log(response?.data)
       setLocalAttributes(response?.data || []);
+      return response?.data
     } catch (error) {
       console.error("Failed to fetch attributes:", error);
     }
@@ -94,19 +100,37 @@ const EmployeePersonalInfo = () => {
     getDepartments();
   }, [AccessToken, dispatch]);
 
+const getLocalAttributesValue=async()=>{
+  const attributes = await getAttributes() ;
+  const attributesObj = attributes && attributes.reduce((acc, obj) => {
+    const attributeName = obj.attributeKey.replace(/ /g, "");
+    acc[attributeName] = preEditedEmployeeDetails.attributes[obj.attributeKey];
+    return acc;
+  }, {});
+ return attributesObj
+}
+
   useEffect(() => {
     if (isEditing && preEditedEmployeeDetails) {
-      for (const [key, value] of Object.entries(preEditedEmployeeDetails)) {
-        if (key === "skills" || key === "designations") {
-          reset({
-            ...preEditedEmployeeDetails,
-            skills: value.skills || [],
-            designations: value.designations || [],
-          });
-        } else {
-          setValue(key, value);
-        }
+      console.log(preEditedEmployeeDetails)
+      console.log(localAttributes)
+      setSelectedDesignations(preEditedEmployeeDetails.designations.map(item=>item.designation))
+      setSelectedSkills(preEditedEmployeeDetails.skills.map(item=>item.skill))
+   getLocalAttributesValue().then(data=>{
+    for (const [key, value] of Object.entries(preEditedEmployeeDetails)) {
+      if (key === "skills" || key === "designations") {
+        reset({
+          ...preEditedEmployeeDetails,
+          ...data,
+          skills: value.skills || [],
+          designations: value.designations || [],
+        });
+      } else {
+        setValue(key, value);
       }
+    }
+   })
+     
     }
   }, [isEditing, preEditedEmployeeDetails, setValue, reset]);
 
@@ -194,6 +218,53 @@ const EmployeePersonalInfo = () => {
           onSubmit={handleSubmit(onSubmit)}
         >
           <div className="grid grid-cols-2 gap-4">
+            <label>
+              <p
+                className={`text-[0.875rem] ${
+                  darkMode ? "text-white" : "text-slate-900"
+                } mb-1 leading-[1.375rem] font-semibold`}
+              >
+                First Name<sup className="text-red-900">*</sup>
+              </p>
+              <input
+                className={`rounded-[0.5rem] w-full p-[12px] border-b-[1px] ${
+                  darkMode
+                    ? "bg-gray-500 border-slate-800 text-white"
+                    : "bg-white border-slate-300 text-black"
+                }`}
+                required
+                type="text"
+                name="firstName"
+                {...register("firstName")}
+                placeholder="Enter Your First Name"
+                data-testid="first-name-input"
+              />
+            </label>
+            <div className="h-4 sm:hidden"></div>
+            <label>
+              <p
+                className={`text-[0.875rem] ${
+                  darkMode ? "text-white" : "text-slate-900"
+                } mb-1 leading-[1.375rem] font-semibold`}
+              >
+                Last Name<sup className="text-red-900">*</sup>
+              </p>
+              <input
+                className={`rounded-[0.5rem] w-full p-[12px] border-b-[1px] ${
+                  darkMode
+                    ? "bg-gray-500 border-slate-800 text-white"
+                    : "bg-white border-slate-300 text-black"
+                }`}
+                required
+                type="text"
+                name="lastName"
+                {...register("lastName")}
+                placeholder="Enter Your Last Name"
+                data-testid="last-name-input"
+              />
+            </label>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
             {localAttributes.map((attr) => {
               const attributeName = attr.attributeKey.replace(/ /g, "");
               return (
@@ -228,6 +299,31 @@ const EmployeePersonalInfo = () => {
                 </div>
               );
             })}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="mt-4">
+                <label
+                  htmlFor="employeeCode"
+                  className={`block text-sm font-semibold ${
+                    darkMode ? "text-white" : "text-slate-900"
+                  }`}
+                >
+                  Employee Code<sup className="text-red-900">*</sup>
+                </label>
+                <input
+                  required
+                  id="employeeCode"
+                  {...register("employeeCode")}
+                  type="text"
+                  className={`border rounded px-3 py-2 mt-2 w-full ${
+                    darkMode
+                      ? "border-slate-300 bg-gray-500 text-white"
+                      : "border-slate-300 bg-white text-black"
+                  }`}
+                  placeholder="Enter Employee Code"
+                  data-testid="employee-code-input"
+                />
+              </div>
+            </div>
           </div>
 
           {/* Skills and Designations Section */}

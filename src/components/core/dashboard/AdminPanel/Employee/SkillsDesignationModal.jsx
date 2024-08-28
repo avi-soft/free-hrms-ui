@@ -125,7 +125,9 @@ const SkillsDesignationModal = ({ modalData }) => {
 
 
   useEffect(() => {
+    if(type==="skill")
     getSkills();
+  else
     getDesignations();
   }, [dispatch, AccessToken]);
   console.log(modalData);
@@ -185,7 +187,7 @@ const SkillsDesignationModal = ({ modalData }) => {
           <input
             id="skill-input"
             type="text"
-            {...register(type==="skills"?"newSkill":"newDesignation")}
+            {...register(type==="skill"?"newSkill":"newDesignation")}
             className={`border rounded px-3 py-2 w-1/2 ${
               darkMode
                 ? "border-slate-300 bg-gray-500 text-white"
