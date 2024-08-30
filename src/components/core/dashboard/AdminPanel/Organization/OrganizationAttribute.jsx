@@ -33,12 +33,17 @@ const OrganizationAttributes = ({ NextHandler }) => {
   }, [dispatch, AccessToken]);
 
   const addAttributes = async () => {
+    if (!attribute.attributeKey)
+      setAttribute({ ...attribute, error: "Attributes field is required" });
+    else {
+      setAttribute({ ...attribute, error: "" });
     await dispatch(addOrganisationAttributes( AccessToken,attribute));
     getRes();
     setAttribute({
       attributeId: "",
       attributeKey: "",
     });
+  }
   };
 
   const handleEdit = (item) => {
@@ -65,7 +70,8 @@ const OrganizationAttributes = ({ NextHandler }) => {
         darkMode ? "bg-slate-600" : "bg-white"
       }`}
     >
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 ">
+      <div className="flex gap-2">
         <input
           id="addAttribute"
           type="text"
@@ -94,6 +100,9 @@ const OrganizationAttributes = ({ NextHandler }) => {
           Add
         </button>
       </div>
+      {attribute.error && <p className="text-red-500 mt-1">{attribute.error}</p>}
+      </div>
+
 
       <div className="mt-4">
         {organizationAttribute &&

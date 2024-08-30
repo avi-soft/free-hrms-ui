@@ -124,6 +124,7 @@ const CreateUpdateDepartment = () => {
       setSearchResults([]);
     }
   }, [isEditing, department, setValue, reset]);
+  
   async function getRes() {
     const res = await dispatch(DepartmentAttributeslist(AccessToken));
     setDepartmentAttributes(res?.data);

@@ -140,3 +140,23 @@ export const EmployeeDesignationsEndpoints = {
   DELETE_EmployeeDesignation_Endpoint: (id) => BASE_URL + `/designation/${id}`,
   PATCH_EmployeeDesignation_Endpoint: (id) => BASE_URL + `/designation/${id}`,
 }
+
+
+export const SubOrganizationAttributesEndPoints = {
+  GET_SUBORGANIZATION_ATTRIBUTES_REQUEST: BASE_URL + "/branchAttribute",
+  ADD_SUBORGANIZATION_ATTRIBUTES_REQUEST:BASE_URL + "/branchAttribute",
+  UPDATE_SUBORGANIZATION_ATTRIBUTES_REQUEST: (suborganizationAttributeId) =>
+    BASE_URL + `/branchAttribute/${suborganizationAttributeId}`,
+  DELETE_SUBORGANIZATION_ATTRIBUTES_REQUEST: (suborganizationAttributeId) =>
+    BASE_URL + `/branchAttribute/${suborganizationAttributeId}`,
+}
+
+
+export const SubOrganizationEndPoints = {
+    GET_SUBORGANIZATION_REQUEST: BASE_URL + "/organization/branches",
+  ADD_SUBORGANIZATION_REQUEST:BASE_URL + "/branch",
+  UPDATE_SUBORGANIZATION_REQUEST: (suborganizationId) =>
+    BASE_URL + `/branch/${suborganizationId}`,
+  DELETE_SUBORGANIZATION_REQUEST: (suborganizationId) =>
+    BASE_URL + `/branch/${suborganizationId}`,
+}

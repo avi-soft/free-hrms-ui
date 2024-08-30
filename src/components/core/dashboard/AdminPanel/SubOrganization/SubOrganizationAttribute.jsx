@@ -3,17 +3,17 @@ import { useDispatch, useSelector } from "react-redux";
 import { FaEdit } from "react-icons/fa";
 import { MdDelete } from "react-icons/md";
 import {
-  addDepartmentAttributes,
-  deleteDepartmentAttributes,
-  DepartmentAttributeslist,
-  updateDepartmentAttributes,
-} from "../../../../../services/operations/departmentAPI";
+  addSubOrganisationAttributes,
+  deleteSubOrganisationAttributes,
+  getSubOrganisationAttributes,
+  updateSubOrganisationAttributes,
+} from "../../../../../services/operations/subOrganisationAPI";
 
-const DepartmentAttributes = ({ NextHandler }) => {
+const SubOrganizationAttribute = ({ NextHandler }) => {
   const dispatch = useDispatch();
   const { darkMode } = useSelector((state) => state.theme);
   const { AccessToken } = useSelector((state) => state.auth);
-  const [departmentAttribute, setDepartmentAttributes] = useState([]);
+  const [branchAttribute, setBranchAttributes] = useState([]);
   const [attribute, setAttribute] = useState({
     attributeId: "",
     attributeKey: "",
@@ -23,12 +23,12 @@ const DepartmentAttributes = ({ NextHandler }) => {
     attributeKey: "",
   });
   const [edit, setEdit] = useState(false);
-  async function getRes() {
-    const res = await dispatch(DepartmentAttributeslist(AccessToken));
-    setDepartmentAttributes(res?.data);
+  async function getSubOrganizationAttributes() {
+    const res = await dispatch(getSubOrganisationAttributes(AccessToken));
+    setBranchAttributes(res?.data.branchAttributes);
   }
   useEffect(() => {
-    getRes();
+    getSubOrganizationAttributes();
   }, [dispatch, AccessToken]);
 
   const addAttributes = async () => {
@@ -36,13 +36,13 @@ const DepartmentAttributes = ({ NextHandler }) => {
       setAttribute({ ...attribute, error: "Attributes field is required" });
     else {
       setAttribute({ ...attribute, error: "" });
-    await dispatch(addDepartmentAttributes(attribute, AccessToken));
-    getRes();
-    setAttribute({
-      attributeId: "",
-      attributeKey: "",
-    });
-  }
+      await dispatch(addSubOrganisationAttributes(attribute, AccessToken));
+      getSubOrganizationAttributes();
+      setAttribute({
+        attributeId: "",
+        attributeKey: "",
+      });
+    }
   };
 
   const handleEdit = (item) => {
@@ -51,26 +51,24 @@ const DepartmentAttributes = ({ NextHandler }) => {
   };
   const editAttributes = async (attributeId) => {
     await dispatch(
-      updateDepartmentAttributes(AccessToken, editAttribute, attributeId)
+      updateSubOrganisationAttributes(AccessToken, editAttribute, attributeId)
     );
-    getRes();
+    getSubOrganizationAttributes();
     setEdit(false);
   };
 
-  const handleDelete=async(attributeId)=>{
-    await dispatch(
-      deleteDepartmentAttributes(AccessToken,attributeId)
-    );
-    getRes();
-  }
+  const handleDelete = async (attributeId) => {
+    await dispatch(deleteSubOrganisationAttributes(AccessToken, attributeId));
+    getSubOrganizationAttributes();
+  };
   return (
     <div
       className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
         darkMode ? "bg-slate-600" : "bg-white"
       }`}
     >
-       <div className="mb-4 ">
-       <div className="flex gap-2">
+      <div className="mb-4 ">
+      <div className="flex gap-2">
         <input
           id="addAttribute"
           type="text"
@@ -98,14 +96,14 @@ const DepartmentAttributes = ({ NextHandler }) => {
         >
           Add
         </button>
-       
+     
       </div>
       {attribute.error && <p className="text-red-500 mt-1">{attribute.error}</p>}
       </div>
 
       <div className="mt-4">
-        {departmentAttribute &&
-          departmentAttribute.map((item) => (
+        {branchAttribute &&
+          branchAttribute.map((item) => (
             <div
               key={item.attributeId}
               className={`max-w-md mx-auto shadow-md rounded flex items-center justify-between px-4 py-2 mb-4 ${
@@ -148,7 +146,7 @@ const DepartmentAttributes = ({ NextHandler }) => {
 
               <div className="flex gap-4">
                 <FaEdit onClick={() => handleEdit(item)} />
-                <MdDelete onClick={() => handleDelete(item.attributeId)}/>
+                <MdDelete onClick={() => handleDelete(item.attributeId)} />
               </div>
             </div>
           ))}
@@ -164,4 +162,4 @@ const DepartmentAttributes = ({ NextHandler }) => {
   );
 };
 
-export default DepartmentAttributes;
+export default SubOrganizationAttribute;

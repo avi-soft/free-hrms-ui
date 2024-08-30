@@ -25,6 +25,8 @@ import RoleList from "./components/core/dashboard/AdminPanel/Role/RoleList";
 import OrganizationList from "./components/core/dashboard/AdminPanel/Organization/OrganizationList";
 import CreateUpdateOrganisation from "./components/core/dashboard/AdminPanel/Organization/CreateUpdateOrganization";
 import AddEmployeeAttributes from "./components/core/dashboard/AdminPanel/Employee/AddEmployeeAttributes";
+import CreateUpdateSubOrganization from "./components/core/dashboard/AdminPanel/SubOrganization/CreateUpdateSubOrganization";
+import SubOrganizationList from "./components/core/dashboard/AdminPanel/SubOrganization/SubOrganizationList";
 
 function App() {
   const { darkMode } = useSelector((state) => state.theme);
@@ -60,6 +62,14 @@ function App() {
             <Route
               path="/organization/organization-create-update"
               element={<CreateUpdateOrganisation />}
+            />
+              <Route
+              path="/suborganization/suborganization-list"
+              element={<SubOrganizationList/>}
+            />
+            <Route
+              path="/suborganization/suborganization-create-update"
+              element={<CreateUpdateSubOrganization />}
             />
 
             <Route path="/employee/employee-list" element={<EmployeeList />} />

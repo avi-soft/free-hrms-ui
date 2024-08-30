@@ -1,39 +1,34 @@
 import React, { useEffect, useState } from "react";
-import { FaRegEdit } from "react-icons/fa";
-import ConfirmationModal from "../../../../common/ConfirmationModal.jsx";
 import { HiOutlinePlusCircle } from "react-icons/hi";
 import { RiDeleteBin6Line } from "react-icons/ri";
-import { Link, useNavigate, useLocation } from "react-router-dom";
-import { useDispatch, useSelector } from "react-redux";
-import {
-  deleteDepartment,
-  Departmentlist,
-} from "../../../../../services/operations/departmentAPI.js";
+import { FaRegEdit } from "react-icons/fa";
 import Spinner from "../../../../common/Spinner.jsx";
-import {
-  setDepartments,
-  setLoading,
-} from "../../../../../slices/departmentSlice.js";
+import toast from "react-hot-toast";
+import ConfirmationModal from "../../../../common/ConfirmationModal";
 import { setOrganization } from "../../../../../slices/OrganisationSlice";
 import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
-import toast from "react-hot-toast";
-
-const DepartmentList = () => {
+import { deleteSubOrganisation, getSubOrganization } from "../../../../../services/operations/subOrganisationAPI";
+import {
+  setSubOrganization,
+  setLoading,
+} from "../../../../../slices/subOrganizationSlice.js";
+import { useDispatch, useSelector } from "react-redux";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+const SubOrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const [updatedOrganization, setUpdatedOrganization] = useState("");
+  const { loading, AllSubOrganization } = useSelector((state) => state.subOrganization);
+  const { AllOrganizations } = useSelector((state) => state.Organisation);
 
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
-  const dispatch = useDispatch();
-  const { loading, AllDepartments } = useSelector((state) => state.department);
-  const { AllOrganizations } = useSelector((state) => state.Organisation);
-
-  const navigate = useNavigate();
   const location = useLocation();
-
+  const dispatch = useDispatch()
+  const navigate = useNavigate()
   const fetchOrganizationList = async () => {
     try {
+      
       dispatch(setLoading(true));
       const res = await dispatch(getOrganisation(AccessToken));
       const organizations = res?.data;
@@ -42,7 +37,7 @@ const DepartmentList = () => {
         // Set the updated organization if available
         const orgId = updatedOrganization || organizations[0].organizationId;
         setSelectedOrganization(orgId);
-        fetchDepartmentsList(orgId);
+        fetchSubOrganization(orgId);
       }
       dispatch(setLoading(false));
     } catch (error) {
@@ -51,11 +46,13 @@ const DepartmentList = () => {
     }
   };
 
-  const fetchDepartmentsList = async (orgId) => {
+  const fetchSubOrganization = async (orgId) => {
     try {
       dispatch(setLoading(true));
-      const res = await dispatch(Departmentlist(AccessToken, orgId));
-      dispatch(setDepartments(res?.data.content));
+      const res = await dispatch(
+        getSubOrganization(AccessToken, orgId)
+      );
+      dispatch(setSubOrganization(res?.data.BranchList));
       dispatch(setLoading(false));
     } catch (error) {
       console.error("Error fetching departments", error);
@@ -64,10 +61,10 @@ const DepartmentList = () => {
   };
 
   useEffect(() => {
-    if (location.state?.updatedDepartment) {
+    if (location.state?.updatedSuborganization) {
       setUpdatedOrganization(location.state.organizationId || "");
     }
-     else if (location.state?.updatedDepartment !== undefined) {
+     else if (location.state?.updatedSuborganization !== undefined) {
       setUpdatedOrganization(location.state.organizationId || "");
       // Reload departments or show updated message
     }
@@ -76,10 +73,9 @@ const DepartmentList = () => {
 
   useEffect(() => {
     if (selectedOrganization) {
-      fetchDepartmentsList(selectedOrganization);
+        fetchSubOrganization(selectedOrganization);
     }
   }, [selectedOrganization]);
-
   return (
     <div
       className={`mb-10 rounded shadow-lg ${
@@ -101,19 +97,19 @@ const DepartmentList = () => {
               className="text-xl font-semibold mb-2 lg:mb-0"
               data-testid="Department List"
             >
-              Department List
+              SubOrganization List
             </div>
             <div>
               <p className="text-xl font-semibold">
                 Home / Dashboard /
-                <span className="text-yellow-700"> Department List</span>
+                <span className="text-yellow-700"> SubOrganization List</span>
               </p>
             </div>
           </div>
           {/* Section 2 */}
           <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
             <Link
-              to="/department/department-create-update"
+              to="/suborganization/suborganization-create-update"
               className={`flex items-center gap-x-1 ${
                 darkMode ? "primary-gradient " : "bg-red-600"
               } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
@@ -121,7 +117,7 @@ const DepartmentList = () => {
               <span>
                 <HiOutlinePlusCircle />
               </span>
-              <button>Add Department</button>
+              <button>Add SubOrganization</button>
             </Link>
           </div>
           {AllOrganizations.length === 0 ? (
@@ -174,13 +170,13 @@ const DepartmentList = () => {
                 </select>
               </div>
               {/* Section 3 */}
-              {AllDepartments?.length === 0 ? (
+              {AllSubOrganization?.length === 0 ? (
                 <div>
                   <h1
                     data-testid="No Departments Found"
                     className="text-center text-2xl mt-10"
                   >
-                    No Departments Found
+                    No SubOrganization Found
                   </h1>
                 </div>
               ) : (
@@ -200,22 +196,9 @@ const DepartmentList = () => {
                             className="px-6 py-3"
                             data-testid="Department-Name-header"
                           >
-                            Department Name
+                            SubOrganization Name
                           </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3"
-                            data-testid="Department-Manager-header"
-                          >
-                            Department Manager
-                          </th>
-                          <th
-                            scope="col"
-                            className="px-6 py-3"
-                            data-testid="Department-Description-header"
-                          >
-                            Department Description
-                          </th>
+                        
                           <th
                             scope="col"
                             className="px-6 py-3"
@@ -226,9 +209,9 @@ const DepartmentList = () => {
                         </tr>
                       </thead>
                       <tbody>
-                        {AllDepartments?.map((department, index) => (
+                        {AllSubOrganization?.map((subOrganization, index) => (
                           <tr
-                            key={department.departmentId}
+                            key={subOrganization.branchId}
                             className={
                               index % 2 === 0
                                 ? darkMode
@@ -240,27 +223,21 @@ const DepartmentList = () => {
                             }
                           >
                             <td className="px-6 py-4">
-                              {department.department}
+                              {subOrganization.branchName}
                             </td>
-                            <td className="px-6 py-4">
-                              {department?.managerId
-                                ? `${department.managerFirstName} ${department.managerLastName}`
-                                : "N/A"}
-                            </td>
-                            <td className="px-6 py-4">
-                              {department.description}
-                            </td>
+                         
+                           
                             <td className="px-6 py-4 flex gap-x-2">
                               <button
                                 data-testid="editButton"
                                 className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
                                 onClick={() =>
                                   navigate(
-                                    `/department/department-create-update`,
+                                    `/suborganization/suborganization-create-update`,
                                     {
                                       state: {
                                         isEditing: true,
-                                        department,
+                                        subOrganization,
                                         organizationId: selectedOrganization,
                                       },
                                     }
@@ -276,21 +253,23 @@ const DepartmentList = () => {
                                   setConfirmationModal({
                                     text1: "Are You Sure?",
                                     text2:
-                                      "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
-                                    btn1Text: "Delete Department",
+                                      "You want to Delete this SubOrganization. This SubOrganization may contain important Information. Deleting this SubOrganization will remove all the details associated with it.",
+                                    btn1Text: "Delete SubOrganization",
                                     btn2Text: "Cancel",
                                     btn1Handler: async () => {
                                       const response = await dispatch(
-                                        deleteDepartment(
+                                        deleteSubOrganisation(
                                           AccessToken,
-                                          department.departmentId
+                                          subOrganization.branchId
                                         )
                                       );
                                       if (response?.status !== 200)
                                         throw new Error(response.data.message);
                                       toast.success(response?.data?.message);
                                       // Fetch departments list based on the current selected organization
-                                      fetchDepartmentsList(selectedOrganization);
+                                      fetchSubOrganization(
+                                        selectedOrganization
+                                      );
                                       setConfirmationModal(null);
                                     },
                                     btn2Handler: () =>
@@ -313,11 +292,9 @@ const DepartmentList = () => {
           )}
         </div>
       )}
-         {confirmationModal && (
-            <ConfirmationModal modalData={confirmationModal} />
-          )}
+      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
     </div>
   );
 };
 
-export default DepartmentList;
+export default SubOrganizationList;
