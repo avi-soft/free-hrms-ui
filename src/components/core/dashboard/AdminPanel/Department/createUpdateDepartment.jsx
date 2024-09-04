@@ -44,6 +44,9 @@ const CreateUpdateDepartment = () => {
     isEditing: false,
     department: null,
   };
+
+  console.log("editing departent dtat is",department);
+  
   const [isAttribute, setIsAttribute] = useState(false);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [departmentAttribute, setDepartmentAttributes] = useState([]);
@@ -73,7 +76,7 @@ const CreateUpdateDepartment = () => {
     },
   };
 
-  console.log(AllOrganizations);
+  console.log(isEditing);
   useEffect(() => {
     const fetchOrganizationList = async () => {
       try {
@@ -319,48 +322,50 @@ const CreateUpdateDepartment = () => {
               darkMode ? "bg-slate-600" : "bg-white"
             }`}
           >
-            <div className="mb-4">
-              <label
-                htmlFor="organization"
-                className={`block text-sm font-bold mb-2 ${
-                  darkMode ? "text-white" : "text-gray-700"
-                }`}
-              >
-                Select Organization
-                <sup className="text-red-900 font-bold">*</sup>
-              </label>
-              <select
-                id="organization"
-                {...register("organization", {
-                  required: "Organization is required",
-                })}
-                value={selectedOrganization}
-                onChange={(e) => {
-                  setSelectedOrganization(e.target.value);
-                }}
-                className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-white text-gray-700"
-                }`}
-              >
-                <option value="">Select Organization</option>
-                {AllOrganizations &&
-                  AllOrganizations.map((org) => (
-                    <option
-                      key={org?.organizationId}
-                      value={org?.organizationId}
-                    >
-                      {org?.organizationName}
-                    </option>
-                  ))}
-              </select>
-              {errors.organization && (
-                <p className="text-red-500 mt-1">
-                  {errors.organization.message}
-                </p>
-              )}
-            </div>
+           {
+            !isEditing  &&             <div className="mb-4">
+            <label
+              htmlFor="organization"
+              className={`block text-sm font-bold mb-2 ${
+                darkMode ? "text-white" : "text-gray-700"
+              }`}
+            >
+              Select Organization
+              <sup className="text-red-900 font-bold">*</sup>
+            </label>
+            <select
+              id="organization"
+              {...register("organization", {
+                required: "Organization is required",
+              })}
+              value={selectedOrganization}
+              onChange={(e) => {
+                setSelectedOrganization(e.target.value);
+              }}
+              className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              <option value="">Select Organization</option>
+              {AllOrganizations &&
+                AllOrganizations.map((org) => (
+                  <option
+                    key={org?.organizationId}
+                    value={org?.organizationId}
+                  >
+                    {org?.organizationName}
+                  </option>
+                ))}
+            </select>
+            {errors.organization && (
+              <p className="text-red-500 mt-1">
+                {errors.organization.message}
+              </p>
+            )}
+          </div>
+           }
             <div className="mb-4">
               <label
                 htmlFor="department"
@@ -503,7 +508,7 @@ const CreateUpdateDepartment = () => {
                 </div>
               </div>
             )}
-            {departmentAttribute &&
+            {/* {departmentAttribute &&
               departmentAttribute.map((attribute) => (
                 <div className="mb-4" key={attribute.attributeId}>
                   <label
@@ -533,7 +538,7 @@ const CreateUpdateDepartment = () => {
                 <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
               )}
                 </div>
-              ))}
+              ))} */}
             <button
               type="submit"
               className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${

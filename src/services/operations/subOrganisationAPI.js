@@ -88,10 +88,8 @@ export const updateSubOrganisationAttributes = (
         }
       );
       console.log(response);
-      if (response?.status != 200) throw new Error(response?.data?.message);
-      else {
+      if (response?.status == 200) {
         toast.success(response?.data?.message);
-        navigate("/organization/organization-list");
       }
     } catch (err) {
       if (err?.response?.data?.message) {

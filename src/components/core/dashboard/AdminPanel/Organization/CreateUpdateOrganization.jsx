@@ -46,7 +46,10 @@ const CreateUpdateOrganisation = () => {
   const [organisationId, setOrganisationId] = useState(null);
   const [showLogoUploadDialog, setShowLogoUploadDialog] = useState(false);
   const [isAttribute, setIsAttribute] = useState(false);
-  const [organizationAttribute, setOrganizationAttributes] = useState([]);
+  const [organizationAttributes, setOrganizationAttributes] = useState(null);
+
+  console.log(organizationAttributes);
+  
 
   useEffect(() => {
     if (isEditing && organization) {
@@ -65,6 +68,8 @@ const CreateUpdateOrganisation = () => {
   console.log(organization)
   async function getRes() {
     const res = await dispatch(getOrganisationAttributes(AccessToken));
+    console.log(res);
+    
     setOrganizationAttributes(res?.data);
   }
   useEffect(()=>{
@@ -88,7 +93,7 @@ const CreateUpdateOrganisation = () => {
   },[])
 
   const handleOrganizationSubmit = async (data) => {
-    const attributesObj = organizationAttribute && organizationAttribute.reduce((acc, obj) => {
+    const attributesObj = organizationAttributes && organizationAttributes.reduce((acc, obj) => {
       acc[obj.attributeKey] = data[obj.attributeKey];
       return acc;
     }, {});
@@ -363,25 +368,25 @@ const CreateUpdateOrganisation = () => {
                   </p>
                 )}
               </div>
-              {organizationAttribute &&
-              organizationAttribute.map((attribute) => (
+              {organizationAttributes &&
+              organizationAttributes.map((attribute) => (
                 <div className="mb-4" key={attribute.attributeId}>
                   <label
-                    htmlFor={attribute.attributeKey}
+                    htmlFor={attribute?.attributeKey}
                     className={`block text-sm font-bold mb-2 ${
                       darkMode ? "text-white" : "text-gray-700"
                     }`}
                   >
-                    {attribute.attributeKey}
+                    {attribute?.attributeKey}
                     <sup className="text-red-900 font-bold">*</sup>
                   </label>
                   <input
-                    id={attribute.attributeKey}
+                    id={attribute?.attributeKey}
                     type="text"
-                    data-testid={attribute.attributeKey}
-                    placeholder={`${attribute.attributeKey}...`}
-                    {...register(attribute.attributeKey, {
-                      required: `${attribute.attributeKey} is required`,
+                    data-testid={attribute?.attributeKey}
+                    placeholder={`${attribute?.attributeKey}...`}
+                    {...register(attribute?.attributeKey, {
+                      required: `${attribute?.attributeKey} is required`,
                     })}
                     className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                       darkMode
@@ -389,7 +394,7 @@ const CreateUpdateOrganisation = () => {
                         : "bg-white text-gray-700"
                     }`}
                   />
-                  {errors[attribute.attributeKey] && (
+                  {errors[attribute?.attributeKey] && (
                 <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
               )}
                 </div>
@@ -576,8 +581,8 @@ const CreateUpdateOrganisation = () => {
                     </p>
                   )}
                 </div>
-                {organizationAttribute &&
-              organizationAttribute.map((attribute) => (
+                {organizationAttributes &&
+              organizationAttributes.map((attribute) => (
                 <div className="mb-4" key={attribute.attributeId}>
                   <label
                     htmlFor={attribute.attributeKey}

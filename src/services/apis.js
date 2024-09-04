@@ -48,6 +48,11 @@ export const DepartmentEndpoints = {
     BASE_URL + `/departmentAttribute/${departmentAttributeId}`,
   DELETE_DEPARTMENT_ATTRIBUTES_API: (departmentAttributeId) =>
     BASE_URL + `/departmentAttribute/${departmentAttributeId}`,
+  UNASSIGN_DEPARTMENT_ORGANIZATION_API: (orgId,depId)=> BASE_URL + `/department/${orgId}/removeDepartment/${depId}`,
+  ASSIGN_DEPARTMENT_ORGANIZATION_API: (orgId,depId)=> BASE_URL + `/department/${orgId}/assignDepartment/${depId}`,
+  UNASSIGN_DEPARTMENT_SUB_ORGANIZATION_API: (SubOrgId,depId)=> BASE_URL + `/department/${SubOrgId}/removeDepartmentFromBranch/${depId}`,
+  UNASSIGNED_DEPARTMENTS_LIST_ORGANIZATION : BASE_URL +'/department/unassignedDepartmentsOfOrganization'
+
 };
 
 //Performance Endpoints

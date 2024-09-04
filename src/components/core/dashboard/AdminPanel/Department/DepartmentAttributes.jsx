@@ -31,80 +31,132 @@ const DepartmentAttributes = ({ NextHandler }) => {
     getRes();
   }, [dispatch, AccessToken]);
 
+  const normalizeString = (str) => {
+    return str.trim().replace(/\s+/g, " "); // Trim and replace multiple spaces with a single space
+  };
+
   const addAttributes = async () => {
-    if (!attribute.attributeKey)
+    const normalizedAttributeKey = normalizeString(attribute.attributeKey);
+
+    if (!normalizedAttributeKey) {
       setAttribute({ ...attribute, error: "Attributes field is required" });
-    else {
-      setAttribute({ ...attribute, error: "" });
-    await dispatch(addDepartmentAttributes(attribute, AccessToken));
-    getRes();
-    setAttribute({
-      attributeId: "",
-      attributeKey: "",
-    });
-  }
+    } else {
+      setAttribute({
+        ...attribute,
+        attributeKey: normalizedAttributeKey,
+        error: "",
+      });
+      try {
+        await dispatch(
+          addDepartmentAttributes(
+            { ...attribute, attributeKey: normalizedAttributeKey },
+            AccessToken
+          )
+        );
+        getRes();
+        setAttribute({
+          attributeId: "",
+          attributeKey: "",
+          error: "",
+        });
+      } catch (error) {
+        setAttribute({ ...attribute, error: "Failed to add attribute" });
+      }
+    }
   };
 
   const handleEdit = (item) => {
     setEdit(item.attributeId);
-    setEditAttribute({ ...editAttribute, attributeKey: item.attributeKey });
-  };
-  const editAttributes = async (attributeId) => {
-    await dispatch(
-      updateDepartmentAttributes(AccessToken, editAttribute, attributeId)
-    );
-    getRes();
-    setEdit(false);
+    setEditAttribute({
+      attributeId: item.attributeId,
+      attributeKey: item.attributeKey,
+      error: "",
+    });
   };
 
-  const handleDelete=async(attributeId)=>{
-    await dispatch(
-      deleteDepartmentAttributes(AccessToken,attributeId)
+  const editAttributes = async (attributeId) => {
+    const normalizedEditAttributeKey = normalizeString(
+      editAttribute.attributeKey
     );
+
+    if (!normalizedEditAttributeKey) {
+      setEditAttribute({
+        ...editAttribute,
+        error: "Attributes field is required",
+      });
+    } else {
+      setEditAttribute({
+        ...editAttribute,
+        attributeKey: normalizedEditAttributeKey,
+        error: "",
+      });
+      try {
+        await dispatch(
+          updateDepartmentAttributes(
+            AccessToken,
+            { ...editAttribute, attributeKey: normalizedEditAttributeKey },
+            attributeId
+          )
+        );
+        getRes();
+        setEdit(false);
+      } catch (error) {
+        setEditAttribute({
+          ...editAttribute,
+          error: "Failed to update attribute",
+        });
+      }
+    }
+  };
+
+  const handleDelete = async (attributeId) => {
+    await dispatch(deleteDepartmentAttributes(AccessToken, attributeId));
     getRes();
-  }
+  };
   return (
     <div
       className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
         darkMode ? "bg-slate-600" : "bg-white"
       }`}
     >
-       <div className="mb-4 ">
-       <div className="flex gap-2">
-        <input
-          id="addAttribute"
-          type="text"
-          data-testid="addAttribute"
-          placeholder="Add Attributes..."
-          value={attribute.attributeKey}
-          className={`shadow appearance-none border rounded w-3/4 py-2 px-3 ${
-            darkMode
-              ? "bg-gray-700 border-gray-600 text-white"
-              : "bg-white text-gray-700"
-          }`}
-          onChange={(e) =>
-            setAttribute({
-              attributeId: 0,
-              attributeKey: e.target.value,
-            })
-          }
-        />
-        <button
-          type="submit"
-          className={`text-center w-1/4 text-sm md:text-base font-medium rounded-md py-2 px-5 bg-blue-700
+      <div className="mb-4 ">
+        <div className="flex gap-2">
+          <input
+            id="addAttribute"
+            type="text"
+            data-testid="addAttribute"
+            placeholder="Add Attributes..."
+            value={attribute.attributeKey}
+            className={`shadow appearance-none border rounded w-3/4 py-2 px-3 ${
+              darkMode
+                ? "bg-gray-700 border-gray-600 text-white"
+                : "bg-white text-gray-700"
+            }`}
+            onChange={(e) =>
+              setAttribute({
+                attributeId: 0,
+                attributeKey: e.target.value,
+              })
+            }
+          />
+          <button
+            type="submit"
+            className={`text-center w-1/4 text-sm md:text-base font-medium rounded-md py-2 px-5 bg-blue-700
               text-white
               hover:scale-95 transition-all duration-200`}
-          onClick={addAttributes}
-        >
-          Add
-        </button>
-       
-      </div>
-      {attribute.error && <p className="text-red-500 mt-1">{attribute.error}</p>}
+            onClick={addAttributes}
+          >
+            Add
+          </button>
+        </div>
+        {attribute.error && (
+          <p className="text-red-500 mt-1">{attribute.error}</p>
+        )}
       </div>
 
-      <div className="mt-4">
-        {departmentAttribute &&
+      <div className="mb-4">
+        {
+        departmentAttribute.length>0 ? (
           departmentAttribute.map((item) => (
             <div
               key={item.attributeId}
@@ -148,10 +200,15 @@ const DepartmentAttributes = ({ NextHandler }) => {
 
               <div className="flex gap-4">
                 <FaEdit onClick={() => handleEdit(item)} />
-                <MdDelete onClick={() => handleDelete(item.attributeId)}/>
+                <MdDelete onClick={() => handleDelete(item.attributeId)} />
               </div>
             </div>
-          ))}
+          ))
+        ) : (
+          <p className={`text-sm ${darkMode ? "text-white" : "text-gray-700"}`}>
+            No attributes available
+          </p>
+        )}
       </div>
       <button
         className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 bg-blue-700

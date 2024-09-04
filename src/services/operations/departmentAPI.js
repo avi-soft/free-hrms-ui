@@ -11,7 +11,11 @@ const {
   DEPARTMENT_ATTRIBUTES,
   ADD_DEPARTMENT_ATTRIBUTES,
   UPDATE_DEPARTMENT_ATTRIBUTES_API,
-  DELETE_DEPARTMENT_ATTRIBUTES_API
+  DELETE_DEPARTMENT_ATTRIBUTES_API,
+  UNASSIGN_DEPARTMENT_ORGANIZATION_API,
+  UNASSIGN_DEPARTMENT_SUB_ORGANIZATION_API,
+  UNASSIGNED_DEPARTMENTS_LIST_ORGANIZATION,
+  ASSIGN_DEPARTMENT_ORGANIZATION_API
 } = DepartmentEndpoints;
 
 export const Departmentlist = (AccessToken, selectedOrganization) => {
@@ -38,6 +42,30 @@ export const Departmentlist = (AccessToken, selectedOrganization) => {
   };
 };
 
+
+export const UnAssignedOrgDepartmentlist = (AccessToken, ) => {
+  return async (dispatch) => {
+    try {
+      console.log(AccessToken);
+      const response = await apiConnector(
+        "GET",
+        `${UNASSIGNED_DEPARTMENTS_LIST_ORGANIZATION}`,
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+
+      return response;
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    }
+  };
+};
 export const addDepartment = (formData) => {
   return async (dispatch) => {
     const toastId = toast.loading("Adding...");
@@ -247,6 +275,91 @@ export const deleteDepartmentAttributes = (AccessToken, DepartmentAttributeId) =
       }
     }finally{
       toast.dismiss(toastId);
+    }
+    
+  };
+};
+
+export const  AssignDepartmentOrganization=(AccessToken,organizationId,DepartmentId)=> {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector(
+        "PATCH",
+         ASSIGN_DEPARTMENT_ORGANIZATION_API(organizationId,DepartmentId),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response
+      // if (response?.status !== 200) throw new Error(response.data.message);
+      // toast.success("DEPARTMENT DELETED SUCCESSFULLY");
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    }finally{
+    }
+    
+  };
+}
+export const UnassignDepartmentOrganization = (AccessToken, organizationId,DepartmentId) => {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector(
+        "PATCH",
+         UNASSIGN_DEPARTMENT_ORGANIZATION_API(organizationId,DepartmentId),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response
+      // if (response?.status !== 200) throw new Error(response.data.message);
+      // toast.success("DEPARTMENT DELETED SUCCESSFULLY");
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    }finally{
+    }
+    
+  };
+};
+
+
+
+export const UnassignDepartmentSubOrganization = (AccessToken, SubOrganizationId,DepartmentId) => {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector(
+        "PATCH",
+         UNASSIGN_DEPARTMENT_SUB_ORGANIZATION_API(SubOrganizationId,DepartmentId),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response
+      // if (response?.status !== 200) throw new Error(response.data.message);
+      // toast.success("DEPARTMENT DELETED SUCCESSFULLY");
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    }finally{
     }
     
   };

@@ -1,32 +1,16 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { FaCheck } from 'react-icons/fa';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import EmployeeAdditionalDetails from './EmployeeAdditionalDetails';
 import EmployeePersonalInfo from './EmployeePersonalInfo';
 import PrimaryEmployeeDetails from './PrimaryEmployeeDetails';
-import { setStep } from '../../../slices/employeeSlice';
-import { setEditing, setPreEditedEmployeeDetails } from '../../../slices/editingSlice';
 
 function RenderSteps() {
   const { step } = useSelector((state) => state.employee);
   const navigate = useNavigate();
   const darkMode = useSelector((state) => state.theme?.darkMode) || false;
-  const isEditing = useSelector((state) => state.editing.isEditing);
-  const dispatch = useDispatch()
-  const preEditedEmployeeDetails = useSelector(
-    (state) => state.editing.preEditedEmployeeDetails
-  );
-useEffect(()=>{
-  if(!preEditedEmployeeDetails){
-    dispatch(setStep(1));
-    dispatch(setEditing(false))
-  }
 
-  return ()=>{
-    dispatch(setPreEditedEmployeeDetails());
-  }
-},[])
   const steps = [
     {
       id: 1,

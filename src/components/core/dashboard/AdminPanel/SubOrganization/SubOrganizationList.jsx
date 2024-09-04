@@ -18,6 +18,8 @@ const SubOrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const [updatedOrganization, setUpdatedOrganization] = useState("");
+  const [showAssignDialog, setShowAssignDialog] = useState(false); // State for dialog visibility
+  const [currentBranch, setCurrentBranch] = useState(null);
   const { loading, AllSubOrganization } = useSelector((state) => state.subOrganization);
   const { AllOrganizations } = useSelector((state) => state.Organisation);
 
@@ -59,6 +61,65 @@ const SubOrganizationList = () => {
       dispatch(setLoading(false));
     }
   };
+
+  const handleAssignOrganization = async (orgId, departmentId) => {
+
+    console.log(orgId,departmentId);
+
+    try {
+      const response = await dispatch(
+        AssignDepartmentOrganization(AccessToken, orgId, departmentId)
+      );
+      if (response?.status !== 200) throw new Error(response.data.message);
+      toast.success(response?.data?.message);
+      fetchDepartmentsList(selectedAssignOrganization); // Refresh department list
+      setShowAssignDialog(false); // Close dialog
+    } catch (error) {
+      console.error("Error assigning organization", error);
+      toast.error("Failed to assign organization");
+    }
+  };
+  const handleUnassignOrganization = async (
+    AccessToken,
+    orgId,
+    departmentId
+  ) => {
+    try {
+      console.log(orgId, departmentId);
+
+      const response = await dispatch(
+        UnassignDepartmentOrganization(AccessToken, orgId, departmentId)
+      );
+      if (response?.status !== 200) throw new Error(response.data.message);
+      toast.success(response?.data?.message);
+      fetchDepartmentsList(selectedOrganization); // Refresh department list
+    } catch (error) {
+      console.error("Error unassigning organization", error);
+      toast.error("Failed to unassign organization");
+    }
+  };
+
+  console.log(" all sub org",AllSubOrganization);
+  
+
+  function UnAssignAssignHeaders() {
+    let headerFlag;
+    AllSubOrganization?.map((department, index) => {
+      const hasOrganization = department?.organizations?.length > 0;
+      const organizationId = hasOrganization
+        ? department.organizations[0].organizationId
+        : null;
+      if (organizationId) {
+        headerFlag = true;
+      } else {
+        headerFlag = false;
+      }
+    });
+    return headerFlag;
+  }
+  const AssignOrganizationHeaderFlag = UnAssignAssignHeaders();
+
+  console.log("flag is", AssignOrganizationHeaderFlag);
 
   useEffect(() => {
     if (location.state?.updatedSuborganization) {

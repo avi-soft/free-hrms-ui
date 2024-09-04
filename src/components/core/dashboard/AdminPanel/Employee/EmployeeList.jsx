@@ -19,6 +19,9 @@ import ExportDataJSON from "../../../../../utils/ExportFromJson";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
 import Spinner from "../../../../common/Spinner";
 import axios from "axios";
+import toast from "react-hot-toast";
+import { setOrganization } from "../../../../../slices/OrganisationSlice";
+import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
 
 const EmployeeList = () => {
   const dispatch = useDispatch();
@@ -29,14 +32,56 @@ const EmployeeList = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
+  const [selectedOrganization, setSelectedOrganization] = useState("");
+  const [subOrganizations, setSubOrganizations] = useState([]);
+const [showSubOrgs, setShowSubOrgs] = useState(false);
   const employeesPerPage = 5;
+  const { AllOrganizations } = useSelector((state) => state.Organisation);
+
   const navigate = useNavigate();
 
+  const fetchOrganizationList = async () => {
+    try {
+      const res = await dispatch(getOrganisation(AccessToken));
+      console.log(res);
+      
+      const organizations = res?.data;
+      dispatch(setOrganization(organizations));
+      // if (organizations.length > 0) {
+      //   // Set the updated organization if available
+      //   const orgId = updatedOrganization || organizations[0].organizationId;
+      //   setSelectedOrganization(orgId);
+      // }
+      dispatch(setLoading(false));
+    } catch (error) {
+      console.error("Error fetching AllOrganizations", error);
+      dispatch(setLoading(false));
+    }
+  };
+
+
+  const fetchSubOrganizations = async (orgId) => {
+    try {
+      const response = await axios.get(`http://your-api-endpoint/sub-organizations/${orgId}`, {
+        headers: { Authorization: `Bearer ${AccessToken}` }
+      });
+      setSubOrganizations(response.data.subOrganizations || []);
+      setShowSubOrgs(response.data.subOrganizations.length > 0);
+    } catch (error) {
+      console.error("Error fetching sub-organizations", error);
+    }
+  };
 
 
   useEffect(() => {
     fetchEmployeesList(currentPage);
-  }, [currentPage]);
+    fetchOrganizationList();
+    if (selectedOrganization) {
+      fetchSubOrganizations(selectedOrganization);
+    }
+  }, [currentPage,selectedOrganization]);
+
+
   const fetchEmployeesList = async (page) => {
     try {
       setLoading(true);
@@ -156,7 +201,56 @@ const EmployeeList = () => {
               </div>
             </div>
           </div>
-          <div className="p-5">
+          {AllOrganizations.length === 0 ? (
+            <div className="p-5 mt-32 flex flex-col items-center justify-center">
+              <div
+                className={`text-xl font-semibold ${
+                  darkMode ? "text-orange-400" : "text-slate-600"
+                }`}
+              >
+                No Organizations Available
+              </div>
+              <p
+                className={`text-center mt-4 ${
+                  darkMode ? "text-white" : "text-gray-700"
+                }`}
+              >
+                You need to create an organization before managing departments.
+              </p>
+              <div className="flex justify-center">
+                <Link
+                  to={`/organization/organization-create-update`}
+                  className={`text-sm md:text-base underline font-medium rounded-md py-2 px-5 ${
+                    darkMode ? "text-blue-400" : "text-blue-700"
+                  }`}
+                >
+                  Create Organization
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="flex justify-start p-5">
+                <select
+                  value={selectedOrganization}
+                  onChange={(e) => setSelectedOrganization(e.target.value)}
+                  className={`${
+                    darkMode
+                      ? "bg-slate-700 text-white"
+                      : "bg-slate-200 text-black"
+                  } p-2 rounded-lg`}
+                >
+                  {AllOrganizations.map((org) => (
+                    <option
+                      key={org?.organizationId}
+                      value={org?.organizationId}
+                    >
+                      {org.organizationName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+             <div className="p-5">
             {employees?.length > 0 ? (
               <div className="relative overflow-x-auto shadow-md rounded-md">
                 <div
@@ -275,14 +369,22 @@ const EmployeeList = () => {
                                   btn1Text: "Delete Employee",
                                   btn2Text: "Cancel",
                                   btn1Handler: async () => {
-                                    await dispatch(
+                                    const response=await dispatch(
                                       EmployeeDelete(
                                         employee?.userId,
                                         AccessToken
                                       )
                                     );
-                                    refreshPage();
-                                  },
+                                    console.log(response,"delete response");
+                                    
+                                    if (response?.status != 204) throw new Error(response?.data?.message);
+                                     else{ 
+                                      console.log("inside else"); 
+                                      toast.success(response?.data?.message);
+                                    fetchEmployeesList()
+                                    setConfirmationModal(null);
+                                  }
+                                },
                                   btn2Handler: () => setConfirmationModal(null),
                                 })
                               }
@@ -325,6 +427,8 @@ const EmployeeList = () => {
               </p>
             )}
           </div>
+          </>
+          )}
           {confirmationModal && (
             <ConfirmationModal modalData={confirmationModal} />
           )}

@@ -22,6 +22,10 @@ const SubOrganizationAttribute = ({ NextHandler }) => {
     attributeId: "",
     attributeKey: "",
   });
+
+  const normalizeString = (str) => {
+    return str.trim().replace(/\s+/g, ' '); 
+  };
   const [edit, setEdit] = useState(false);
   async function getSubOrganizationAttributes() {
     const res = await dispatch(getSubOrganisationAttributes(AccessToken));
@@ -32,29 +36,48 @@ const SubOrganizationAttribute = ({ NextHandler }) => {
   }, [dispatch, AccessToken]);
 
   const addAttributes = async () => {
-    if (!attribute.attributeKey)
+    const normalizedAttributeKey = normalizeString(attribute.attributeKey);
+
+    if (!normalizedAttributeKey) {
       setAttribute({ ...attribute, error: "Attributes field is required" });
-    else {
-      setAttribute({ ...attribute, error: "" });
-      await dispatch(addSubOrganisationAttributes(attribute, AccessToken));
-      getSubOrganizationAttributes();
-      setAttribute({
-        attributeId: "",
-        attributeKey: "",
-      });
+    } else {
+      setAttribute({ ...attribute, attributeKey: normalizedAttributeKey, error: "" });
+      try {
+        await dispatch(addSubOrganisationAttributes({ ...attribute, attributeKey: normalizedAttributeKey }, AccessToken));
+        getSubOrganizationAttributes();
+        setAttribute({ attributeId: "", attributeKey: "", error: "" });
+      } catch (error) {
+        setAttribute({ ...attribute, error: "Failed to add attribute" });
+      }
     }
   };
 
   const handleEdit = (item) => {
     setEdit(item.attributeId);
-    setEditAttribute({ ...editAttribute, attributeKey: item.attributeKey });
+    setEditAttribute({
+      attributeId: item.attributeId,
+      attributeKey: item.attributeKey,
+      error: "",
+    });
   };
+
   const editAttributes = async (attributeId) => {
-    await dispatch(
-      updateSubOrganisationAttributes(AccessToken, editAttribute, attributeId)
-    );
-    getSubOrganizationAttributes();
-    setEdit(false);
+    const normalizedEditAttributeKey = normalizeString(editAttribute.attributeKey);
+
+    if (!normalizedEditAttributeKey) {
+      setEditAttribute({ ...editAttribute, error: "Attributes field is required" });
+    } else {
+      setEditAttribute({ ...editAttribute, attributeKey: normalizedEditAttributeKey, error: "" });
+      try {
+        await dispatch(
+          updateSubOrganisationAttributes(AccessToken, { ...editAttribute, attributeKey: normalizedEditAttributeKey }, attributeId)
+        );
+        getSubOrganizationAttributes();
+        setEdit(false);
+      } catch (error) {
+        setEditAttribute({ ...editAttribute, error: "Failed to update attribute" });
+      }
+    }
   };
 
   const handleDelete = async (attributeId) => {

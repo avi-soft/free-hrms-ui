@@ -350,7 +350,7 @@ export function EditEmployeeBankDetails(employeeId, data, AccessToken) {
   };
 }
 
-export function EmployeesList(AccessToken, page, size) {
+export function EmployeesList(AccessToken, page, size,sortBy) {
   return async (dispatch) => {
     try {
       console.log(page);
@@ -365,6 +365,7 @@ export function EmployeesList(AccessToken, page, size) {
         {
           page: page,
           size: size,
+          
         }
       );
       return response;
