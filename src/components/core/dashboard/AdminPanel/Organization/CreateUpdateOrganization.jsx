@@ -47,6 +47,8 @@ const CreateUpdateOrganisation = () => {
 
   console.log(organizationAttributes);
 
+  console.log("editing", isEditing);
+
   useEffect(() => {
     if (isEditing && organization) {
       setValue("organizationName", organization.organizationName);

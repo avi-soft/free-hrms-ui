@@ -7,6 +7,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import {
   AssignDepartmentOrganization,
+  AssignDepartmentSubOrganization,
   deleteDepartment,
   Departmentlist,
   UnassignDepartmentOrganization,
@@ -22,6 +23,7 @@ import { setOrganization } from "../../../../../slices/OrganisationSlice";
 import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
 import toast from "react-hot-toast";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice.js";
+import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI.js";
 
 const DepartmentList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -31,7 +33,13 @@ const DepartmentList = () => {
   const [selectedAssignOrganization, setSelectedAssignOrganization] =
     useState("");
 
-  const [showAssignDialog, setShowAssignDialog] = useState(false); // State for dialog visibility
+  const [selectedAssignSubOrganization, setSelectedAssignSubOrganization] =
+    useState("");
+  const [showOrganizationAssignDialog, setShowOrganizationAssignDialog] =
+    useState(false); // State for dialog visibility
+  const [showSubOrganizationAssignDialog, setShowSubOrganizationAssignDialog] =
+    useState(false); // State for dialog visibility
+
   const [currentDepartment, setCurrentDepartment] = useState(null);
 
   const { AccessToken } = useSelector((state) => state.auth);
@@ -39,11 +47,13 @@ const DepartmentList = () => {
   const dispatch = useDispatch();
   const { loading, AllDepartments } = useSelector((state) => state.department);
   const { AllOrganizations } = useSelector((state) => state.Organisation);
+  const { AllSubOrganization } = useSelector((state) => state.subOrganization);
 
   const navigate = useNavigate();
   const location = useLocation();
 
   console.log(AllDepartments);
+  console.log(AllSubOrganization, "sub org list");
 
   const fetchOrganizationList = async () => {
     try {
@@ -102,7 +112,7 @@ const DepartmentList = () => {
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success(response?.data?.message);
       fetchDepartmentsList(selectedAssignOrganization); // Refresh department list
-      setShowAssignDialog(false); // Close dialog
+      setShowOrganizationAssignDialog(false); // Close dialog
     } catch (error) {
       console.error("Error assigning organization", error);
       toast.error("Failed to assign organization");
@@ -128,6 +138,27 @@ const DepartmentList = () => {
     }
   };
 
+  //ASSIGN UNASSIGN Sub Org to Department
+  const handleAssignSubOrganization = async (orgId, departmentId) => {
+    console.log("i am called");
+
+    console.log(orgId, departmentId);
+
+    try {
+      await dispatch(
+        AssignDepartmentSubOrganization(AccessToken, orgId, departmentId)
+      );
+      console.log(response);
+
+      if (response?.status !== 200) throw new Error(response.data.message);
+      toast.success(response?.data?.message);
+      fetchDepartmentsList(selectedAssignOrganization); // Refresh department list
+      setShowOrganizationAssignDialog(false); // Close dialog
+    } catch (error) {
+      console.error("Error assigning organization", error);
+      toast.error("Failed to assign organization");
+    }
+  };
   const handleUnassignSubOrganization = async (
     AccessToken,
     orgId,
@@ -147,8 +178,25 @@ const DepartmentList = () => {
       toast.error("Failed to unassign organization");
     }
   };
+  const fetchSubOrganization = async (orgId) => {
+    console.log("org id", orgId);
 
+    try {
+      dispatch(setLoading(true));
+
+      const res = await dispatch(getSubOrganizationList(AccessToken));
+      console.log(res, "sub org response");
+
+      dispatch(setSubOrganization(res?.data?.Branches?.content));
+
+      dispatch(setLoading(false));
+    } catch (error) {
+      console.error("Error fetching departments", error);
+      dispatch(setLoading(false));
+    }
+  };
   useEffect(() => {
+    fetchSubOrganization();
     if (location.state?.updatedDepartment) {
       setUpdatedOrganization(location.state.organizationId);
     } else if (location.state?.updatedDepartment !== undefined) {
@@ -185,28 +233,6 @@ const DepartmentList = () => {
   }
 
   const AssignOrganizationHeaderFlag = UnAssignAssignOrganizationHeaders();
-  // const fetchSubOrganization = async (orgId) => {
-  //   console.log("org id", orgId);
-
-  //   try {
-  //     dispatch(setLoading(true));
-  //     if (orgId == "unassigned") {
-  //       console.log("inside if");
-  //       const res = await dispatch(UnAssignedSubOrgList(AccessToken));
-  //       console.log(res);
-  //       dispatch(setSubOrganization(res?.data?.Branches?.content));
-  //     } else {
-  //       const res = await dispatch(getSubOrganization(AccessToken, orgId));
-  //       dispatch(setSubOrganization(res?.data.BranchList));
-  //     }
-
-  //     dispatch(setLoading(false));
-  //   } catch (error) {
-  //     console.error("Error fetching departments", error);
-  //     dispatch(setLoading(false));
-  //   }
-  // };
-  // const AssignOrganizationHeaderFlag = UnAssignAssignOrganizationHeaders();
 
   function UnAssignAssignSubOrganizationHeaders() {
     let SubheaderFlag;
@@ -390,7 +416,7 @@ const DepartmentList = () => {
                             </th>
                           )}
 
-{AssignSubOrganizationHeaderFlag ? (
+                          {AssignSubOrganizationHeaderFlag ? (
                             <th
                               scope="col"
                               className="px-6 py-3"
@@ -466,7 +492,7 @@ const DepartmentList = () => {
                                   data-testid="assign-button"
                                   onClick={() => {
                                     setCurrentDepartment(department);
-                                    setShowAssignDialog(true);
+                                    setShowOrganizationAssignDialog(true);
                                   }}
                                   className="bg-yellow-500 text-black py-1 px-4 rounded"
                                 >
@@ -497,7 +523,7 @@ const DepartmentList = () => {
                                   data-testid="assign-button"
                                   onClick={() => {
                                     setCurrentDepartment(department);
-                                    setShowAssignDialog(true);
+                                    setShowSubOrganizationAssignDialog(true);
                                   }}
                                   className="bg-yellow-500 text-black py-1 px-4 rounded"
                                 >
@@ -573,7 +599,7 @@ const DepartmentList = () => {
         </div>
       )}
       {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
-      {showAssignDialog && (
+      {showOrganizationAssignDialog && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
             <h2 className="text-xl font-semibold mb-4">Assign Organization</h2>
@@ -617,7 +643,63 @@ const DepartmentList = () => {
               </button>
               <button
                 className="bg-gray-500 text-white py-2 px-4 rounded"
-                onClick={() => setShowAssignDialog(false)}
+                onClick={() => setShowOrganizationAssignDialog(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showSubOrganizationAssignDialog && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
+            <h2 className="text-xl font-semibold mb-4">
+              Assign Sub Organization
+            </h2>
+            <div className="mb-4">
+              <label
+                htmlFor="organization-select"
+                className="block text-sm font-medium"
+              >
+                Select Sub Organization
+              </label>
+              <select
+                id="organization-select"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white text-gray-700"
+                } max-h-60 overflow-y-auto`}
+                value={selectedAssignSubOrganization}
+                onChange={(e) =>
+                  setSelectedAssignSubOrganization(e.target.value)
+                }
+              >
+                <option value="">Select Organization</option>
+                {AllSubOrganization.map((subOrg) => (
+                  <option key={subOrg?.branchId} value={subOrg?.branchId}>
+                    {subOrg.branchName}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex justify-end">
+              <button
+                className="bg-blue-500 text-white py-2 px-4 rounded mr-2"
+                onClick={() =>
+                  handleAssignSubOrganization(
+                    selectedAssignSubOrganization,
+                    currentDepartment.departmentId
+                  )
+                }
+              >
+                Assign
+              </button>
+              <button
+                className="bg-gray-500 text-white py-2 px-4 rounded"
+                onClick={() => setShowOrganizationAssignDialog(false)}
               >
                 Cancel
               </button>
