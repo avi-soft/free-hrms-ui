@@ -1,22 +1,22 @@
-import { createSlice } from '@reduxjs/toolkit';
+import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-    isEditing: false,
-    preEditedEmployeeDetails: []
+  isEditing: false,
+  preEditedEmployeeDetails: null,
 };
 
 const editingSlice = createSlice({
-    name: "editing",
-    initialState: initialState,
-    reducers: {
-        setEditing(state, action) {
-            state.isEditing = action.payload;
-        },
-        setPreEditedEmployeeDetails(state,action) {
-               state.preEditedEmployeeDetails=action.payload;
-        }
+  name: "editing",
+  initialState: initialState,
+  reducers: {
+    setEditing(state, action) {
+      state.isEditing = action.payload;
     },
+    setPreEditedEmployeeDetails(state, action) {
+      state.preEditedEmployeeDetails = action.payload;
+    },
+  },
 });
 
-export const { setEditing,setPreEditedEmployeeDetails } = editingSlice.actions;
+export const { setEditing, setPreEditedEmployeeDetails } = editingSlice.actions;
 export default editingSlice.reducer;

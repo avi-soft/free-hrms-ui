@@ -45,8 +45,8 @@ const CreateUpdateDepartment = () => {
     department: null,
   };
 
-  console.log("editing departent dtat is",department);
-  
+  console.log("editing departent dtat is", department);
+
   const [isAttribute, setIsAttribute] = useState(false);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [departmentAttribute, setDepartmentAttributes] = useState([]);
@@ -98,6 +98,8 @@ const CreateUpdateDepartment = () => {
       setValue("department", department.department);
       setValue("description", department.description);
       setSelectedOrganization(department.organizationId);
+
+      // Set manager if exists
       if (department?.managerId) {
         setSelectedManager({
           userId: department.managerId,
@@ -112,22 +114,26 @@ const CreateUpdateDepartment = () => {
             lastName: department.managerLastName,
           },
         ]);
-      } else {
-        reset(); // Clear form fields
-        setSelectedOrganization("");
-        setSelectedManager(null);
-        setShowCheckbox(false);
-        setSearchResults([]);
+      }
+
+      // Set the values for department attributes
+      if (departmentAttribute && department.attributes) {
+        departmentAttribute.forEach((attribute) => {
+          const attributeValue = department.attributes[attribute.attributeKey];
+          if (attributeValue) {
+            setValue(attribute.attributeKey, attributeValue);
+          }
+        });
       }
     } else {
-      reset(); // Clear form fields
+      reset(); // Clear form fields if not editing
       setSelectedManager(null);
       setSelectedOrganization("");
       setShowCheckbox(false);
       setSearchResults([]);
     }
-  }, [isEditing, department, setValue, reset]);
-  
+  }, [isEditing, department, departmentAttribute, setValue, reset]);
+
   async function getRes() {
     const res = await dispatch(DepartmentAttributeslist(AccessToken));
     setDepartmentAttributes(res?.data);
@@ -145,17 +151,19 @@ const CreateUpdateDepartment = () => {
     }
     const trimmedDepartmentName = data.department?.trim() || "";
     const trimmedDescription = data.description?.trim() || "";
-    const attributesObj = departmentAttribute && departmentAttribute.reduce((acc, obj) => {
-      acc[obj.attributeKey] = data[obj.attributeKey];
-      return acc;
-    }, {});
+    const attributesObj =
+      departmentAttribute &&
+      departmentAttribute.reduce((acc, obj) => {
+        acc[obj.attributeKey] = data[obj.attributeKey];
+        return acc;
+      }, {});
     const formData = {
       department: trimmedDepartmentName,
       description: trimmedDescription,
       managerId: selectedManager?.userId || null,
       organizationId: selectedOrganization,
       AccessToken,
-      attributes:attributesObj
+      attributes: attributesObj,
     };
 
     try {
@@ -220,8 +228,7 @@ const CreateUpdateDepartment = () => {
   useEffect(() => {
     setConfirmationModal({
       text1: "Do you want to add new attributes?",
-      text2:
-        "This action will redirect you to the Attributes creation page.",
+      text2: "This action will redirect you to the Attributes creation page.",
       btn1Text: "Yes",
       btn2Text: "Skip",
       btn1Handler: () => {
@@ -322,50 +329,50 @@ const CreateUpdateDepartment = () => {
               darkMode ? "bg-slate-600" : "bg-white"
             }`}
           >
-           {
-            !isEditing  &&             <div className="mb-4">
-            <label
-              htmlFor="organization"
-              className={`block text-sm font-bold mb-2 ${
-                darkMode ? "text-white" : "text-gray-700"
-              }`}
-            >
-              Select Organization
-              <sup className="text-red-900 font-bold">*</sup>
-            </label>
-            <select
-              id="organization"
-              {...register("organization", {
-                required: "Organization is required",
-              })}
-              value={selectedOrganization}
-              onChange={(e) => {
-                setSelectedOrganization(e.target.value);
-              }}
-              className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600 text-white"
-                  : "bg-white text-gray-700"
-              }`}
-            >
-              <option value="">Select Organization</option>
-              {AllOrganizations &&
-                AllOrganizations.map((org) => (
-                  <option
-                    key={org?.organizationId}
-                    value={org?.organizationId}
-                  >
-                    {org?.organizationName}
-                  </option>
-                ))}
-            </select>
-            {errors.organization && (
-              <p className="text-red-500 mt-1">
-                {errors.organization.message}
-              </p>
+            {!isEditing && (
+              <div className="mb-4">
+                <label
+                  htmlFor="organization"
+                  className={`block text-sm font-bold mb-2 ${
+                    darkMode ? "text-white" : "text-gray-700"
+                  }`}
+                >
+                  Select Organization
+                  <sup className="text-red-900 font-bold">*</sup>
+                </label>
+                <select
+                  id="organization"
+                  {...register("organization", {
+                    required: "Organization is required",
+                  })}
+                  value={selectedOrganization}
+                  onChange={(e) => {
+                    setSelectedOrganization(e.target.value);
+                  }}
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white text-gray-700"
+                  }`}
+                >
+                  <option value="">Select Organization</option>
+                  {AllOrganizations &&
+                    AllOrganizations.map((org) => (
+                      <option
+                        key={org?.organizationId}
+                        value={org?.organizationId}
+                      >
+                        {org?.organizationName}
+                      </option>
+                    ))}
+                </select>
+                {errors.organization && (
+                  <p className="text-red-500 mt-1">
+                    {errors.organization.message}
+                  </p>
+                )}
+              </div>
             )}
-          </div>
-           }
             <div className="mb-4">
               <label
                 htmlFor="department"
@@ -508,7 +515,7 @@ const CreateUpdateDepartment = () => {
                 </div>
               </div>
             )}
-            {/* {departmentAttribute &&
+            {departmentAttribute &&
               departmentAttribute.map((attribute) => (
                 <div className="mb-4" key={attribute.attributeId}>
                   <label
@@ -535,10 +542,12 @@ const CreateUpdateDepartment = () => {
                     }`}
                   />
                   {errors[attribute.attributeKey] && (
-                <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
-              )}
+                    <p className="text-red-500 mt-1">
+                      {errors[attribute.attributeKey].message}
+                    </p>
+                  )}
                 </div>
-              ))} */}
+              ))}
             <button
               type="submit"
               className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${
@@ -552,7 +561,9 @@ const CreateUpdateDepartment = () => {
           </form>
         )}
       </div>
-      {confirmationModal && !isEditing && <ConfirmationModal modalData={confirmationModal} />}
+      {confirmationModal && !isEditing && (
+        <ConfirmationModal modalData={confirmationModal} />
+      )}
     </div>
   );
 };

@@ -11,10 +11,7 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { FiUpload } from "react-icons/fi";
 import defaultImage from "../../../../../assets/Images/placeholder.jpg";
 import toast from "react-hot-toast";
-import {
-
-  setShowOption,
-} from "../../../../../slices/OrganisationSlice";
+import { setShowOption } from "../../../../../slices/OrganisationSlice";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
 import OrganizationAttributes from "./OrganizationAttribute";
 import { DepartmentAttributeslist } from "../../../../../services/operations/departmentAPI";
@@ -49,35 +46,44 @@ const CreateUpdateOrganisation = () => {
   const [organizationAttributes, setOrganizationAttributes] = useState(null);
 
   console.log(organizationAttributes);
-  
 
   useEffect(() => {
     if (isEditing && organization) {
       setValue("organizationName", organization.organizationName);
       setValue("organizationDescription", organization.organizationDescription);
-      setExistingImage(organization.organizationImage); // Update local state for existing image
+      setExistingImage(organization.organizationImage); // Set existing image
       setOrganisationId(organization.organizationId);
+
+      // Set the values for organization attributes
+      if (organizationAttributes && organization.attributes) {
+        organizationAttributes.forEach((attribute) => {
+          const attributeValue =
+            organization.attributes[attribute.attributeKey];
+          if (attributeValue) {
+            setValue(attribute.attributeKey, attributeValue);
+          }
+        });
+      }
     } else {
       reset(); // Reset form values if not in editing mode
       setSelectedImage(null); // Reset selected image
       setExistingImage(null); // Reset existing image
     }
-  }, [isEditing]);
+  }, [isEditing, organization, organizationAttributes]);
 
-  console.log(isEditing)
-  console.log(organization)
+  console.log(isEditing);
+  console.log(organization);
   async function getRes() {
     const res = await dispatch(getOrganisationAttributes(AccessToken));
     console.log(res);
-    
+
     setOrganizationAttributes(res?.data);
   }
-  useEffect(()=>{
-    getRes()
+  useEffect(() => {
+    getRes();
     setConfirmationModal({
       text1: "Do you want to add new attributes?",
-      text2:
-        "This action will redirect you to the Attributes creation page.",
+      text2: "This action will redirect you to the Attributes creation page.",
       btn1Text: "Yes",
       btn2Text: "Skip",
       btn1Handler: () => {
@@ -90,16 +96,18 @@ const CreateUpdateOrganisation = () => {
         setConfirmationModal(null);
       },
     });
-  },[])
+  }, []);
 
   const handleOrganizationSubmit = async (data) => {
-    const attributesObj = organizationAttributes && organizationAttributes.reduce((acc, obj) => {
-      acc[obj.attributeKey] = data[obj.attributeKey];
-      return acc;
-    }, {});
+    const attributesObj =
+      organizationAttributes &&
+      organizationAttributes.reduce((acc, obj) => {
+        acc[obj.attributeKey] = data[obj.attributeKey];
+        return acc;
+      }, {});
     data.organizationName = data.organizationName.trim();
     data.organizationDescription = data.organizationDescription.trim();
-    data.attributes=attributesObj
+    data.attributes = attributesObj;
     try {
       let response;
       if (isEditing) {
@@ -111,15 +119,14 @@ const CreateUpdateOrganisation = () => {
             organization.organizationId
           )
         );
-        if(response?.isSuccess==true) {
+        if (response?.isSuccess == true) {
           navigate("/organization/organization-list");
-
         }
       } else {
         response = await dispatch(addOrganisation(AccessToken, data));
       }
       console.log(response);
-      
+
       if (response?.status != 201) throw new Error(response?.data?.message);
       else {
         toast.success(response?.data?.message);
@@ -375,36 +382,38 @@ const CreateUpdateOrganisation = () => {
                 )}
               </div>
               {organizationAttributes &&
-              organizationAttributes.map((attribute) => (
-                <div className="mb-4" key={attribute.attributeId}>
-                  <label
-                    htmlFor={attribute?.attributeKey}
-                    className={`block text-sm font-bold mb-2 ${
-                      darkMode ? "text-white" : "text-gray-700"
-                    }`}
-                  >
-                    {attribute?.attributeKey}
-                    <sup className="text-red-900 font-bold">*</sup>
-                  </label>
-                  <input
-                    id={attribute?.attributeKey}
-                    type="text"
-                    data-testid={attribute?.attributeKey}
-                    placeholder={`${attribute?.attributeKey}...`}
-                    {...register(attribute?.attributeKey, {
-                      required: `${attribute?.attributeKey} is required`,
-                    })}
-                    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white text-gray-700"
-                    }`}
-                  />
-                  {errors[attribute?.attributeKey] && (
-                <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
-              )}
-                </div>
-              ))}
+                organizationAttributes.map((attribute) => (
+                  <div className="mb-4" key={attribute.attributeId}>
+                    <label
+                      htmlFor={attribute?.attributeKey}
+                      className={`block text-sm font-bold mb-2 ${
+                        darkMode ? "text-white" : "text-gray-700"
+                      }`}
+                    >
+                      {attribute?.attributeKey}
+                      <sup className="text-red-900 font-bold">*</sup>
+                    </label>
+                    <input
+                      id={attribute?.attributeKey}
+                      type="text"
+                      data-testid={attribute?.attributeKey}
+                      placeholder={`${attribute?.attributeKey}...`}
+                      {...register(attribute?.attributeKey, {
+                        required: `${attribute?.attributeKey} is required`,
+                      })}
+                      className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                        darkMode
+                          ? "bg-gray-700 border-gray-600 text-white"
+                          : "bg-white text-gray-700"
+                      }`}
+                    />
+                    {errors[attribute?.attributeKey] && (
+                      <p className="text-red-500 mt-1">
+                        {errors[attribute.attributeKey].message}
+                      </p>
+                    )}
+                  </div>
+                ))}
               <button
                 type="submit"
                 className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
@@ -497,7 +506,7 @@ const CreateUpdateOrganisation = () => {
                   getRes();
                 }}
               />
-            ): (
+            ) : (
               <form
                 role="form"
                 onSubmit={handleSubmit(handleOrganizationSubmit)}
@@ -588,36 +597,38 @@ const CreateUpdateOrganisation = () => {
                   )}
                 </div>
                 {organizationAttributes &&
-              organizationAttributes.map((attribute) => (
-                <div className="mb-4" key={attribute.attributeId}>
-                  <label
-                    htmlFor={attribute.attributeKey}
-                    className={`block text-sm font-bold mb-2 ${
-                      darkMode ? "text-white" : "text-gray-700"
-                    }`}
-                  >
-                    {attribute.attributeKey}
-                    <sup className="text-red-900 font-bold">*</sup>
-                  </label>
-                  <input
-                    id={attribute.attributeKey}
-                    type="text"
-                    data-testid={attribute.attributeKey}
-                    placeholder={`${attribute.attributeKey}...`}
-                    {...register(attribute.attributeKey, {
-                      required: `${attribute.attributeKey} is required`,
-                    })}
-                    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white text-gray-700"
-                    }`}
-                  />
-                  {errors[attribute.attributeKey] && (
-                <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
-              )}
-                </div>
-              ))}
+                  organizationAttributes.map((attribute) => (
+                    <div className="mb-4" key={attribute.attributeId}>
+                      <label
+                        htmlFor={attribute.attributeKey}
+                        className={`block text-sm font-bold mb-2 ${
+                          darkMode ? "text-white" : "text-gray-700"
+                        }`}
+                      >
+                        {attribute.attributeKey}
+                        <sup className="text-red-900 font-bold">*</sup>
+                      </label>
+                      <input
+                        id={attribute.attributeKey}
+                        type="text"
+                        data-testid={attribute.attributeKey}
+                        placeholder={`${attribute.attributeKey}...`}
+                        {...register(attribute.attributeKey, {
+                          required: `${attribute.attributeKey} is required`,
+                        })}
+                        className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                          darkMode
+                            ? "bg-gray-700 border-gray-600 text-white"
+                            : "bg-white text-gray-700"
+                        }`}
+                      />
+                      {errors[attribute.attributeKey] && (
+                        <p className="text-red-500 mt-1">
+                          {errors[attribute.attributeKey].message}
+                        </p>
+                      )}
+                    </div>
+                  ))}
                 <button
                   type="submit"
                   className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
@@ -633,7 +644,9 @@ const CreateUpdateOrganisation = () => {
           </div>
         )}
       </div>
-      {(confirmationModal && !isEditing) && <ConfirmationModal modalData={confirmationModal} />}
+      {confirmationModal && !isEditing && (
+        <ConfirmationModal modalData={confirmationModal} />
+      )}
     </div>
   );
 };

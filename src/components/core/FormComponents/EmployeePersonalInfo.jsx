@@ -46,46 +46,48 @@ const EmployeePersonalInfo = () => {
   );
 
   console.log(AllDepartments);
+  console.log(employees);
 
   const onSubmit = (data) => {
-    console.log(data);
-    
-if(!isEditing) {
-  const trimmedData = {};
-  for (const key in data) {
-    if (Object.hasOwnProperty.call(data, key)) {
-      trimmedData[key] = data[key].trim();
+    console.log("Form Data:", data);
+
+    const trimmedData = {};
+    // Trim all fields
+    for (const key in data) {
+      if (Object.hasOwnProperty.call(data, key)) {
+        trimmedData[key] = data[key]?.trim ? data[key].trim() : data[key];
+      }
     }
-  }
 
-  const attributesObj = localAttributes.reduce((acc, obj) => {
-    const attributeName = obj.attributeKey.replace(/ /g, "");
-    acc[attributeName] = trimmedData[attributeName];
-    return acc;
-  }, {});
+    // Create attributes object by matching keys from localAttributes with trimmedData
+    const attributesObj = localAttributes.reduce((acc, obj) => {
+      const attributeName = obj.attributeKey; // Don't modify the key
+      if (trimmedData[attributeName]) {
+        acc[attributeName] = trimmedData[attributeName]; // Use the original key
+      }
+      return acc;
+    }, {});
 
-  const employeeId = employees[0];
-  const submissionData = {
-    ...trimmedData,
-    skillList: selectedSkills,
-    designationList: selectedDesignations,
-    attributes: attributesObj,
-  };
+    const submissionData = {
+      ...trimmedData,
+      skillList: selectedSkills,
+      designationList: selectedDesignations,
+      attributes: attributesObj, // Include the attributes here
+    };
 
-  console.log(submissionData);
-}
+    console.log("Submission Data:", submissionData);
 
     if (isEditing) {
       dispatch(
         UpdateEmployeePersonalDetails(
           preEditedEmployeeDetails.employeeId,
-          data,
+          submissionData, // Pass the correct submission data
           AccessToken
         )
       );
     } else {
       dispatch(
-        addEmployeePersonalDetails(employeeId, submissionData, AccessToken)
+        addEmployeePersonalDetails(employees, submissionData, AccessToken)
       );
     }
   };
@@ -110,7 +112,7 @@ if(!isEditing) {
 
   useEffect(() => {
     getAttributes();
-    if(!isEditing) {
+    if (!isEditing) {
       getDepartments();
     }
   }, [AccessToken, dispatch]);
@@ -258,8 +260,7 @@ if(!isEditing) {
                   required: "First name is required",
                   pattern: {
                     value: /^[A-Za-z\s]+$/, // Allow only letters and spaces
-                    message:
-                      "First name should contain only letters",
+                    message: "First name should contain only letters",
                   },
                   validate: (value) =>
                     value.trim() !== "" || "First name cannot be empty",
@@ -342,42 +343,42 @@ if(!isEditing) {
                 </p>
               )}
             </div>
- {  !isEditing   &&
+            {!isEditing && (
               <div className="mt-4">
-              <label
-                htmlFor="departmentId"
-                className={`block text-sm font-semibold ${
-                  darkMode ? "text-white" : "text-slate-900"
-                }`}
-              >
-                Department<sup className="text-red-900">*</sup>
-              </label>
-              <select
-                required
-                id="departmentId"
-                {...register("departmentId")}
-                disabled={AllDepartments?.length == 0}
-                className={`border rounded px-3 py-2 mt-2 w-full ${
-                  darkMode
-                    ? "border-slate-300 bg-gray-500 text-white"
-                    : "border-slate-300 bg-white text-black"
-                }`}
-                data-testid="department-select"
-              >
-                <option value="" disabled selected>
-                  Select Department
-                </option>
-                {AllDepartments.map((department) => (
-                  <option
-                    key={department?.departmentId}
-                    value={department?.departmentId}
-                  >
-                    {department?.department}
+                <label
+                  htmlFor="departmentId"
+                  className={`block text-sm font-semibold ${
+                    darkMode ? "text-white" : "text-slate-900"
+                  }`}
+                >
+                  Department<sup className="text-red-900">*</sup>
+                </label>
+                <select
+                  required
+                  id="departmentId"
+                  {...register("departmentId")}
+                  disabled={AllDepartments?.length == 0}
+                  className={`border rounded px-3 py-2 mt-2 w-full ${
+                    darkMode
+                      ? "border-slate-300 bg-gray-500 text-white"
+                      : "border-slate-300 bg-white text-black"
+                  }`}
+                  data-testid="department-select"
+                >
+                  <option value="" disabled selected>
+                    Select Department
                   </option>
-                ))}
-              </select>
-            </div>
-}
+                  {AllDepartments.map((department) => (
+                    <option
+                      key={department?.departmentId}
+                      value={department?.departmentId}
+                    >
+                      {department?.department}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             {localAttributes.map((attr) => {
@@ -392,12 +393,11 @@ if(!isEditing) {
                   >
                     {attributeName.charAt(0).toUpperCase() +
                       attributeName.slice(1).replace(/([A-Z])/g, " $1")}
-                    <sup className="text-red-900">*</sup>
                   </label>
                   <input
                     id={attr?.attributeKey}
                     type="text"
-                    {...register(attr?.attributeKey, { required: true })}
+                    {...register(attr?.attributeKey)}
                     className={`border rounded px-3 py-2 mt-2 w-full ${
                       darkMode
                         ? "border-slate-300 bg-gray-500 text-white"
