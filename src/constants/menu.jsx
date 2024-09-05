@@ -51,6 +51,30 @@ const MenuItems = () => {
               ],
             },
             {
+                key: "SubOrganization",
+                label: t("Sub Organization"),
+                isTitle: false,
+                icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+                children: [
+                  {
+                    key: "NewSubOrganization",
+                    label: t("Create Sub Organization"),
+                    url: "/suborganization/suborganization-create-update",
+                    parentKey: "SubOrganization",
+                    icon: (
+                      <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />
+                    ),
+                  },
+                  {
+                    key: "SubOrganization List",
+                    label: t("Sub Organization List"),
+                    url: "/SubOrganization/SubOrganization-list",
+                    parentKey: "SubOrganization",
+                    icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+                  },
+                ],
+              },
+            {
                 key: "Department",
                 label: t("Department"),
                 isTitle: false,
@@ -321,7 +345,7 @@ const MenuItems = () => {
     const filteredMenu = menu.map((item) => ({
         ...item,
         children: item.children && item.children.length > 0 ? item.children : undefined,
-    })).filter((item) => item.key === "Dashboard" || item.children);
+    })).filter((item) => item.key==="navigation" || item.key === "Dashboard" || item.children);
 
     return filteredMenu;
 };

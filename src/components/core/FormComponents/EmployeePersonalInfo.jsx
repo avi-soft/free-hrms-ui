@@ -23,7 +23,9 @@ const EmployeePersonalInfo = () => {
     formState: { errors },
     reset,
     getValues,
-  } = useForm();
+  } = useForm({
+    mode: "onBlur",
+  });
 
   const [skillsDesignationModal, setSkillsDesignationModal] = useState(null);
   const [selectedSkills, setSelectedSkills] = useState([]);
@@ -46,22 +48,29 @@ const EmployeePersonalInfo = () => {
   console.log(AllDepartments);
 
   const onSubmit = (data) => {
-    console.log(data)
-    
-    const attributesObj = localAttributes && localAttributes.reduce((acc, obj) => {
+    const trimmedData = {};
+    for (const key in data) {
+      if (Object.hasOwnProperty.call(data, key)) {
+        trimmedData[key] = data[key].trim();
+      }
+    }
+
+    const attributesObj = localAttributes.reduce((acc, obj) => {
       const attributeName = obj.attributeKey.replace(/ /g, "");
-      acc[obj.attributeKey] = data[attributeName];
+      acc[attributeName] = trimmedData[attributeName];
       return acc;
     }, {});
+
     const employeeId = employees[0];
     const submissionData = {
-      ...data,
+      ...trimmedData,
       skillList: selectedSkills,
       designationList: selectedDesignations,
-      attributes:attributesObj
+      attributes: attributesObj,
     };
 
     console.log(submissionData);
+
     if (isEditing) {
       dispatch(
         UpdateEmployeePersonalDetails(
@@ -87,9 +96,9 @@ const EmployeePersonalInfo = () => {
   async function getAttributes() {
     try {
       const response = await dispatch(GetEmployeeAttributes(AccessToken));
-      console.log(response?.data)
+      console.log(response?.data);
       setLocalAttributes(response?.data || []);
-      return response?.data
+      return response?.data;
     } catch (error) {
       console.error("Failed to fetch attributes:", error);
     }
@@ -100,37 +109,43 @@ const EmployeePersonalInfo = () => {
     getDepartments();
   }, [AccessToken, dispatch]);
 
-const getLocalAttributesValue=async()=>{
-  const attributes = await getAttributes() ;
-  const attributesObj = attributes && attributes.reduce((acc, obj) => {
-    const attributeName = obj.attributeKey.replace(/ /g, "");
-    acc[attributeName] = preEditedEmployeeDetails.attributes[obj.attributeKey];
-    return acc;
-  }, {});
- return attributesObj
-}
+  const getLocalAttributesValue = async () => {
+    const attributes = await getAttributes();
+    const attributesObj =
+      attributes &&
+      attributes.reduce((acc, obj) => {
+        const attributeName = obj.attributeKey.replace(/ /g, "");
+        acc[attributeName] =
+          preEditedEmployeeDetails.attributes[obj.attributeKey];
+        return acc;
+      }, {});
+    return attributesObj;
+  };
 
   useEffect(() => {
     if (isEditing && preEditedEmployeeDetails) {
-      console.log(preEditedEmployeeDetails)
-      console.log(localAttributes)
-      setSelectedDesignations(preEditedEmployeeDetails.designations.map(item=>item.designation))
-      setSelectedSkills(preEditedEmployeeDetails.skills.map(item=>item.skill))
-   getLocalAttributesValue().then(data=>{
-    for (const [key, value] of Object.entries(preEditedEmployeeDetails)) {
-      if (key === "skills" || key === "designations") {
-        reset({
-          ...preEditedEmployeeDetails,
-          ...data,
-          skills: value.skills || [],
-          designations: value.designations || [],
-        });
-      } else {
-        setValue(key, value);
-      }
-    }
-   })
-     
+      console.log(preEditedEmployeeDetails);
+      console.log(localAttributes);
+      setSelectedDesignations(
+        preEditedEmployeeDetails.designations.map((item) => item.designation)
+      );
+      setSelectedSkills(
+        preEditedEmployeeDetails.skills.map((item) => item.skill)
+      );
+      getLocalAttributesValue().then((data) => {
+        for (const [key, value] of Object.entries(preEditedEmployeeDetails)) {
+          if (key === "skills" || key === "designations") {
+            reset({
+              ...preEditedEmployeeDetails,
+              ...data,
+              skills: value.skills || [],
+              designations: value.designations || [],
+            });
+          } else {
+            setValue(key, value);
+          }
+        }
+      });
     }
   }, [isEditing, preEditedEmployeeDetails, setValue, reset]);
 
@@ -232,14 +247,25 @@ const getLocalAttributesValue=async()=>{
                     ? "bg-gray-500 border-slate-800 text-white"
                     : "bg-white border-slate-300 text-black"
                 }`}
-                required
                 type="text"
-                name="firstName"
-                {...register("firstName")}
+                {...register("firstName", {
+                  required: "First name is required",
+                  pattern: {
+                    value: /^[A-Za-z\s]+$/, // Allow only letters and spaces
+                    message:
+                      "First name should contain only letters and spaces",
+                  },
+                  validate: (value) =>
+                    value.trim() !== "" || "First name cannot be empty",
+                })}
                 placeholder="Enter Your First Name"
                 data-testid="first-name-input"
               />
+              {errors.firstName && (
+                <p className="text-red-500 mt-1">{errors.firstName.message}</p>
+              )}
             </label>
+
             <div className="h-4 sm:hidden"></div>
             <label>
               <p
@@ -255,14 +281,95 @@ const getLocalAttributesValue=async()=>{
                     ? "bg-gray-500 border-slate-800 text-white"
                     : "bg-white border-slate-300 text-black"
                 }`}
-                required
                 type="text"
-                name="lastName"
-                {...register("lastName")}
+                {...register("lastName", {
+                  required: "Last name is required",
+                  pattern: {
+                    value: /^[A-Za-z\s]+$/, // Allow only letters and spaces
+                    message: "Last name should contain only letters and spaces",
+                  },
+                  validate: (value) =>
+                    value.trim() !== "" || "Last name cannot be empty",
+                })}
                 placeholder="Enter Your Last Name"
                 data-testid="last-name-input"
               />
+              {errors.lastName && (
+                <p className="text-red-500 mt-1">{errors.lastName.message}</p>
+              )}
             </label>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="mt-4">
+              <label
+                htmlFor="employeeCode"
+                className={`block text-sm font-semibold ${
+                  darkMode ? "text-white" : "text-slate-900"
+                }`}
+              >
+                Employee Code<sup className="text-red-900">*</sup>
+              </label>
+              <input
+                id="employeeCode"
+                {...register("employeeCode", {
+                  required: "Employee code is required",
+                  pattern: {
+                    value: /^[A-Za-z0-9]+$/, // Allow only letters and numbers
+                    message:
+                      "Employee code should contain only letters and numbers",
+                  },
+                  validate: (value) =>
+                    value.trim() !== "" || "Employee code cannot be empty",
+                })}
+                type="text"
+                className={`border rounded px-3 py-2 mt-2 w-full ${
+                  darkMode
+                    ? "border-slate-300 bg-gray-500 text-white"
+                    : "border-slate-300 bg-white text-black"
+                }`}
+                placeholder="Enter Employee Code"
+                data-testid="employee-code-input"
+              />
+              {errors.employeeCode && (
+                <p className="text-red-500 mt-1">
+                  {errors.employeeCode.message}
+                </p>
+              )}
+            </div>
+            <div className="mt-4">
+              <label
+                htmlFor="departmentId"
+                className={`block text-sm font-semibold ${
+                  darkMode ? "text-white" : "text-slate-900"
+                }`}
+              >
+                Department<sup className="text-red-900">*</sup>
+              </label>
+              <select
+                required
+                id="departmentId"
+                {...register("departmentId")}
+                disabled={AllDepartments?.length == 0}
+                className={`border rounded px-3 py-2 mt-2 w-full ${
+                  darkMode
+                    ? "border-slate-300 bg-gray-500 text-white"
+                    : "border-slate-300 bg-white text-black"
+                }`}
+                data-testid="department-select"
+              >
+                <option value="" disabled selected>
+                  Select Department
+                </option>
+                {AllDepartments.map((department) => (
+                  <option
+                    key={department?.departmentId}
+                    value={department?.departmentId}
+                  >
+                    {department?.department}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             {localAttributes.map((attr) => {
@@ -299,31 +406,6 @@ const getLocalAttributesValue=async()=>{
                 </div>
               );
             })}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="mt-4">
-                <label
-                  htmlFor="employeeCode"
-                  className={`block text-sm font-semibold ${
-                    darkMode ? "text-white" : "text-slate-900"
-                  }`}
-                >
-                  Employee Code<sup className="text-red-900">*</sup>
-                </label>
-                <input
-                  required
-                  id="employeeCode"
-                  {...register("employeeCode")}
-                  type="text"
-                  className={`border rounded px-3 py-2 mt-2 w-full ${
-                    darkMode
-                      ? "border-slate-300 bg-gray-500 text-white"
-                      : "border-slate-300 bg-white text-black"
-                  }`}
-                  placeholder="Enter Employee Code"
-                  data-testid="employee-code-input"
-                />
-              </div>
-            </div>
           </div>
 
           {/* Skills and Designations Section */}
@@ -419,31 +501,23 @@ const getLocalAttributesValue=async()=>{
 
           <div className="flex justify-between mt-6">
             <button
-              type="button"
-              onClick={() => dispatch(setStep(1))}
-              className="bg-yellow-500 text-black py-1 px-4 rounded flex items-center"
-            >
-              <FaArrowRight className="mr-2" /> Next
-            </button>
-            <button
               type="submit"
               className="bg-green-500 text-white py-1 px-4 rounded flex items-center"
             >
-              <FaSave className="mr-2" /> Save
+              <FaSave className="mr-2" /> Save All Changes
+            </button>
+            <button
+              onClick={() => dispatch(setStep(3))}
+              className={`text-center  text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200
+                  bg-yellow-500 text-black py-1 px-5 flex items-center justify-center`}
+            >
+              {isEditing ? "Update Additional Details" : "Next Step"}
+              <FaArrowRight className="ml-2" />
             </button>
           </div>
         </form>
       </div>
-      <div className="flex flex-col items-center justify-center px-72 w-full">
-        <button
-          onClick={() => dispatch(setStep(3))}
-          className={`text-center w-full text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200
-                  bg-yellow-500 text-black py-1 px-5 flex items-center justify-center`}
-        >
-          {isEditing ? "Update Additional Details" : "Next Step"}
-          <FaArrowRight className="ml-2" />
-        </button>
-      </div>
+
       {skillsDesignationModal && (
         <SkillsDesignationModal modalData={skillsDesignationModal} />
       )}

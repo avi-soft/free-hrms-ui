@@ -32,25 +32,56 @@ const OrganizationAttributes = ({ NextHandler }) => {
     getRes();
   }, [dispatch, AccessToken]);
 
+
+  const normalizeString = (str) => {
+    return str.trim().replace(/\s+/g, ' '); 
+  };
+
   const addAttributes = async () => {
-    await dispatch(addOrganisationAttributes( AccessToken,attribute));
-    getRes();
-    setAttribute({
-      attributeId: "",
-      attributeKey: "",
-    });
+    const normalizedAttributeKey = normalizeString(attribute.attributeKey);
+
+    if (!normalizedAttributeKey) {
+      setAttribute({ ...attribute, error: "Attributes field is required" });
+    } else {
+      setAttribute({ ...attribute, attributeKey: normalizedAttributeKey, error: "" });
+      try {
+        await dispatch(addOrganisationAttributes(AccessToken, { ...attribute, attributeKey: normalizedAttributeKey }));
+        getRes();
+        setAttribute({
+          attributeId: "",
+          attributeKey: "",
+          error: "",
+        });
+      } catch (error) {
+        setAttribute({ ...attribute, error: "Failed to add attribute" });
+      }
+    }
   };
 
   const handleEdit = (item) => {
     setEdit(item.attributeId);
-    setEditAttribute({ ...editAttribute, attributeKey: item.attributeKey });
+    setEditAttribute({
+      attributeId: item.attributeId,
+      attributeKey: item.attributeKey,
+      error: "",
+    });
   };
+
   const editAttributes = async (attributeId) => {
-    await dispatch(
-        updateOrganisationAttributes(AccessToken, editAttribute, attributeId)
-    );
-    getRes();
-    setEdit(false);
+    const normalizedEditAttributeKey = normalizeString(editAttribute.attributeKey);
+
+    if (!normalizedEditAttributeKey) {
+      setEditAttribute({ ...editAttribute, error: "Attributes field is required" });
+    } else {
+      setEditAttribute({ ...editAttribute, attributeKey: normalizedEditAttributeKey, error: "" });
+      try {
+        await dispatch(updateOrganisationAttributes(AccessToken, { ...editAttribute, attributeKey: normalizedEditAttributeKey }, attributeId));
+        getRes();
+        setEdit(false);
+      } catch (error) {
+        setEditAttribute({ ...editAttribute, error: "Failed to update attribute" });
+      }
+    }
   };
 
   const handleDelete=async(attributeId)=>{
@@ -65,7 +96,8 @@ const OrganizationAttributes = ({ NextHandler }) => {
         darkMode ? "bg-slate-600" : "bg-white"
       }`}
     >
-      <div className="mb-4 flex gap-2">
+      <div className="mb-4 ">
+      <div className="flex gap-2">
         <input
           id="addAttribute"
           type="text"
@@ -94,6 +126,9 @@ const OrganizationAttributes = ({ NextHandler }) => {
           Add
         </button>
       </div>
+      {attribute.error && <p className="text-red-500 mt-1">{attribute.error}</p>}
+      </div>
+
 
       <div className="mt-4">
         {organizationAttribute &&
