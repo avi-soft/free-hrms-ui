@@ -7,6 +7,7 @@ import editingReducer from "../slices/editingSlice";
 import themeReducer from "../slices/themeSlice";
 import OrganisationReducer from "../slices/OrganisationSlice";
 import roleReducer from "../slices/roleSlice";
+import subOrganizationReducer from "../slices/subOrganizationSlice"
 
 const rootReducer=combineReducers({
      auth: authReducer,
@@ -16,7 +17,8 @@ const rootReducer=combineReducers({
      department:departmentReducer,
      editing:editingReducer,
      theme:themeReducer,
-     role:roleReducer
+     role:roleReducer,
+     subOrganization:subOrganizationReducer
 
 })
 

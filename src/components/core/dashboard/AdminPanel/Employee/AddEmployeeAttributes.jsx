@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from "react-redux";
 import toast from "react-hot-toast";
 import { AddEmployeeAttributes, DeleteEmployeeAttribute, EditEmployeeAttributes, GetEmployeeAttributes } from "../../../../../services/operations/employeeAPI";
 import { useNavigate } from "react-router-dom";
+import { setStep } from "../../../../../slices/employeeSlice";
 
 const EmployeeAttributes = () => {
   const { darkMode } = useSelector((state) => state.theme);
@@ -37,23 +38,7 @@ const EmployeeAttributes = () => {
     setEditAttributeValue(value);
   };
 
-  const handleSaveEdit = async (editedAttributeValue,id) => {
 
-    console.log(editedAttributeValue,id);
-    try{
-        const response =await dispatch(EditEmployeeAttributes({attributeKey:editedAttributeValue},id,AccessToken));
-        console.log(response);
-        if(response?.data?.isSuccess) {
-           toast.success(response?.data?.message);
-           getAttributes();
-           navigate("/employee/employee-attributes")
-        }
-      setEditAttributeId(null);
-      setEditAttributeValue("");
-    }catch{
-
-    }
-  };
 
   const handleDeleteAttribute = async (id) => {
     try {
@@ -69,11 +54,15 @@ const EmployeeAttributes = () => {
     }
 
   };
+  const formatAndTrim = (value) => {
+    return value.trim().replace(/\s+/g, ' ');
+  };
 
   const handleSubmitForm = async(data) => {
-    console.log(data);
+    const formattedAttributeKey = formatAndTrim(data.attributeKey);
+
     try {
-      const response=await dispatch(AddEmployeeAttributes(data,AccessToken));
+      const response = await dispatch(AddEmployeeAttributes({ attributeKey: formattedAttributeKey }, AccessToken));
       console.log(response);
       if(response?.data?.isSuccess) {
         toast.success(response?.data?.message);
@@ -85,6 +74,30 @@ const EmployeeAttributes = () => {
       console.log("error is",error)
     }
   };
+
+  const handleSaveEdit = async (editedAttributeValue,id) => {
+    const formattedAttributeValue = formatAndTrim(editAttributeValue);
+    try{
+        const response =await dispatch(EditEmployeeAttributes({attributeKey:formattedAttributeValue},id,AccessToken));
+        console.log(response);
+        if(response?.data?.isSuccess) {
+           toast.success(response?.data?.message);
+           getAttributes();
+           navigate("/employee/employee-attributes")
+        }
+      setEditAttributeId(null);
+      setEditAttributeValue("");
+    }catch{
+
+    }
+  };
+
+  const saveAllButton=async ()=> {
+    const response=await dispatch(setStep(2))
+    console.log("heeelo",response);
+    navigate('/employee/employee-create-update')
+
+  }
 
   return (
     <div className={`pb-9 h-auto mb-10 mt-5 rounded ${darkMode ? "bg-slate-700 text-white" : "bg-slate-100"}`}>
@@ -101,19 +114,31 @@ const EmployeeAttributes = () => {
             <label htmlFor="attributeKey" className={`block text-sm font-bold mb-2 ${darkMode ? "text-white" : "text-gray-700"}`}>
               Add New Attribute
             </label>
-            <div className="flex items-center gap-2">
-            <Controller
+            <div className="flex flex-col gap-2">
+              <Controller
                 name="attributeKey"
                 control={control}
                 defaultValue=""
-                render={({ field }) => (
-                  <input
-                    id="attributeKey"
-                    type="text"
-                    placeholder="New Attribute Name..."
-                    className={`flex-1 shadow appearance-none border rounded py-2 px-3 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"}`}
-                    {...field}
-                  />
+                rules={{
+                  required: "Attribute name is required",
+                  validate: value => value.trim() !== "" || "Attribute name cannot be empty"
+                }}
+                render={({ field, fieldState }) => (
+                  <>
+                    <input
+                      id="attributeKey"
+                      type="text"
+                      placeholder="New Attribute Name..."
+                      className={`flex-1 shadow appearance-none border rounded py-2 px-3 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"}`}
+                      {...field}
+                      onChange={(e) => field.onChange(e.target.value)} // Trim spaces
+                    />
+                    {fieldState.error && (
+                      <p className="text-red-500 text-md mt-1">
+                        {fieldState.error.message}
+                      </p>
+                    )}
+                  </>
                 )}
               />
               <button
@@ -123,6 +148,7 @@ const EmployeeAttributes = () => {
               >
                 Add Attribute
               </button>
+              
             </div>
           </div>
 
@@ -175,7 +201,8 @@ const EmployeeAttributes = () => {
           </div>
 
           <button
-            // type="submit"
+           type="button" 
+            onClick={saveAllButton}
             className={`w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${darkMode ? "bg-blue-500" : "bg-blue-700"} ${darkMode ? "text-white" : "text-white"} hover:scale-95 transition-all duration-200`}
           >
             Save All Attributes
