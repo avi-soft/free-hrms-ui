@@ -32,6 +32,7 @@ export const employeeEndpoints = {
     BASE_URL + `/account/${employeeId}/EditBankAccount`,
   EMPLOYEE_SEARCH_API: (employeeName) =>
     BASE_URL + `/employee/searchEmployee?name=${employeeName}`,
+  DEPARTMENT_EMPLOYEE_LIST :(deptId) =>BASE_URL + `/department/${deptId}`
 };
 
 //Department Endpoints
@@ -51,7 +52,8 @@ export const DepartmentEndpoints = {
   UNASSIGN_DEPARTMENT_ORGANIZATION_API: (orgId,depId)=> BASE_URL + `/department/${orgId}/removeDepartment/${depId}`,
   ASSIGN_DEPARTMENT_ORGANIZATION_API: (orgId,depId)=> BASE_URL + `/department/${orgId}/assignDepartment/${depId}`,
   UNASSIGN_DEPARTMENT_SUB_ORGANIZATION_API: (SubOrgId,depId)=> BASE_URL + `/department/${SubOrgId}/removeDepartmentFromBranch/${depId}`,
-  UNASSIGNED_DEPARTMENTS_LIST_ORGANIZATION : BASE_URL +'/department/unassignedDepartmentsOfOrganization'
+  UNASSIGNED_DEPARTMENTS_LIST_ORGANIZATION : BASE_URL +'/department/unassignedDepartmentsOfOrganization',
+  ALL_DEPARTMENTS_LIST: BASE_URL + '/department'
 
 };
 
@@ -158,10 +160,16 @@ export const SubOrganizationAttributesEndPoints = {
 
 
 export const SubOrganizationEndPoints = {
+   GET_SUBORGANIZATION_LIST: BASE_URL + "/branch",
     GET_SUBORGANIZATION_REQUEST: BASE_URL + "/organization/branches",
   ADD_SUBORGANIZATION_REQUEST:BASE_URL + "/branch",
   UPDATE_SUBORGANIZATION_REQUEST: (suborganizationId) =>
     BASE_URL + `/branch/${suborganizationId}`,
   DELETE_SUBORGANIZATION_REQUEST: (suborganizationId) =>
     BASE_URL + `/branch/${suborganizationId}`,
+  UNASSIGNED_LIST_SUBORGANIZATION :  BASE_URL + "/branch/unassignedBranches",
+  UNASSIGN_SUBORGANIZATION_FROM_ORGANIZATION: (OrgId,SuborganizationId) =>
+    BASE_URL + `/branch/${OrgId}/removeBranch/${SuborganizationId}`,
+    ASSIGN_SUBORGANIZATION_TO_ORGANIZATION: (OrgId,SuborganizationId) =>
+    BASE_URL + `/branch/${OrgId}/assignBranch/${SuborganizationId}`
 }

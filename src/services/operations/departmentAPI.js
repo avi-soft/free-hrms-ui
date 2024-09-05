@@ -15,7 +15,7 @@ const {
   UNASSIGN_DEPARTMENT_ORGANIZATION_API,
   UNASSIGN_DEPARTMENT_SUB_ORGANIZATION_API,
   UNASSIGNED_DEPARTMENTS_LIST_ORGANIZATION,
-  ASSIGN_DEPARTMENT_ORGANIZATION_API
+  ASSIGN_DEPARTMENT_ORGANIZATION_API,ALL_DEPARTMENTS_LIST
 } = DepartmentEndpoints;
 
 export const Departmentlist = (AccessToken, selectedOrganization) => {
@@ -25,6 +25,29 @@ export const Departmentlist = (AccessToken, selectedOrganization) => {
       const response = await apiConnector(
         "GET",
         `${DEPARTMENT_LIST_API}/${selectedOrganization}`,
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+
+      return response;
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    }
+  };
+};
+export const AllDepartmentlist = (AccessToken) => {
+  return async (dispatch) => {
+    try {
+      console.log(AccessToken);
+      const response = await apiConnector(
+        "GET",
+        ALL_DEPARTMENTS_LIST,
         null,
         {
           Authorization: `Bearer ${AccessToken}`,

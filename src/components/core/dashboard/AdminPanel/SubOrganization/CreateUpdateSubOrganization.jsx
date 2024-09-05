@@ -238,48 +238,50 @@ const CreateUpdateSubOrganization = () => {
               darkMode ? "bg-slate-600" : "bg-white"
             }`}
           >
-            <div className="mb-4">
-              <label
-                htmlFor="organization"
-                className={`block text-sm font-bold mb-2 ${
-                  darkMode ? "text-white" : "text-gray-700"
-                }`}
-              >
-                Select Organization
-                <sup className="text-red-900 font-bold">*</sup>
-              </label>
-              <select
-                id="organization"
-                {...register("organization", {
-                  required: "Organization is required",
-                })}
-                value={selectedOrganization}
-                onChange={(e) => {
-                  setSelectedOrganization(e.target.value);
-                }}
-                className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-white text-gray-700"
-                }`}
-              >
-                <option value="">Select Organization</option>
-                {AllOrganizations &&
-                  AllOrganizations.map((org) => (
-                    <option
-                      key={org?.organizationId}
-                      value={org?.organizationId}
-                    >
-                      {org?.organizationName}
-                    </option>
-                  ))}
-              </select>
-              {errors.organization && (
-                <p className="text-red-500 mt-1">
-                  {errors.organization.message}
-                </p>
-              )}
-            </div>
+           {
+            !isEditing  &&             <div className="mb-4">
+            <label
+              htmlFor="organization"
+              className={`block text-sm font-bold mb-2 ${
+                darkMode ? "text-white" : "text-gray-700"
+              }`}
+            >
+              Select Organization
+              <sup className="text-red-900 font-bold">*</sup>
+            </label>
+            <select
+              id="organization"
+              {...register("organization", {
+                required: "Organization is required",
+              })}
+              value={selectedOrganization}
+              onChange={(e) => {
+                setSelectedOrganization(e.target.value);
+              }}
+              className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                darkMode
+                  ? "bg-gray-700 border-gray-600 text-white"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              <option value="">Select Organization</option>
+              {AllOrganizations &&
+                AllOrganizations.map((org) => (
+                  <option
+                    key={org?.organizationId}
+                    value={org?.organizationId}
+                  >
+                    {org?.organizationName}
+                  </option>
+                ))}
+            </select>
+            {errors.organization && (
+              <p className="text-red-500 mt-1">
+                {errors.organization.message}
+              </p>
+            )}
+          </div>
+           }
             <div className="mb-4">
               <label
                 htmlFor="SubOrganization"

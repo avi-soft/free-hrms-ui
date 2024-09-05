@@ -18,6 +18,7 @@ const {
   ADD_EMPLOYEE_BANK_DETAILS_API,
   EDIT_EMPLOYEE_BANK_DETAILS_API,
   EMPLOYEE_SEARCH_API,
+  DEPARTMENT_EMPLOYEE_LIST
 } = employeeEndpoints;
 const {
   GET_EmployeeAttributes_Endpoint,
@@ -349,7 +350,29 @@ export function EditEmployeeBankDetails(employeeId, data, AccessToken) {
     toast.dismiss(toastId);
   };
 }
+export function DepartmentEmployeesList(AccessToken,deptId,page, size, sortBy) {
+  return async (dispatch) => {
+    try {
 
+      const response = await apiConnector(
+        "GET",
+        DEPARTMENT_EMPLOYEE_LIST(deptId),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        },
+        {
+          page: page,
+          size: size,
+          sortBy: sortBy
+        }
+      );
+      return response;
+    } catch (err) {
+      console.log(err);
+    }
+  };
+}
 export function EmployeesList(AccessToken, page, size,sortBy) {
   return async (dispatch) => {
     try {
@@ -365,7 +388,7 @@ export function EmployeesList(AccessToken, page, size,sortBy) {
         {
           page: page,
           size: size,
-          
+          sortBy: sortBy
         }
       );
       return response;

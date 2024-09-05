@@ -365,7 +365,7 @@ const DepartmentList = () => {
                             </td>
                             <td className="px-6 py-4">
                               {department?.managerId
-                                ? `${department.managerFirstName} ${department.managerLastName}`
+                                ? `${(department.managerFirstName   || department?.manager?.firstName)} ${department.managerLastName}`
                                 : "N/A"}
                             </td>
                             <td className="px-6 py-4">

@@ -7,6 +7,7 @@ import { SiMicrosoftexcel } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  DepartmentEmployeesList,
   EmployeeDelete,
   EmployeesList,
 } from "../../../../../services/operations/employeeAPI";
@@ -22,6 +23,9 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { setOrganization } from "../../../../../slices/OrganisationSlice";
 import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
+import { getSubOrganization, getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI";
+import departmentSlice, { setDepartments } from "../../../../../slices/departmentSlice";
+import { AllDepartmentlist, Departmentlist } from "../../../../../services/operations/departmentAPI";
 
 const EmployeeList = () => {
   const dispatch = useDispatch();
@@ -32,25 +36,30 @@ const EmployeeList = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
-  const [selectedOrganization, setSelectedOrganization] = useState("");
+  const [selectedDepartment, setSelectedDepartment] = useState("");
   const [subOrganizations, setSubOrganizations] = useState([]);
-const [showSubOrgs, setShowSubOrgs] = useState(false);
+  const [showSubOrgs, setShowSubOrgs] = useState(false);
+  const [sortBy, setSortBy] = useState("");
   const employeesPerPage = 5;
   const { AllOrganizations } = useSelector((state) => state.Organisation);
+  const {  AllDepartments } = useSelector((state) => state.department);
+
 
   const navigate = useNavigate();
+
+  console.log("all organizations",AllOrganizations);
+  
 
   const fetchOrganizationList = async () => {
     try {
       const res = await dispatch(getOrganisation(AccessToken));
-      console.log(res);
-      
-      const organizations = res?.data;
-      dispatch(setOrganization(organizations));
+      console.log(res,"response is");
+
+      dispatch(setOrganization(res?.data));
       // if (organizations.length > 0) {
       //   // Set the updated organization if available
       //   const orgId = updatedOrganization || organizations[0].organizationId;
-      //   setSelectedOrganization(orgId);
+      //   setSelectedDepartment(orgId);
       // }
       dispatch(setLoading(false));
     } catch (error) {
@@ -59,58 +68,85 @@ const [showSubOrgs, setShowSubOrgs] = useState(false);
     }
   };
 
-
-  const fetchSubOrganizations = async (orgId) => {
+  const fetchSubOrganizations = async () => {
     try {
-      const response = await axios.get(`http://your-api-endpoint/sub-organizations/${orgId}`, {
-        headers: { Authorization: `Bearer ${AccessToken}` }
-      });
-      setSubOrganizations(response.data.subOrganizations || []);
-      setShowSubOrgs(response.data.subOrganizations.length > 0);
+      const response = await dispatch(getSubOrganizationList(AccessToken));
+      console.log("sub org resp",response);
+      
+      setSubOrganizations(response?.data?.Branches?.content || []);
+      // setShowSubOrgs(response.data.subOrganizations.length > 0);
     } catch (error) {
       console.error("Error fetching sub-organizations", error);
     }
   };
 
-
-  useEffect(() => {
-    fetchEmployeesList(currentPage);
-    fetchOrganizationList();
-    if (selectedOrganization) {
-      fetchSubOrganizations(selectedOrganization);
+  
+  const fetchDepartmentsList = async () => {
+    console.log("hi");
+    
+    try {
+        console.log("here");
+        
+        const res = await dispatch(AllDepartmentlist(AccessToken));
+        console.log("else", res);
+        dispatch(setDepartments(res?.data?.content));
+    } catch (error) {
+      console.error("Error fetching departments", error);
+      dispatch(setLoading(false));
     }
-  }, [currentPage,selectedOrganization]);
+  };
 
+console.log("all dept",AllDepartments);
 
   const fetchEmployeesList = async (page) => {
     try {
       setLoading(true);
-      const res = await dispatch(
-        EmployeesList(AccessToken, page, employeesPerPage)
-      );
-      setEmployees(res?.data?.Users);
-      setTotalPages(res.data.totalPages);
+      if(selectedDepartment) {
+        const res = await dispatch(
+          DepartmentEmployeesList(AccessToken,selectedDepartment,page, employeesPerPage, sortBy)
+        );
+        console.log("departments employee",res);
+        
+        setEmployees(res?.data?.Employees?.content);
+      }else{
+        const res = await dispatch(
+          EmployeesList(AccessToken, page, employeesPerPage, sortBy)
+        );
+        setEmployees(res?.data?.Users);
+        setTotalPages(res.data.totalPages);
+      }
     } catch (error) {
       console.error("Error fetching employees", error);
     }
     setLoading(false);
   };
 
+  useEffect(() => {
+    fetchDepartmentsList()
+
+    fetchEmployeesList(currentPage);
+    fetchOrganizationList();
+      // fetchSubOrganizations();
+  }, [currentPage,sortBy,selectedDepartment]);
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
   };
 
   const handlePreviousPage = () => {
-    setCurrentPage((prevPage) =>(prevPage -  1));
+    setCurrentPage((prevPage) => prevPage - 1);
   };
 
   const handleEdit = async (employee) => {
-    console.log(employee?.employeeId)
-      const response = await axios.get(`http://ec2-16-16-249-120.eu-north-1.compute.amazonaws.com/api/v1/employee/${employee.employeeId}`,{
-        headers:{
-        Authorization : `Bearer ${AccessToken}`
-    }});
-    const editedEmployeeData=response?.data?.Employee;
+    console.log(employee?.employeeId);
+    const response = await axios.get(
+      `http://ec2-16-16-249-120.eu-north-1.compute.amazonaws.com/api/v1/employee/${employee.employeeId}`,
+      {
+        headers: {
+          Authorization: `Bearer ${AccessToken}`,
+        },
+      }
+    );
+    const editedEmployeeData = response?.data?.Employee;
 
     console.log(editedEmployeeData);
     dispatch(setEditing(true));
@@ -119,16 +155,12 @@ const [showSubOrgs, setShowSubOrgs] = useState(false);
     dispatch(setStep(2));
   };
 
-  function refreshPage() {
-    window.location.reload(false);
-  }
 
+
+  console.log("sub org",selectedDepartment);
+  
   return (
-    <div
-      className={` h-lvh mb-2 rounded-md ${
-        darkMode ? " text-white" : ""
-      }`}
-    >
+    <div className={` h-lvh mb-2 rounded-md ${darkMode ? " text-white" : ""}`}>
       {loading ? (
         <div className="absolute grid place-content-center  h-[70%] w-[85%]">
           <Spinner />
@@ -215,7 +247,7 @@ const [showSubOrgs, setShowSubOrgs] = useState(false);
                   darkMode ? "text-white" : "text-gray-700"
                 }`}
               >
-                You need to create an organization before managing departments.
+                You need to create an organization before managing employees.
               </p>
               <div className="flex justify-center">
                 <Link
@@ -230,204 +262,235 @@ const [showSubOrgs, setShowSubOrgs] = useState(false);
             </div>
           ) : (
             <>
-              <div className="flex justify-start p-5">
+              <div className="flex justify-start p-5 gap-x-3">
+                {AllDepartments?.length>0 &&
+                                  <select
+                                  value={selectedDepartment}
+                                  onChange={(e) => setSelectedDepartment(e.target.value)}
+                                  className={`${
+                                    darkMode
+                                      ? "bg-slate-700 text-white"
+                                      : "bg-slate-200 text-black"
+                                  } p-2 rounded-lg`}
+                                >
+                                                    <option value="">Select Department</option>
+
+                                  {AllDepartments.map((dept) => (
+                                    <option
+                                      key={dept?.departmentId}
+                                      value={dept?.departmentId}
+                                    >
+                                      {dept?.department}
+                                    </option>
+                                  ))}
+                                </select>
+                }
+
                 <select
-                  value={selectedOrganization}
-                  onChange={(e) => setSelectedOrganization(e.target.value)}
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
                   className={`${
                     darkMode
                       ? "bg-slate-700 text-white"
                       : "bg-slate-200 text-black"
                   } p-2 rounded-lg`}
                 >
-                  {AllOrganizations.map((org) => (
-                    <option
-                      key={org?.organizationId}
-                      value={org?.organizationId}
-                    >
-                      {org.organizationName}
-                    </option>
-                  ))}
+                  <option value="">Sort By</option>
+                  <option value="createdAt">Creation Date</option>
+                  <option value="Name">Alphabetically</option>
                 </select>
               </div>
-             <div className="p-5">
-            {employees?.length > 0 ? (
-              <div className="relative overflow-x-auto shadow-md rounded-md">
-                <div
-                  className={` p-5  ${
-                    darkMode ? " bg-slate-700" : "bg-slate-200"
-                  }`}
-                >
-                  <table
-                    className={`w-full text-sm rounded-md  text-left rtl:text-right ${
-                      darkMode ? "text-gray-400" : "text-gray-500"
-                    } dark:text-gray-400`}
-                  >
-                    <thead
-                      className={` text-base  border-b-[1px] ${
-                        darkMode
-                          ? "text-gray-200 bg-gray-800"
-                          : "text-black bg-slate-300"
+              <div className="p-5">
+                {employees?.length > 0 ? (
+                  <div className="relative overflow-x-auto shadow-md rounded-md">
+                    <div
+                      className={` p-5  ${
+                        darkMode ? " bg-slate-700" : "bg-slate-200"
                       }`}
                     >
-                      <tr>
-                        <th
-                          scope="col"
-                          className="px-6 py-3"
-                          data-testid="avatar-header"
+                      <table
+                        className={`w-full text-sm rounded-md  text-left rtl:text-right ${
+                          darkMode ? "text-gray-400" : "text-gray-500"
+                        } dark:text-gray-400`}
+                      >
+                        <thead
+                          className={` text-base  border-b-[1px] ${
+                            darkMode
+                              ? "text-gray-200 bg-gray-800"
+                              : "text-black bg-slate-300"
+                          }`}
                         >
-                          Avatar
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3"
-                          data-testid="name-header"
-                        >
-                          Employee Name
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3"
-                          data-testid="email-header"
-                        >
-                          Employee Email
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3"
-                          data-testid="address-header"
-                        >
-                          Employee Code
-                        </th>
-                        <th
-                          scope="col"
-                          className="px-6 py-3"
-                          data-testid="action-header"
-                        >
-                          Action
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {employees.map((employee, index) => (
-                        <tr
-                          key={employee?.employeeId}
-                          className={
-                            index % 2 === 0
-                              ? `${
-                                  darkMode
-                                    ? "bg-gray-800 text-white"
-                                    : "bg-white text-black"
-                                }`
-                              : `${
-                                  darkMode
-                                    ? "bg-gray-800 text-white"
-                                    : "bg-gray-100 text-black"
-                                }`
-                          }
-                        >
-                          <td scope="row" className="px-6 py-4 w-10">
-                            <div className="flex justify-start">
-                              <img
-                                className="rounded-full aspect-square w-[30px] h-[30px] object-cover"
-                                src={employee?.profileImage}
-                                alt={`${employee?.firstName}`}
-                              />
-                            </div>
-                          </td>
-                          <td scope="row" className="px-6 py-4">
-                            <Link
-                              to={`/employee-info/${employee?.employeeName}`}
-                              className={`${
-                                darkMode ? "text-yellow-500" : "text-blue-500"
-                              }`}
+                          <tr>
+                            <th
+                              scope="col"
+                              className="px-6 py-3"
+                              data-testid="avatar-header"
                             >
-                              {employee?.employeeName}
-                            </Link>
-                          </td>
-                          <td className="px-6 py-4">{employee?.email}</td>
-                          <td className="px-6 py-4">
-                            {employee?.employeeCode}
-                          </td>
-                          <td className="px-6 py-4 flex gap-x-2">
-                            <button onClick={() => handleEdit(employee)}>
-                              <FaRegEdit
-                                className={`${
-                                  darkMode ? "text-yellow-500" : "text-blue-500"
-                                }`}
-                              />
-                            </button>
-                            <button
-                              className={`${
-                                darkMode ? "text-red-400" : "text-red-600"
-                              } text-lg`}
-                              onClick={() =>
-                                setConfirmationModal({
-                                  text1: "Are you sure?",
-                                  text2:
-                                    "You want to delete this selected employee from the records.",
-                                  btn1Text: "Delete Employee",
-                                  btn2Text: "Cancel",
-                                  btn1Handler: async () => {
-                                    const response=await dispatch(
-                                      EmployeeDelete(
-                                        employee?.userId,
-                                        AccessToken
-                                      )
-                                    );
-                                    console.log(response,"delete response");
-                                    
-                                    if (response?.status != 204) throw new Error(response?.data?.message);
-                                     else{ 
-                                      console.log("inside else"); 
-                                      toast.success(response?.data?.message);
-                                    fetchEmployeesList()
-                                    setConfirmationModal(null);
-                                  }
-                                },
-                                  btn2Handler: () => setConfirmationModal(null),
-                                })
+                              Avatar
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3"
+                              data-testid="name-header"
+                            >
+                              Employee Name
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3"
+                              data-testid="email-header"
+                            >
+                              Employee Email
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3"
+                              data-testid="address-header"
+                            >
+                              Employee Code
+                            </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3"
+                              data-testid="action-header"
+                            >
+                              Action
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {employees.map((employee, index) => (
+                            <tr
+                              key={employee?.employeeId}
+                              className={
+                                index % 2 === 0
+                                  ? `${
+                                      darkMode
+                                        ? "bg-gray-800 text-white"
+                                        : "bg-white text-black"
+                                    }`
+                                  : `${
+                                      darkMode
+                                        ? "bg-gray-800 text-white"
+                                        : "bg-gray-100 text-black"
+                                    }`
                               }
                             >
-                              <RiDeleteBin6Line />
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                  <div className="flex justify-between p-5">
-                    <button
-                      onClick={handlePreviousPage}
-                      disabled={currentPage === 0}
-                      className={` text-white p-2 rounded disabled:opacity-50 ${
-                        darkMode ? "bg-gray-600" : "bg-slate-400"
-                      }`}
-                    >
-                      Previous
-                    </button>
-                    <button
-                      onClick={handleNextPage}
-                      disabled={currentPage === totalPages-1}
-                      className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
-                        darkMode ? "bg-gray-600" : "bg-slate-400"
-                      }`}
-                    >
-                      Next
-                    </button>
+                              <td scope="row" className="px-6 py-4 w-10">
+                                <div className="flex justify-start">
+                                  <img
+                                    className="rounded-full aspect-square w-[30px] h-[30px] object-cover"
+                                    src={employee?.profileImage}
+                                    alt={`${employee?.firstName}`}
+                                  />
+                                </div>
+                              </td>
+                              <td scope="row" className="px-6 py-4">
+                                <Link
+                                  to={`/employee-info/${employee?.employeeName}`}
+                                  className={`${
+                                    darkMode
+                                      ? "text-yellow-500"
+                                      : "text-blue-500"
+                                  }`}
+                                >
+                                  {employee?.employeeName}
+                                </Link>
+                              </td>
+                              <td className="px-6 py-4">{employee?.email}</td>
+                              <td className="px-6 py-4">
+                                {employee?.employeeCode}
+                              </td>
+                              <td className="px-6 py-4 flex gap-x-2">
+                                <button onClick={() => handleEdit(employee)}>
+                                  <FaRegEdit
+                                    className={`${
+                                      darkMode
+                                        ? "text-yellow-500"
+                                        : "text-blue-500"
+                                    }`}
+                                  />
+                                </button>
+                                <button
+                                  className={`${
+                                    darkMode ? "text-red-400" : "text-red-600"
+                                  } text-lg`}
+                                  onClick={() =>
+                                    setConfirmationModal({
+                                      text1: "Are you sure?",
+                                      text2:
+                                        "You want to delete this selected employee from the records.",
+                                      btn1Text: "Delete Employee",
+                                      btn2Text: "Cancel",
+                                      btn1Handler: async () => {
+                                        const response = await dispatch(
+                                          EmployeeDelete(
+                                            employee?.userId,
+                                            AccessToken
+                                          )
+                                        );
+                                        console.log(
+                                          response,
+                                          "delete response"
+                                        );
+
+                                        if (response?.status != 204)
+                                          throw new Error(
+                                            response?.data?.message
+                                          );
+                                        else {
+                                          console.log("inside else");
+                                          toast.success(
+                                            response?.data?.message
+                                          );
+                                          fetchEmployeesList();
+                                          setConfirmationModal(null);
+                                        }
+                                      },
+                                      btn2Handler: () =>
+                                        setConfirmationModal(null),
+                                    })
+                                  }
+                                >
+                                  <RiDeleteBin6Line />
+                                </button>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                      <div className="flex justify-between p-5">
+                        <button
+                          onClick={handlePreviousPage}
+                          disabled={currentPage === 0}
+                          className={` text-white p-2 rounded disabled:opacity-50 ${
+                            darkMode ? "bg-gray-600" : "bg-slate-400"
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={handleNextPage}
+                          disabled={currentPage === totalPages - 1}
+                          className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
+                            darkMode ? "bg-gray-600" : "bg-slate-400"
+                          }`}
+                        >
+                          Next
+                        </button>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <p
+                    data-testid="no-employee-found"
+                    className="text-center mt-[7%]"
+                  >
+                    No employees found
+                  </p>
+                )}
               </div>
-            ) : (
-              <p
-                data-testid="no-employee-found"
-                className="text-center mt-[7%]"
-              >
-                No employees found
-              </p>
-            )}
-          </div>
-          </>
+            </>
           )}
           {confirmationModal && (
             <ConfirmationModal modalData={confirmationModal} />
