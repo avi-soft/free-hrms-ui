@@ -48,34 +48,38 @@ const EmployeePersonalInfo = () => {
   console.log(AllDepartments);
 
   const onSubmit = (data) => {
-    const trimmedData = {};
-    for (const key in data) {
-      if (Object.hasOwnProperty.call(data, key)) {
-        trimmedData[key] = data[key].trim();
-      }
+    console.log(data);
+    
+if(!isEditing) {
+  const trimmedData = {};
+  for (const key in data) {
+    if (Object.hasOwnProperty.call(data, key)) {
+      trimmedData[key] = data[key].trim();
     }
+  }
 
-    const attributesObj = localAttributes.reduce((acc, obj) => {
-      const attributeName = obj.attributeKey.replace(/ /g, "");
-      acc[attributeName] = trimmedData[attributeName];
-      return acc;
-    }, {});
+  const attributesObj = localAttributes.reduce((acc, obj) => {
+    const attributeName = obj.attributeKey.replace(/ /g, "");
+    acc[attributeName] = trimmedData[attributeName];
+    return acc;
+  }, {});
 
-    const employeeId = employees[0];
-    const submissionData = {
-      ...trimmedData,
-      skillList: selectedSkills,
-      designationList: selectedDesignations,
-      attributes: attributesObj,
-    };
+  const employeeId = employees[0];
+  const submissionData = {
+    ...trimmedData,
+    skillList: selectedSkills,
+    designationList: selectedDesignations,
+    attributes: attributesObj,
+  };
 
-    console.log(submissionData);
+  console.log(submissionData);
+}
 
     if (isEditing) {
       dispatch(
         UpdateEmployeePersonalDetails(
           preEditedEmployeeDetails.employeeId,
-          submissionData,
+          data,
           AccessToken
         )
       );
@@ -106,7 +110,9 @@ const EmployeePersonalInfo = () => {
 
   useEffect(() => {
     getAttributes();
-    getDepartments();
+    if(!isEditing) {
+      getDepartments();
+    }
   }, [AccessToken, dispatch]);
 
   const getLocalAttributesValue = async () => {
@@ -253,7 +259,7 @@ const EmployeePersonalInfo = () => {
                   pattern: {
                     value: /^[A-Za-z\s]+$/, // Allow only letters and spaces
                     message:
-                      "First name should contain only letters and spaces",
+                      "First name should contain only letters",
                   },
                   validate: (value) =>
                     value.trim() !== "" || "First name cannot be empty",
@@ -286,7 +292,7 @@ const EmployeePersonalInfo = () => {
                   required: "Last name is required",
                   pattern: {
                     value: /^[A-Za-z\s]+$/, // Allow only letters and spaces
-                    message: "Last name should contain only letters and spaces",
+                    message: "Last name should contain only letters",
                   },
                   validate: (value) =>
                     value.trim() !== "" || "Last name cannot be empty",
@@ -336,7 +342,8 @@ const EmployeePersonalInfo = () => {
                 </p>
               )}
             </div>
-            <div className="mt-4">
+ {  !isEditing   &&
+              <div className="mt-4">
               <label
                 htmlFor="departmentId"
                 className={`block text-sm font-semibold ${
@@ -370,6 +377,7 @@ const EmployeePersonalInfo = () => {
                 ))}
               </select>
             </div>
+}
           </div>
           <div className="grid grid-cols-2 gap-4">
             {localAttributes.map((attr) => {
@@ -377,7 +385,7 @@ const EmployeePersonalInfo = () => {
               return (
                 <div key={attr.attributeId} className="mt-4">
                   <label
-                    htmlFor={attributeName}
+                    htmlFor={attr?.attributeKey}
                     className={`block text-sm font-semibold ${
                       darkMode ? "text-white" : "text-slate-900"
                     }`}
@@ -387,9 +395,9 @@ const EmployeePersonalInfo = () => {
                     <sup className="text-red-900">*</sup>
                   </label>
                   <input
-                    id={attributeName}
+                    id={attr?.attributeKey}
                     type="text"
-                    {...register(attributeName, { required: true })}
+                    {...register(attr?.attributeKey, { required: true })}
                     className={`border rounded px-3 py-2 mt-2 w-full ${
                       darkMode
                         ? "border-slate-300 bg-gray-500 text-white"

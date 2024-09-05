@@ -180,7 +180,7 @@ const CreateUpdateSubOrganization = () => {
             darkMode ? "text-white" : ""
           }`}
         >
-           {isEditing ? "Edit Suborganization" : "Create Suborganization"}
+           {isEditing ? "Edit Sub Organization" : "Create Sub Organization"}
           
         </div>
         <div>
@@ -190,7 +190,7 @@ const CreateUpdateSubOrganization = () => {
             }`}
           >
             Home / Dashboard /{" "}
-            <span className="text-yellow-700">{isEditing ? "Edit Suborganization" : "Create Suborganization"}</span>
+            <span className="text-yellow-700">{isEditing ? "Edit Sub Organization" : "Create Sub Organization"}</span>
           </p>
         </div>
       </div>

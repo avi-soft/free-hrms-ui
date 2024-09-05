@@ -21,12 +21,15 @@ import {
 import { setOrganization } from "../../../../../slices/OrganisationSlice";
 import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
 import toast from "react-hot-toast";
+import { setSubOrganization } from "../../../../../slices/subOrganizationSlice.js";
 
 const DepartmentList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
-  const [selectedOrganization, setSelectedOrganization] =useState("unassigned");
+  const [selectedOrganization, setSelectedOrganization] =
+    useState("unassigned");
   const [updatedOrganization, setUpdatedOrganization] = useState("");
-  const [selectedAssignOrganization, setSelectedAssignOrganization] =useState("");
+  const [selectedAssignOrganization, setSelectedAssignOrganization] =
+    useState("");
 
   const [showAssignDialog, setShowAssignDialog] = useState(false); // State for dialog visibility
   const [currentDepartment, setCurrentDepartment] = useState(null);
@@ -51,16 +54,15 @@ const DepartmentList = () => {
       if (organizations.length > 0) {
         // Set the updated organization if available
         const orgId = updatedOrganization;
-        console.log(orgId,"orgid");
-        
-        if(orgId) {
+        console.log(orgId, "orgid");
+
+        if (orgId) {
           setSelectedOrganization(orgId);
           fetchDepartmentsList(orgId);
-        }  else{
+        } else {
           setSelectedOrganization("unassigned");
           fetchDepartmentsList("unassigned");
         }
-
       }
       dispatch(setLoading(false));
     } catch (error) {
@@ -91,8 +93,7 @@ const DepartmentList = () => {
     }
   };
   const handleAssignOrganization = async (orgId, departmentId) => {
-
-    console.log(orgId,departmentId);
+    console.log(orgId, departmentId);
 
     try {
       const response = await dispatch(
@@ -163,24 +164,76 @@ const DepartmentList = () => {
     }
   }, [selectedOrganization]);
 
-  function UnAssignAssignHeaders() {
+  function UnAssignAssignOrganizationHeaders() {
     let headerFlag;
-    AllDepartments?.map((department, index) => {
-      const hasOrganization = department?.organizations?.length > 0;
+    AllDepartments?.map((subOrg, index) => {
+      const hasOrganization = subOrg?.organizations?.length > 0;
       const organizationId = hasOrganization
-        ? department.organizations[0].organizationId
+        ? subOrg.organizations[0].organizationId
         : null;
       if (organizationId) {
+        console.log("here");
+
         headerFlag = true;
       } else {
+        console.log("here 2");
+
         headerFlag = false;
       }
     });
     return headerFlag;
   }
-  const AssignOrganizationHeaderFlag = UnAssignAssignHeaders();
+
+  const AssignOrganizationHeaderFlag = UnAssignAssignOrganizationHeaders();
+  // const fetchSubOrganization = async (orgId) => {
+  //   console.log("org id", orgId);
+
+  //   try {
+  //     dispatch(setLoading(true));
+  //     if (orgId == "unassigned") {
+  //       console.log("inside if");
+  //       const res = await dispatch(UnAssignedSubOrgList(AccessToken));
+  //       console.log(res);
+  //       dispatch(setSubOrganization(res?.data?.Branches?.content));
+  //     } else {
+  //       const res = await dispatch(getSubOrganization(AccessToken, orgId));
+  //       dispatch(setSubOrganization(res?.data.BranchList));
+  //     }
+
+  //     dispatch(setLoading(false));
+  //   } catch (error) {
+  //     console.error("Error fetching departments", error);
+  //     dispatch(setLoading(false));
+  //   }
+  // };
+  // const AssignOrganizationHeaderFlag = UnAssignAssignOrganizationHeaders();
+
+  function UnAssignAssignSubOrganizationHeaders() {
+    let SubheaderFlag;
+    AllDepartments?.map((subOrg, index) => {
+      const hasOrganization = subOrg?.branches?.length > 0;
+      const organizationId = hasOrganization
+        ? subOrg.branches[0].BranchId
+        : null;
+      if (organizationId) {
+        console.log("here");
+
+        SubheaderFlag = true;
+      } else {
+        console.log("here 2");
+
+        SubheaderFlag = false;
+      }
+    });
+    return SubheaderFlag;
+  }
 
   console.log("flag is", AssignOrganizationHeaderFlag);
+
+  const AssignSubOrganizationHeaderFlag =
+    UnAssignAssignSubOrganizationHeaders();
+
+  console.log(" sub  orgflag is", AssignSubOrganizationHeaderFlag);
 
   return (
     <div
@@ -337,6 +390,23 @@ const DepartmentList = () => {
                             </th>
                           )}
 
+{AssignSubOrganizationHeaderFlag ? (
+                            <th
+                              scope="col"
+                              className="px-6 py-3"
+                              data-testid="Department-Description-header"
+                            >
+                              Unassign Sub Organization
+                            </th>
+                          ) : (
+                            <th
+                              scope="col"
+                              className="px-6 py-3"
+                              data-testid="Department-Description-header"
+                            >
+                              Assign Sub Organization
+                            </th>
+                          )}
                           <th
                             scope="col"
                             className="px-6 py-3"
@@ -365,7 +435,10 @@ const DepartmentList = () => {
                             </td>
                             <td className="px-6 py-4">
                               {department?.managerId
-                                ? `${(department.managerFirstName   || department?.manager?.firstName)} ${department.managerLastName}`
+                                ? `${
+                                    department.managerFirstName ||
+                                    department?.manager?.firstName
+                                  } ${department.managerLastName}`
                                 : "N/A"}
                             </td>
                             <td className="px-6 py-4">
@@ -389,17 +462,48 @@ const DepartmentList = () => {
                               </td>
                             ) : (
                               <td className="px-6 py-4 ">
-                              <button
-                                data-testid="assign-button"
-                                onClick={() => {
-                                  setCurrentDepartment(department);
-                                  setShowAssignDialog(true);
-                                }}
-                                className="bg-yellow-500 text-black py-1 px-4 rounded"
-                              >
-                                ASSIGN
-                              </button>
-                            </td>
+                                <button
+                                  data-testid="assign-button"
+                                  onClick={() => {
+                                    setCurrentDepartment(department);
+                                    setShowAssignDialog(true);
+                                  }}
+                                  className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                >
+                                  ASSIGN
+                                </button>
+                              </td>
+                            )}
+
+                            {AssignSubOrganizationHeaderFlag ? (
+                              <td className="px-6 py-4 ">
+                                <button
+                                  data-testid="unassign-button"
+                                  onClick={() =>
+                                    handleUnassignOrganization(
+                                      AccessToken,
+                                      selectedOrganization,
+                                      department.departmentId
+                                    )
+                                  }
+                                  className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                >
+                                  UNASSIGN
+                                </button>
+                              </td>
+                            ) : (
+                              <td className="px-6 py-4 ">
+                                <button
+                                  data-testid="assign-button"
+                                  onClick={() => {
+                                    setCurrentDepartment(department);
+                                    setShowAssignDialog(true);
+                                  }}
+                                  className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                >
+                                  ASSIGN
+                                </button>
+                              </td>
                             )}
 
                             <td className="px-6 py-4 flex items-center justify-between w-1/2 gap-x-2">
@@ -474,32 +578,40 @@ const DepartmentList = () => {
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg max-w-sm w-full">
             <h2 className="text-xl font-semibold mb-4">Assign Organization</h2>
             <div className="mb-4">
-  <label htmlFor="organization-select" className="block text-sm font-medium">
-    Select Organization
-  </label>
-  <select
-    id="organization-select"
-    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-      darkMode
-        ? "bg-gray-700 border-gray-600 text-white"
-        : "bg-white text-gray-700"
-    } max-h-60 overflow-y-auto`} // Apply max-height and scrolling
-    value={selectedAssignOrganization}
-    onChange={(e) => setSelectedAssignOrganization(e.target.value)}
-  >
-    <option value="">Select Organization</option>
-    {AllOrganizations.map((org) => (
-      <option key={org?.organizationId} value={org?.organizationId}>
-        {org.organizationName}
-      </option>
-    ))}
-  </select>
-</div>
+              <label
+                htmlFor="organization-select"
+                className="block text-sm font-medium"
+              >
+                Select Organization
+              </label>
+              <select
+                id="organization-select"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white text-gray-700"
+                } max-h-60 overflow-y-auto`} // Apply max-height and scrolling
+                value={selectedAssignOrganization}
+                onChange={(e) => setSelectedAssignOrganization(e.target.value)}
+              >
+                <option value="">Select Organization</option>
+                {AllOrganizations.map((org) => (
+                  <option key={org?.organizationId} value={org?.organizationId}>
+                    {org.organizationName}
+                  </option>
+                ))}
+              </select>
+            </div>
 
             <div className="flex justify-end">
               <button
                 className="bg-blue-500 text-white py-2 px-4 rounded mr-2"
-                onClick={() => handleAssignOrganization(selectedAssignOrganization, currentDepartment.departmentId)}
+                onClick={() =>
+                  handleAssignOrganization(
+                    selectedAssignOrganization,
+                    currentDepartment.departmentId
+                  )
+                }
               >
                 Assign
               </button>

@@ -11,6 +11,7 @@ import {
   EditEmployeeEmergencyContactDetails,
   UpdateEmployeeAddressDetails,
 } from "../../../services/operations/employeeAPI";
+import { useNavigate } from "react-router-dom";
 
 const EmployeeAdditionalDetails = () => {
   const {
@@ -34,6 +35,7 @@ const EmployeeAdditionalDetails = () => {
 
   const { AccessToken } = useSelector((state) => state.auth);
   const { employees } = useSelector((state) => state.employee);
+  const navigate=useNavigate()
   const darkMode = useSelector((state) => state.theme?.darkMode) || false;
   const isEditing = useSelector((state) => state.editing.isEditing);
   const preEditedEmployeeDetails = useSelector(
@@ -803,7 +805,7 @@ const EmployeeAdditionalDetails = () => {
                   ))}
                 </select>
                 {errorsBank.bankName && (
-                  <span className="text-red-500 text-xs">{errorsBank.bankName.message}</span>
+                  <p className="text-red-500 text-md mt-2">{errorsBank.bankName.message}</p>
                 )}
               </div>
 
@@ -819,7 +821,7 @@ const EmployeeAdditionalDetails = () => {
                   defaultValue={bankDetails.accountNumber}
                 />
                 {errorsBank.accountNumber && (
-                  <span className="text-red-500 text-xs">{errorsBank.accountNumber.message}</span>
+                  <p className="text-red-500 text-md mt-2">{errorsBank.accountNumber.message}</p>
                 )}
               </div>
 
@@ -835,7 +837,7 @@ const EmployeeAdditionalDetails = () => {
                   defaultValue={bankDetails.ifscCode}
                 />
                 {errorsBank.ifsc && (
-                  <span className="text-red-500 text-xs">{errorsBank.ifsc.message}</span>
+                  <p className="text-red-500 text-md mt-2">{errorsBank.ifsc.message}</p>
                 )}
               </div>
 
@@ -851,7 +853,7 @@ const EmployeeAdditionalDetails = () => {
                   defaultValue={bankDetails.bankBranch}
                 />
                 {errorsBank.branch && (
-                  <span className="text-red-500 text-xs">{errorsBank.branch.message}</span>
+                  <p className="text-red-500 text-md mt-2">{errorsBank.branch.message}</p>
                 )}
               </div>
             </div>
@@ -888,7 +890,7 @@ const EmployeeAdditionalDetails = () => {
                   ))}
                 </select>
                 {errorsBank.bankName && (
-                  <span className="text-red-500 text-xs">{errorsBank.bankName.message}</span>
+                  <p className="text-red-500 text-md mt-2">{errorsBank.bankName.message}</p>
                 )}
               </div>
 
@@ -905,7 +907,7 @@ const EmployeeAdditionalDetails = () => {
                     placeholder="Enter Account Number"
                   />
                   {errorsBank.accountNumber && (
-                    <span className="text-red-500 text-xs">{errorsBank.accountNumber.message}</span>
+                    <p className="text-red-500 text-md mt-2">{errorsBank.accountNumber.message}</p>
                   )}
                 </div>
 
@@ -921,7 +923,7 @@ const EmployeeAdditionalDetails = () => {
                     placeholder="Enter IFSC Code"
                   />
                   {errorsBank.ifsc && (
-                    <span className="text-red-500 text-xs">{errorsBank.ifsc.message}</span>
+                    <p className="text-red-500 text-md mt-2">{errorsBank.ifsc.message}</p>
                   )}
                 </div>
               </div>
@@ -938,20 +940,29 @@ const EmployeeAdditionalDetails = () => {
                   placeholder="Enter Branch"
                 />
                 {errorsBank.branch && (
-                  <span className="text-red-500 text-xs">{errorsBank.branch.message}</span>
+                  <p className="text-red-500 text-md mt-2">{errorsBank.branch.message}</p>
                 )}
               </div>
 
               <div className="flex items-center gap-x-3 mt-10">
                 <button
                   type="submit"
-                  className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${loading ? 'bg-slate-900 text-white' : 'bg-yellow-500 text-black'} py-1 px-5 flex items-center`}
+                  className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200
+                     ${loading ? 'bg-slate-900 text-white' : 'bg-yellow-500 text-black'} py-1 px-5 flex items-center`}
                 >
-                  Add <FaPlus className="ml-2" />
+                  Add Bank Details <FaPlus className="ml-2" />
                 </button>
               </div>
+            
 
-              <div className="flex justify-between mt-6">
+            </form>
+            
+          </div>
+          
+        </div>
+        
+      )}
+                    <div className="flex justify-between mt-6">
                 <button
                   onClick={() => dispatch(setStep(2))}
                   className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 bg-yellow-500 text-black py-1 px-5 flex items-center justify-center`}
@@ -959,16 +970,15 @@ const EmployeeAdditionalDetails = () => {
                   <FaArrowLeft className="ml-2" /> Previous Step
                 </button>
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={()=> {
+                    navigate("/employee/employee-list")
+                  }}
                   className="bg-green-500 text-white py-1 px-4 rounded flex items-center"
                 >
                   <FaSave className="mr-2" /> Save All Changes
                 </button>
               </div>
-            </form>
-          </div>
-        </div>
-      )}
     </div>
     </div>
   );

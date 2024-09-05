@@ -111,9 +111,15 @@ const CreateUpdateOrganisation = () => {
             organization.organizationId
           )
         );
+        if(response?.isSuccess==true) {
+          navigate("/organization/organization-list");
+
+        }
       } else {
         response = await dispatch(addOrganisation(AccessToken, data));
       }
+      console.log(response);
+      
       if (response?.status != 201) throw new Error(response?.data?.message);
       else {
         toast.success(response?.data?.message);
@@ -146,7 +152,7 @@ const CreateUpdateOrganisation = () => {
         dispatch(setShowOption(true));
       }
       if (isEditing) {
-        return null;
+        null;
       } else {
         navigate("/organization/organization-list");
       }
@@ -178,7 +184,7 @@ const CreateUpdateOrganisation = () => {
             darkMode ? "text-white" : ""
           }`}
         >
-          {isEditing ? "Edit Organisation" : "Create Organisation"}
+          {isEditing ? "Edit Organization" : "Create Organization"}
         </div>
         <div>
           <p
@@ -188,7 +194,7 @@ const CreateUpdateOrganisation = () => {
           >
             Home / Dashboard /{" "}
             <span className="text-yellow-700">
-              {isEditing ? "Edit Organisation" : "Create Organisation"}
+              {isEditing ? "Edit Organization" : "Create Organization"}
             </span>
           </p>
         </div>
@@ -209,7 +215,7 @@ const CreateUpdateOrganisation = () => {
                         ? URL.createObjectURL(selectedImage)
                         : existingImage || defaultImage
                     }
-                    alt="Organisation Logo"
+                    alt="Organization Logo"
                     className="aspect-square rounded-full object-cover h-20"
                   />
                   <div className="w-[80%] flex gap-4 ml-5 flex-col">
@@ -293,33 +299,33 @@ const CreateUpdateOrganisation = () => {
                     darkMode ? "text-white" : ""
                   }`}
                 >
-                  Organisation Name
+                  Organization Name
                   <sup className="text-red-900 font-bold">*</sup>
                 </label>
                 <input
                   id="organization"
                   type="text"
-                  placeholder="Organisation Name..."
+                  placeholder="Organization Name..."
                   {...register("organizationName", {
-                    required: "Organisation Name is required",
+                    required: "Organization Name is required",
                     minLength: {
                       value: 3,
                       message:
-                        "Organisation Name must be at least 3 characters",
+                        "Organization Name must be at least 3 characters",
                     },
                     validate: {
                       noNumbers: (value) =>
                         !/\d/.test(value) ||
-                        "Organisation Name must not contain numbers",
+                        "Organization Name must not contain numbers",
 
                       noSpecialChars: (value) =>
                         /^[a-zA-Z0-9 ]*$/.test(value) ||
-                        "Organisation Name must not contain special characters",
+                        "Organization Name must not contain special characters",
                       noExtraSpaces: (value) => {
                         const trimmedValue = value.trim();
                         return (
                           !/\s{2,}/.test(trimmedValue) ||
-                          "Organisation Name must not contain consecutive spaces"
+                          "Organization Name must not contain consecutive spaces"
                         );
                       },
                     },
@@ -341,7 +347,7 @@ const CreateUpdateOrganisation = () => {
                     darkMode ? "text-white" : ""
                   }`}
                 >
-                  Organisation Description
+                  Organization Description
                   <sup className="text-red-900 font-bold">*</sup>
                 </label>
                 <textarea
@@ -512,27 +518,27 @@ const CreateUpdateOrganisation = () => {
                   <input
                     id="organization"
                     type="text"
-                    placeholder="Organisation Name..."
+                    placeholder="Organization Name..."
                     {...register("organizationName", {
-                      required: "Organisation Name is required",
+                      required: "Organization Name is required",
                       minLength: {
                         value: 3,
                         message:
-                          "Organisation Name must be at least 3 characters",
+                          "Organization Name must be at least 3 characters",
                       },
                       validate: {
                         noNumbers: (value) =>
                           !/\d/.test(value) ||
-                          "Organisation Name must not contain numbers",
+                          "Organization Name must not contain numbers",
 
                         noSpecialChars: (value) =>
                           /^[a-zA-Z0-9 ]*$/.test(value) ||
-                          "Organisation Name must not contain special characters",
+                          "Organization Name must not contain special characters",
                         noExtraSpaces: (value) => {
                           const trimmedValue = value.trim();
                           return (
                             !/\s{2,}/.test(trimmedValue) ||
-                            "Organisation Name must not contain consecutive spaces"
+                            "Organization Name must not contain consecutive spaces"
                           );
                         },
                       },
@@ -554,12 +560,12 @@ const CreateUpdateOrganisation = () => {
                       darkMode ? "text-white" : ""
                     }`}
                   >
-                    Organisation Description
+                    Organization Description
                     <sup className="text-red-900 font-bold">*</sup>
                   </label>
                   <textarea
                     id="organizationDescription"
-                    placeholder="Organisation Description..."
+                    placeholder="Organization Description..."
                     {...register("organizationDescription", {
                       required: "Description is required",
                       minLength: {
@@ -620,7 +626,7 @@ const CreateUpdateOrganisation = () => {
                       : "bg-blue-700 text-white"
                   } hover:scale-95 transition-all duration-200`}
                 >
-                  {isEditing ? "Update Organisation" : "Submit Organisation"}
+                  {isEditing ? "Update Organization" : "Submit Organization"}
                 </button>
               </form>
             )}

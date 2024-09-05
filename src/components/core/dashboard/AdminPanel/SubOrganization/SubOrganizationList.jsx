@@ -184,12 +184,12 @@ const SubOrganizationList = () => {
               className="text-xl font-semibold mb-2 lg:mb-0"
               data-testid="Department List"
             >
-              SubOrganization List
+              Sub Organization List
             </div>
             <div>
               <p className="text-xl font-semibold">
                 Home / Dashboard /
-                <span className="text-yellow-700"> SubOrganization List</span>
+                <span className="text-yellow-700"> Sub Organization List</span>
               </p>
             </div>
           </div>
@@ -204,7 +204,7 @@ const SubOrganizationList = () => {
               <span>
                 <HiOutlinePlusCircle />
               </span>
-              <button>Add SubOrganization</button>
+              <button>Add Sub Organization</button>
             </Link>
           </div>
           {AllOrganizations.length === 0 ? (
