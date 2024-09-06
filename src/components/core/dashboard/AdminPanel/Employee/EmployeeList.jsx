@@ -23,9 +23,17 @@ import axios from "axios";
 import toast from "react-hot-toast";
 import { setOrganization } from "../../../../../slices/OrganisationSlice";
 import { getOrganisation } from "../../../../../services/operations/OrganisationAPI";
-import { getSubOrganization, getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI";
-import departmentSlice, { setDepartments } from "../../../../../slices/departmentSlice";
-import { AllDepartmentlist, Departmentlist } from "../../../../../services/operations/departmentAPI";
+import {
+  getSubOrganization,
+  getSubOrganizationList,
+} from "../../../../../services/operations/subOrganisationAPI";
+import departmentSlice, {
+  setDepartments,
+} from "../../../../../slices/departmentSlice";
+import {
+  AllDepartmentlist,
+  Departmentlist,
+} from "../../../../../services/operations/departmentAPI";
 
 const EmployeeList = () => {
   const dispatch = useDispatch();
@@ -42,18 +50,16 @@ const EmployeeList = () => {
   const [sortBy, setSortBy] = useState("");
   const employeesPerPage = 5;
   const { AllOrganizations } = useSelector((state) => state.Organisation);
-  const {  AllDepartments } = useSelector((state) => state.department);
-
+  const { AllDepartments } = useSelector((state) => state.department);
 
   const navigate = useNavigate();
 
-  console.log("all organizations",AllOrganizations);
-  
+  console.log("all organizations", AllOrganizations);
 
   const fetchOrganizationList = async () => {
     try {
       const res = await dispatch(getOrganisation(AccessToken));
-      console.log(res,"response is");
+      console.log(res, "response is");
 
       dispatch(setOrganization(res?.data));
       // if (organizations.length > 0) {
@@ -71,8 +77,8 @@ const EmployeeList = () => {
   const fetchSubOrganizations = async () => {
     try {
       const response = await dispatch(getSubOrganizationList(AccessToken));
-      console.log("sub org resp",response);
-      
+      console.log("sub org resp", response);
+
       setSubOrganizations(response?.data?.Branches?.content || []);
       // setShowSubOrgs(response.data.subOrganizations.length > 0);
     } catch (error) {
@@ -80,39 +86,44 @@ const EmployeeList = () => {
     }
   };
 
-  
   const fetchDepartmentsList = async () => {
     console.log("hi");
-    
+
     try {
-        console.log("here");
-        
-        const res = await dispatch(AllDepartmentlist(AccessToken));
-        console.log("else", res);
-        dispatch(setDepartments(res?.data?.content));
+      console.log("here");
+
+      const res = await dispatch(AllDepartmentlist(AccessToken));
+      console.log("else", res);
+      dispatch(setDepartments(res?.data?.content));
     } catch (error) {
       console.error("Error fetching departments", error);
       dispatch(setLoading(false));
     }
   };
 
-console.log("all dept",AllDepartments);
+  console.log("all dept", AllDepartments);
 
   const fetchEmployeesList = async (page) => {
     try {
       setLoading(true);
-      if(selectedDepartment) {
+      if (selectedDepartment) {
         const res = await dispatch(
-          DepartmentEmployeesList(AccessToken,selectedDepartment,page, employeesPerPage, sortBy)
+          DepartmentEmployeesList(
+            AccessToken,
+            selectedDepartment,
+            page,
+            employeesPerPage,
+            sortBy
+          )
         );
-        console.log("departments employee",res);
-        
+        console.log("departments employee", res);
+
         setEmployees(res?.data?.Employees?.content);
-      }else{
+      } else {
         const res = await dispatch(
           EmployeesList(AccessToken, page, employeesPerPage, sortBy)
         );
-        setEmployees(res?.data?.Users);
+        setEmployees(res?.data?.Employees?.content);
         setTotalPages(res.data.totalPages);
       }
     } catch (error) {
@@ -122,12 +133,12 @@ console.log("all dept",AllDepartments);
   };
 
   useEffect(() => {
-    fetchDepartmentsList()
+    fetchDepartmentsList();
 
     fetchEmployeesList(currentPage);
     fetchOrganizationList();
-      // fetchSubOrganizations();
-  }, [currentPage,sortBy,selectedDepartment]);
+    // fetchSubOrganizations();
+  }, [currentPage, sortBy, selectedDepartment]);
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
   };
@@ -146,6 +157,8 @@ console.log("all dept",AllDepartments);
         },
       }
     );
+    console.log("response",response);
+    
     const editedEmployeeData = response?.data?.Employee;
 
     console.log(editedEmployeeData);
@@ -155,10 +168,8 @@ console.log("all dept",AllDepartments);
     dispatch(setStep(2));
   };
 
+  console.log("sub org", selectedDepartment);
 
-
-  console.log("sub org",selectedDepartment);
-  
   return (
     <div className={` h-lvh mb-2 rounded-md ${darkMode ? " text-white" : ""}`}>
       {loading ? (
@@ -263,28 +274,28 @@ console.log("all dept",AllDepartments);
           ) : (
             <>
               <div className="flex justify-start p-5 gap-x-3">
-                {AllDepartments?.length>0 &&
-                                  <select
-                                  value={selectedDepartment}
-                                  onChange={(e) => setSelectedDepartment(e.target.value)}
-                                  className={`${
-                                    darkMode
-                                      ? "bg-slate-700 text-white"
-                                      : "bg-slate-200 text-black"
-                                  } p-2 rounded-lg`}
-                                >
-                                                    <option value="">Select Department</option>
+                {AllDepartments?.length > 0 && (
+                  <select
+                    value={selectedDepartment}
+                    onChange={(e) => setSelectedDepartment(e.target.value)}
+                    className={`${
+                      darkMode
+                        ? "bg-slate-700 text-white"
+                        : "bg-slate-200 text-black"
+                    } p-2 rounded-lg`}
+                  >
+                    <option value="">Select Department</option>
 
-                                  {AllDepartments.map((dept) => (
-                                    <option
-                                      key={dept?.departmentId}
-                                      value={dept?.departmentId}
-                                    >
-                                      {dept?.department}
-                                    </option>
-                                  ))}
-                                </select>
-                }
+                    {AllDepartments.map((dept) => (
+                      <option
+                        key={dept?.departmentId}
+                        value={dept?.departmentId}
+                      >
+                        {dept?.department}
+                      </option>
+                    ))}
+                  </select>
+                )}
 
                 <select
                   value={sortBy}
@@ -387,19 +398,19 @@ console.log("all dept",AllDepartments);
                               </td>
                               <td scope="row" className="px-6 py-4">
                                 <Link
-                                  to={`/employee-info/${employee?.employeeName}`}
+                                  to={`/employee-info/${employee?.firstName}`}
                                   className={`${
                                     darkMode
                                       ? "text-yellow-500"
                                       : "text-blue-500"
                                   }`}
                                 >
-                                  {employee?.employeeName}
+                                  {employee?.firstName}  {employee?.lastName}
                                 </Link>
                               </td>
-                              <td className="px-6 py-4">{employee?.email}</td>
+                              <td className="px-6 py-4">{employee?.email ? employee?.email : "CONFIDENTIAL"}</td>
                               <td className="px-6 py-4">
-                                {employee?.employeeCode}
+                                {employee?.employeeId}
                               </td>
                               <td className="px-6 py-4 flex gap-x-2">
                                 <button onClick={() => handleEdit(employee)}>
@@ -425,7 +436,7 @@ console.log("all dept",AllDepartments);
                                       btn1Handler: async () => {
                                         const response = await dispatch(
                                           EmployeeDelete(
-                                            employee?.userId,
+                                            employee?.employeeId,
                                             AccessToken
                                           )
                                         );
@@ -471,7 +482,7 @@ console.log("all dept",AllDepartments);
                         </button>
                         <button
                           onClick={handleNextPage}
-                          disabled={currentPage === totalPages - 1}
+                          disabled={currentPage === totalPages - 1 || employees.length < employeesPerPage}
                           className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
                             darkMode ? "bg-gray-600" : "bg-slate-400"
                           }`}

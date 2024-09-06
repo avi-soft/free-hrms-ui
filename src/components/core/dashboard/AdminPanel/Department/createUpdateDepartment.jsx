@@ -5,6 +5,7 @@ import {
   addDepartment,
   updateDepartment,
   DepartmentAttributeslist,
+  AssignDepartmentSubOrganization,
 } from "../../../../../services/operations/departmentAPI";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { EmployeeSearch } from "../../../../../services/operations/employeeAPI";
@@ -16,6 +17,8 @@ import { getOrganisation } from "../../../../../services/operations/Organisation
 import toast from "react-hot-toast";
 import DepartmentAttributes from "./DepartmentAttributes";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
+import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI";
+import { setSubOrganization } from "../../../../../slices/subOrganizationSlice";
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -31,6 +34,7 @@ const CreateUpdateDepartment = () => {
   const [selectedManager, setSelectedManager] = useState(null);
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const [showCheckbox, setShowCheckbox] = useState(false);
+
   const { loading } = useSelector((state) => state.department);
   const { AllOrganizations } = useSelector((state) => state.Organisation);
   const [noSearch, setNoSearch] = useState(false);
@@ -39,14 +43,22 @@ const CreateUpdateDepartment = () => {
   const location = useLocation();
   const { darkMode } = useSelector((state) => state.theme);
   const debounceTimeoutRef = useRef(null);
+  const { AllSubOrganization } = useSelector((state) => state.subOrganization);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const { isEditing, department } = location.state || {
     isEditing: false,
     department: null,
   };
 
-  console.log("editing departent dtat is",department);
-  
+  console.log(department?.branches[0]?.branchName);
+  console.log("select org", selectedOrganization);
+
+  const [selectedSubOrganization, setSelectedSubOrganization] = useState(""); // Added state
+
+  console.log("editing departent dtat is", department);
+  console.log(selectedSubOrganization);
+
   const [isAttribute, setIsAttribute] = useState(false);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [departmentAttribute, setDepartmentAttributes] = useState([]);
@@ -77,6 +89,24 @@ const CreateUpdateDepartment = () => {
   };
 
   console.log(isEditing);
+
+  const fetchSubOrganizationList = async (orgId) => {
+    console.log("org id", orgId);
+
+    try {
+      dispatch(setLoading(true));
+
+      const res = await dispatch(getSubOrganizationList(AccessToken));
+      console.log(res, "sub org response");
+
+      dispatch(setSubOrganization(res?.data?.Branches?.content));
+
+      dispatch(setLoading(false));
+    } catch (error) {
+      console.error("Error fetching departments", error);
+      dispatch(setLoading(false));
+    }
+  };
   useEffect(() => {
     const fetchOrganizationList = async () => {
       try {
@@ -91,6 +121,7 @@ const CreateUpdateDepartment = () => {
     };
 
     fetchOrganizationList();
+    fetchSubOrganizationList();
   }, [dispatch, AccessToken]);
 
   useEffect(() => {
@@ -98,6 +129,8 @@ const CreateUpdateDepartment = () => {
       setValue("department", department.department);
       setValue("description", department.description);
       setSelectedOrganization(department.organizationId);
+
+      // Set manager if exists
       if (department?.managerId) {
         setSelectedManager({
           userId: department.managerId,
@@ -112,22 +145,29 @@ const CreateUpdateDepartment = () => {
             lastName: department.managerLastName,
           },
         ]);
-      } else {
-        reset(); // Clear form fields
-        setSelectedOrganization("");
-        setSelectedManager(null);
-        setShowCheckbox(false);
-        setSearchResults([]);
       }
+
+      // Set the values for department attributes
+      if (departmentAttribute && department.attributes) {
+        departmentAttribute.forEach((attribute) => {
+          const attributeValue = department.attributes[attribute.attributeKey];
+          if (attributeValue) {
+            setValue(attribute.attributeKey, attributeValue);
+          }
+        });
+      }
+      // if (department?.branches?.length > 0) {
+      //   setSelectedSubOrganization(department.branches[0].branchId);
+      // }
     } else {
-      reset(); // Clear form fields
+      reset(); // Clear form fields if not editing
       setSelectedManager(null);
       setSelectedOrganization("");
       setShowCheckbox(false);
       setSearchResults([]);
     }
-  }, [isEditing, department, setValue, reset]);
-  
+  }, [isEditing, department, departmentAttribute, setValue, reset]);
+
   async function getRes() {
     const res = await dispatch(DepartmentAttributeslist(AccessToken));
     setDepartmentAttributes(res?.data);
@@ -139,24 +179,30 @@ const CreateUpdateDepartment = () => {
   }, [selectedOrganization, setValue]);
 
   const onSubmit = async (data) => {
+    console.log("submit data", data);
+
     if (!selectedManager) {
       toast.error("Please select a valid Manager.");
       return;
     }
     const trimmedDepartmentName = data.department?.trim() || "";
     const trimmedDescription = data.description?.trim() || "";
-    const attributesObj = departmentAttribute && departmentAttribute.reduce((acc, obj) => {
-      acc[obj.attributeKey] = data[obj.attributeKey];
-      return acc;
-    }, {});
+    const attributesObj =
+      departmentAttribute &&
+      departmentAttribute.reduce((acc, obj) => {
+        acc[obj.attributeKey] = data[obj.attributeKey];
+        return acc;
+      }, {});
     const formData = {
       department: trimmedDepartmentName,
       description: trimmedDescription,
       managerId: selectedManager?.userId || null,
-      organizationId: selectedOrganization,
+      organizationId: data?.organization,
+      branchId: data?.subOrganization,
       AccessToken,
-      attributes:attributesObj
+      attributes: attributesObj,
     };
+    console.log("submit from data", formData);
 
     try {
       if (isEditing) {
@@ -220,8 +266,7 @@ const CreateUpdateDepartment = () => {
   useEffect(() => {
     setConfirmationModal({
       text1: "Do you want to add new attributes?",
-      text2:
-        "This action will redirect you to the Attributes creation page.",
+      text2: "This action will redirect you to the Attributes creation page.",
       btn1Text: "Yes",
       btn2Text: "Skip",
       btn1Handler: () => {
@@ -249,6 +294,54 @@ const CreateUpdateDepartment = () => {
     }
   };
 
+  function UnAssignAssignSubOrganizationHeaders() {
+    let SubheaderFlag;
+    const hasOrganization = department?.branches?.length > 0;
+    const organizationId = hasOrganization
+      ? department.branches[0].branchId
+      : null;
+    if (organizationId) {
+      console.log("here");
+
+      SubheaderFlag = true;
+    } else {
+      console.log("here 2");
+
+      SubheaderFlag = false;
+    }
+    return SubheaderFlag;
+  }
+
+  const AssignSubOrganizationHeaderFlag =
+    UnAssignAssignSubOrganizationHeaders();
+
+  console.log(" sub  orgflag is", AssignSubOrganizationHeaderFlag);
+
+  useEffect(() => {
+    const handleAssignSubOrganization = async (SubOrgId) => {
+      console.log("i am called");
+
+      try {
+        const response = await dispatch(
+          AssignDepartmentSubOrganization(
+            AccessToken,
+            SubOrgId,
+            department?.departmentId
+          )
+        );
+        console.log(response);
+
+        if (response?.status !== 200) throw new Error(response.data.message);
+        toast.success(response?.data?.message);
+      } catch (error) {
+        console.error("Error assigning organization", error);
+        toast.error("Failed to assign organization");
+      }
+    };
+    if (selectedSubOrganization) {
+      handleAssignSubOrganization(selectedSubOrganization);
+    }
+  }, [selectedSubOrganization]);
   return (
     <div
       className={`pb-9 h-auto mb-10 mt-5 rounded ${
@@ -322,50 +415,106 @@ const CreateUpdateDepartment = () => {
               darkMode ? "bg-slate-600" : "bg-white"
             }`}
           >
-           {
-            !isEditing  &&             <div className="mb-4">
-            <label
-              htmlFor="organization"
-              className={`block text-sm font-bold mb-2 ${
-                darkMode ? "text-white" : "text-gray-700"
-              }`}
-            >
-              Select Organization
-              <sup className="text-red-900 font-bold">*</sup>
-            </label>
-            <select
-              id="organization"
-              {...register("organization", {
-                required: "Organization is required",
-              })}
-              value={selectedOrganization}
-              onChange={(e) => {
-                setSelectedOrganization(e.target.value);
-              }}
-              className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600 text-white"
-                  : "bg-white text-gray-700"
-              }`}
-            >
-              <option value="">Select Organization</option>
-              {AllOrganizations &&
-                AllOrganizations.map((org) => (
-                  <option
-                    key={org?.organizationId}
-                    value={org?.organizationId}
-                  >
-                    {org?.organizationName}
-                  </option>
-                ))}
-            </select>
-            {errors.organization && (
-              <p className="text-red-500 mt-1">
-                {errors.organization.message}
-              </p>
+            {!isEditing && (
+              <div className="mb-4">
+                <label
+                  htmlFor="organization"
+                  className={`block text-sm font-bold mb-2 ${
+                    darkMode ? "text-white" : "text-gray-700"
+                  }`}
+                >
+                  Select Organization
+                  <sup className="text-red-900 font-bold">*</sup>
+                </label>
+                <select
+
+                  id="organization"
+                  {...register("organization", {
+                    required: "Organization is required",
+                  })}
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white text-gray-700"
+                  }`}
+                >
+                  <option value="">Select Organization</option>
+                  {AllOrganizations &&
+                    AllOrganizations.map((org) => (
+                      <option
+                        key={org?.organizationId}
+                        value={org?.organizationId}
+                      >
+                        {org?.organizationName}
+                      </option>
+                    ))}
+                </select>
+                {errors.organization && (
+                  <p className="text-red-500 mt-1">
+                    {errors.organization.message}
+                  </p>
+                )}
+              </div>
             )}
-          </div>
-           }
+            {isEditing && AssignSubOrganizationHeaderFlag ? (
+              <div className="mb-4">
+                <label
+                  htmlFor="organization-select"
+                  className="block text-sm font-medium"
+                >
+                  Select Sub Organization
+                </label>
+                <select
+                  id="organization-select"
+                  className={` mt-2 shadow appearance-none border rounded w-full py-2 px-3 ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white text-gray-700"
+                  } max-h-60 overflow-y-auto`}
+                  value={selectedSubOrganization}
+                  onChange={(e) => setSelectedSubOrganization(e.target.value)}
+                >
+                  <option value="">Select Sub Organization</option>
+                  {AllSubOrganization.map((subOrg) => (
+                    <option key={subOrg?.branchId} value={subOrg?.branchId}>
+                      {subOrg.branchName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <div className="mb-4">
+                <label
+                  htmlFor="subOrganization"
+                  className="block text-sm font-medium"
+                >
+                  Select Sub Organization
+                </label>
+                <select
+                  id="subOrganization"
+                  {...register("subOrganization", {
+                    required: " Sub Organization is required",
+                  })}
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white text-gray-700"
+                  } max-h-60 overflow-y-auto`}
+                >
+                  <option value="">Select Sub Organization</option>
+                  {AllSubOrganization.map((subOrg) => (
+                    <option key={subOrg?.branchId} value={subOrg?.branchId}>
+                      {subOrg.branchName}
+                    </option>
+                  ))}
+                </select>
+                {errors.subOrganization && (
+                  <p className="text-red-500 mt-1">
+                    {errors.subOrganization.message}
+                  </p>
+                )}
+              </div>
+            )}
             <div className="mb-4">
               <label
                 htmlFor="department"
@@ -508,7 +657,7 @@ const CreateUpdateDepartment = () => {
                 </div>
               </div>
             )}
-            {/* {departmentAttribute &&
+            {departmentAttribute &&
               departmentAttribute.map((attribute) => (
                 <div className="mb-4" key={attribute.attributeId}>
                   <label
@@ -535,10 +684,12 @@ const CreateUpdateDepartment = () => {
                     }`}
                   />
                   {errors[attribute.attributeKey] && (
-                <p className="text-red-500 mt-1">{errors[attribute.attributeKey].message}</p>
-              )}
+                    <p className="text-red-500 mt-1">
+                      {errors[attribute.attributeKey].message}
+                    </p>
+                  )}
                 </div>
-              ))} */}
+              ))}
             <button
               type="submit"
               className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${
@@ -552,7 +703,9 @@ const CreateUpdateDepartment = () => {
           </form>
         )}
       </div>
-      {confirmationModal && !isEditing && <ConfirmationModal modalData={confirmationModal} />}
+      {confirmationModal && !isEditing && (
+        <ConfirmationModal modalData={confirmationModal} />
+      )}
     </div>
   );
 };

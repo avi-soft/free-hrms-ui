@@ -9,7 +9,11 @@ import Spinner from "../../common/Spinner";
 import { setOrganization } from "../../../slices/OrganisationSlice";
 import { getOrganisation } from "../../../services/operations/OrganisationAPI";
 import ConfirmationModal from "../../common/ConfirmationModal";
-import { addEmployees, setCurrentOrganizationId, setStep } from "../../../slices/employeeSlice";
+import {
+  addEmployees,
+  setCurrentOrganizationId,
+  setStep,
+} from "../../../slices/employeeSlice";
 
 const PrimaryEmployeeDetails = () => {
   const {
@@ -66,7 +70,7 @@ const PrimaryEmployeeDetails = () => {
       console.log(response);
       if (response?.data?.success == true) {
         dispatch(addEmployees(response?.data?.newUser?.employeeId));
-        dispatch(setCurrentOrganizationId(data?.organization))
+        dispatch(setCurrentOrganizationId(data?.organization));
         setConfirmationModal({
           text1: "Employee added successfully!",
           text2:
@@ -85,7 +89,6 @@ const PrimaryEmployeeDetails = () => {
       console.error("Error adding employee", error);
     }
   };
-
 
   return (
     <div
