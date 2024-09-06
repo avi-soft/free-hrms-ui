@@ -123,7 +123,7 @@ const EmployeeList = () => {
         const res = await dispatch(
           EmployeesList(AccessToken, page, employeesPerPage, sortBy)
         );
-        setEmployees(res?.data?.Users);
+        setEmployees(res?.data?.Employees?.content);
         setTotalPages(res.data.totalPages);
       }
     } catch (error) {
@@ -157,6 +157,8 @@ const EmployeeList = () => {
         },
       }
     );
+    console.log("response",response);
+    
     const editedEmployeeData = response?.data?.Employee;
 
     console.log(editedEmployeeData);
@@ -396,19 +398,19 @@ const EmployeeList = () => {
                               </td>
                               <td scope="row" className="px-6 py-4">
                                 <Link
-                                  to={`/employee-info/${employee?.employeeName}`}
+                                  to={`/employee-info/${employee?.firstName}`}
                                   className={`${
                                     darkMode
                                       ? "text-yellow-500"
                                       : "text-blue-500"
                                   }`}
                                 >
-                                  {employee?.employeeName}
+                                  {employee?.firstName}  {employee?.lastName}
                                 </Link>
                               </td>
-                              <td className="px-6 py-4">{employee?.email}</td>
+                              <td className="px-6 py-4">{employee?.email ? employee?.email : "CONFIDENTIAL"}</td>
                               <td className="px-6 py-4">
-                                {employee?.employeeCode}
+                                {employee?.employeeId}
                               </td>
                               <td className="px-6 py-4 flex gap-x-2">
                                 <button onClick={() => handleEdit(employee)}>
@@ -434,7 +436,7 @@ const EmployeeList = () => {
                                       btn1Handler: async () => {
                                         const response = await dispatch(
                                           EmployeeDelete(
-                                            employee?.userId,
+                                            employee?.employeeId,
                                             AccessToken
                                           )
                                         );
@@ -480,7 +482,7 @@ const EmployeeList = () => {
                         </button>
                         <button
                           onClick={handleNextPage}
-                          disabled={currentPage === totalPages - 1}
+                          disabled={currentPage === totalPages - 1 || employees.length < employeesPerPage}
                           className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
                             darkMode ? "bg-gray-600" : "bg-slate-400"
                           }`}

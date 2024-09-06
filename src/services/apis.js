@@ -11,7 +11,7 @@ export const authEndpoints = {
 export const employeeEndpoints = {
   ADD_EMPLOYEE_API: BASE_URL + "/user/addNewUser",
   DELETE_EMPLOYEE_API: (userId) => BASE_URL + `/user/${userId}`,
-  EMPLOYEE_LIST_API: BASE_URL + "/user/getAllUserInfo",
+  EMPLOYEE_LIST_API: BASE_URL + "/employee/getAllEmployees",
   UPLOAD_EMPLOYEE_IMAGE_API: (employeeId) =>
     BASE_URL + `/employee/${employeeId}/uploadImage`,
   ADD_EMPLOYEE_PERSONAL_DETAILS_API: (employeeId) =>
@@ -29,7 +29,7 @@ export const employeeEndpoints = {
   ADD_EMPLOYEE_BANK_DETAILS_API: (employeeId) =>
     BASE_URL + `/account/${employeeId}/AddBankAccount`,
   EDIT_EMPLOYEE_BANK_DETAILS_API: (employeeId) =>
-    BASE_URL + `/account/${employeeId}/EditBankAccount`,
+    BASE_URL + `/account/${employeeId}`,
   EMPLOYEE_SEARCH_API: (employeeName) =>
     BASE_URL + `/employee/searchEmployee?name=${employeeName}`,
   DEPARTMENT_EMPLOYEE_LIST: (deptId) => BASE_URL + `/department/${deptId}`,

@@ -28,6 +28,8 @@ const SubOrganizationList = () => {
   const [showAssignDialog, setShowAssignDialog] = useState(false); // State for dialog visibility
   const [currentBranch, setCurrentBranch] = useState(null);
   const [selectedAssignOrganization, setSelectedAssignOrganization] =useState("");
+  const [renderFlag,setRenderFlag]=useState(false)
+
 
   const { loading, AllSubOrganization } = useSelector(
     (state) => state.subOrganization
@@ -98,7 +100,7 @@ const SubOrganizationList = () => {
       );
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success(response?.data?.message);
-      fetchSubOrganization(selectedAssignOrganization); // Refresh department list
+      setRenderFlag(true)
       setShowAssignDialog(false); // Close dialog
     } catch (error) {
       console.error("Error assigning organization", error);
@@ -162,7 +164,7 @@ const SubOrganizationList = () => {
     if (selectedOrganization) {
       fetchSubOrganization(selectedOrganization);
     }
-  }, [selectedOrganization,setSelectedOrganization]);
+  }, [selectedOrganization,setSelectedOrganization,renderFlag]);
   return (
     <div
       className={`mb-10 rounded shadow-lg ${

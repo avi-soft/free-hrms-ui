@@ -26,7 +26,7 @@ const CreateUpdateOrganisation = () => {
     formState: { errors },
   } = useForm();
   const dispatch = useDispatch();
-  const navigate = useNavigate();
+  const          navigate = useNavigate();
   const location = useLocation();
   const inputRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -121,9 +121,6 @@ const CreateUpdateOrganisation = () => {
             organization.organizationId
           )
         );
-        if (response?.isSuccess == true) {
-          navigate("/organization/organization-list");
-        }
       } else {
         response = await dispatch(addOrganisation(AccessToken, data));
       }

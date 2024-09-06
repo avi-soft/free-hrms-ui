@@ -330,7 +330,7 @@ export function EditEmployeeBankDetails(employeeId, data, AccessToken) {
       console.log(AccessToken);
       console.log(data);
       const response = await apiConnector(
-        "POST",
+        "PATCH",
         EDIT_EMPLOYEE_BANK_DETAILS_API(employeeId),
         data,
         {

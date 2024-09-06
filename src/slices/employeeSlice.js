@@ -3,7 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   employees: [],
   loading: false,
-  step: null,
+  step: 1,
   currentOrganizationId: null,
   skills: [],
   designations: [],

@@ -48,81 +48,33 @@ const EmployeeAdditionalDetails = () => {
   const { employees } = useSelector((state) => state.employee);
   const navigate = useNavigate();
   const darkMode = useSelector((state) => state.theme?.darkMode) || false;
+  const [editingFlag,setEditingFlag]=useState(false)
   const isEditing = useSelector((state) => state.editing.isEditing);
   const preEditedEmployeeDetails = useSelector(
     (state) => state.editing.preEditedEmployeeDetails
   );
   const editedEmployeeId = preEditedEmployeeDetails?.employeeId;
 
+
+  console.log(editedEmployeeId,"edited");
+  
+
   const [addressFields, setAddressFields] = useState([]);
   const [editingAddressIndex, setEditingAddressIndex] = useState(null);
   const [emergencyFields, setEmergencyFields] = useState([]);
   const [editingEmergencyIndex, setEditingEmergencyIndex] = useState(null);
+  const [editingContactId, seteditingContactId] = useState(null);
+
   const [bankDetails, setBankDetails] = useState(null);
+  const [editedAddressId,setEditedAddressId]=useState(null)
+  const [bankAccountId,setBankAccountId]=useState(null);
 
   const formatString = (str) => {
     if (!str) return "";
     return str.trim().replace(/\s+/g, " ");
   };
 
-  useEffect(() => {
-    if (isEditing && preEditedEmployeeDetails) {
-      const { emergencyContacts, addresses, account } =
-        preEditedEmployeeDetails;
 
-      if (emergencyContacts && emergencyContacts.length > 0) {
-        setEmergencyFields(emergencyContacts);
-        emergencyContacts.forEach((contact, index) => {
-          setEmergencyValue(
-            `contacts[${index}].contactId`,
-            contact?.emergencyContactId
-          );
-          setEmergencyValue(`contacts[${index}].contact`, contact.contact);
-          setEmergencyValue(
-            `contacts[${index}].relationship`,
-            contact.relationship
-          );
-        });
-      }
-
-      if (addresses && addresses.length > 0) {
-        setAddressFields(addresses);
-        addresses.forEach((address, index) => {
-          setAddressValue(`addresses[${index}].addressId`, address.addressId);
-          setAddressValue(
-            `addresses[${index}].addressType`,
-            address.addressType
-          );
-          setAddressValue(
-            `addresses[${index}].propertyNumber`,
-            address.propertyNumber
-          );
-          setAddressValue(`addresses[${index}].city`, address.zipCode.city);
-          setAddressValue(
-            `addresses[${index}].zipCode`,
-            address.zipCode.zipCode
-          );
-          setAddressValue(`addresses[${index}].state`, address.zipCode.state);
-          setAddressValue(`addresses[${index}].country`, address.country);
-        });
-      }
-
-      if (account) {
-        setBankDetails(account);
-        const { bankName, accountNumber, ifsc, branch } = account;
-        setBankValue("bankName", bankName);
-        setBankValue("accountNumber", accountNumber);
-        setBankValue("ifsc", ifsc);
-        setBankValue("branch", branch);
-      }
-    }
-  }, [
-    isEditing,
-    preEditedEmployeeDetails,
-    setEmergencyValue,
-    setAddressValue,
-    setBankValue,
-  ]);
 
   const { loading } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
@@ -154,23 +106,38 @@ const EmployeeAdditionalDetails = () => {
     return data;
   };
 
-  const EditEmergencyContactDetailsSubmit = (data, index = null) => {
+  const EditEmergencyContactDetailsSubmit =  async (data, index = null) => {
+    console.log(data);
     const employeeId = employees[0];
     const contact = formatData(data.contacts[index]);
     const { contactId, ...contactData } = contact;
+    if(contactId) {
+      seteditingContactId(contactId)
+    }
     console.log(contactData);
+    console.log(contactId);
 
-    dispatch(
+
+   if(editingContactId) {
+    const response= await dispatch(
+      EditEmployeeEmergencyContactDetails(editingContactId, contactData, AccessToken)
+    );
+   }else{
+    const response= await dispatch(
       EditEmployeeEmergencyContactDetails(contactId, contactData, AccessToken)
     );
+   }
     setEditingEmergencyIndex(null);
-    resetEmergencyForm(); // Reset form after submission
+    setEditingFlag(true)
+
   };
 
   const AddEmergencyContactDetailsSubmit = (data) => {
     const formattedData = formatData(data);
     const employeeId = employees[0];
     if (editedEmployeeId) {
+      console.log("here");
+      
       dispatch(
         addEmployeeEmergencyContactDetails(
           editedEmployeeId,
@@ -179,8 +146,8 @@ const EmployeeAdditionalDetails = () => {
         )
       );
     } else {
+      console.log("here 2");
       console.log(formattedData?.contacts[0]);
-
       dispatch(
         addEmployeeEmergencyContactDetails(
           employeeId,
@@ -190,11 +157,23 @@ const EmployeeAdditionalDetails = () => {
       );
     }
     resetEmergencyForm(); // Reset form after submission
+    setEditingFlag(true)
   };
 
   const EditSubmitAddress = (data, index = null) => {
     const address = formatData(data.addresses[index]);
     const { addressId, ...addressData } = address;
+
+    if(editedAddressId) {
+      dispatch(
+        UpdateEmployeeAddressDetails(
+          editedEmployeeId,
+          editedAddressId,
+          addressData,
+          AccessToken
+        )
+      );
+    }else{
     dispatch(
       UpdateEmployeeAddressDetails(
         editedEmployeeId,
@@ -203,8 +182,12 @@ const EmployeeAdditionalDetails = () => {
         AccessToken
       )
     );
+  }
+    if(addressId) {
+      setEditedAddressId(addressId)
+    }
     setEditingAddressIndex(null);
-    resetAddressForm(); // Reset form after submission
+    setEditingFlag(true)
   };
 
   const AddSubmitAddress = (data) => {
@@ -219,14 +202,17 @@ const EmployeeAdditionalDetails = () => {
         addEmployeeAddressDetails(employeeId, formattedData, AccessToken)
       );
     }
-    setEditingAddressIndex(null);
     resetAddressForm(); // Reset form after submission
+    setEditingFlag(true)
+    setEditingAddressIndex(null);
   };
 
   const EditSubmitBank = (data) => {
     const formattedData = formatData(data);
+    console.log(formattedData);
+    
     dispatch(
-      EditEmployeeBankDetails(editedEmployeeId, formattedData, AccessToken)
+      EditEmployeeBankDetails(bankAccountId, formattedData, AccessToken)
     );
   };
 
@@ -287,6 +273,68 @@ const EmployeeAdditionalDetails = () => {
     return (value && value.trim() !== "") || "Bank Branch is required";
   };
 
+    useEffect(() => {
+    console.log("Callledd");
+    
+    if (isEditing && preEditedEmployeeDetails) {
+      const { emergencyContacts, addresses, account } =
+        preEditedEmployeeDetails;
+
+      if (emergencyContacts && emergencyContacts.length > 0) {
+        setEmergencyFields(emergencyContacts);
+        emergencyContacts.forEach((contact, index) => {
+          setEmergencyValue(
+            `contacts[${index}].contactId`,
+            contact?.emergencyContactId
+          );
+          setEmergencyValue(`contacts[${index}].contact`, contact.contact);
+          setEmergencyValue(
+            `contacts[${index}].relationship`,
+            contact.relationship
+          );
+        });
+      }
+
+      if (addresses && addresses.length > 0) {
+        setAddressFields(addresses);
+        addresses.forEach((address, index) => {
+          setAddressValue(`addresses[${index}].addressId`, address.addressId);
+          setAddressValue(
+            `addresses[${index}].addressType`,
+            address.addressType
+          );
+          setAddressValue(
+            `addresses[${index}].propertyNumber`,
+            address.propertyNumber
+          );
+          setAddressValue(`addresses[${index}].city`, address.zipCode.city);
+          setAddressValue(
+            `addresses[${index}].zipCode`,
+            address.zipCode.zipCode
+          );
+          setAddressValue(`addresses[${index}].state`, address.zipCode.state);
+          setAddressValue(`addresses[${index}].country`, address.country);
+        });
+      }
+
+      if (account) {
+        setBankAccountId(account?.accountId)
+        setBankDetails(account);
+        const { bankName, accountNumber, ifsc, branch } = account;
+        setBankValue("bankName", bankName);
+        setBankValue("accountNumber", accountNumber);
+        setBankValue("ifsc", ifsc);
+        setBankValue("branch", branch);
+      }
+    }
+  }, [
+    isEditing,
+    preEditedEmployeeDetails,
+    setEmergencyValue,
+    setAddressValue,
+    setBankValue,
+    editingFlag
+  ]);
   return (
     <div>
       <div>
@@ -719,7 +767,7 @@ const EmployeeAdditionalDetails = () => {
                     } py-1 px-5 flex items-center gap-3`}
                     data-testid="edit-address-button"
                   >
-                    <FaSave className="ml-2" /> Save Address
+                    <FaSave className="ml-2" /> Update Address
                   </button>
                 </div>
               </form>

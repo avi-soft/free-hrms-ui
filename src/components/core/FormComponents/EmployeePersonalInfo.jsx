@@ -130,16 +130,12 @@ const EmployeePersonalInfo = () => {
     return attributesObj;
   };
 
+
   useEffect(() => {
     if (isEditing && preEditedEmployeeDetails) {
-      console.log(preEditedEmployeeDetails);
-      console.log(localAttributes);
-      setSelectedDesignations(
-        preEditedEmployeeDetails.designations.map((item) => item.designation)
-      );
-      setSelectedSkills(
-        preEditedEmployeeDetails.skills.map((item) => item.skill)
-      );
+      setSelectedDesignations(preEditedEmployeeDetails.designations.map((item) => item.designation));
+      setSelectedSkills(preEditedEmployeeDetails.skills.map((item) => item.skill));
+
       getLocalAttributesValue().then((data) => {
         for (const [key, value] of Object.entries(preEditedEmployeeDetails)) {
           if (key === "skills" || key === "designations") {
@@ -148,6 +144,10 @@ const EmployeePersonalInfo = () => {
               ...data,
               skills: value.skills || [],
               designations: value.designations || [],
+            });
+          } else if (key === "attributes") {
+            Object.keys(value).forEach(attributeKey => {
+              setValue(attributeKey, value[attributeKey]);
             });
           } else {
             setValue(key, value);

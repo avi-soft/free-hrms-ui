@@ -48,12 +48,13 @@ const DepartmentList = () => {
   const { loading, AllDepartments } = useSelector((state) => state.department);
   const { AllOrganizations } = useSelector((state) => state.Organisation);
   const { AllSubOrganization } = useSelector((state) => state.subOrganization);
+  const [renderFlag,setRenderFlag]=useState(false)
 
   const navigate = useNavigate();
   const location = useLocation();
 
   console.log(AllDepartments);
-  console.log(AllSubOrganization, "sub org list");
+  console.log(selectedAssignOrganization, "SELECTED ASSIGN ");
 
   const fetchOrganizationList = async () => {
     try {
@@ -111,7 +112,7 @@ const DepartmentList = () => {
       );
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success(response?.data?.message);
-      fetchDepartmentsList(selectedAssignOrganization); // Refresh department list
+      setRenderFlag(true);
       setShowOrganizationAssignDialog(false); // Close dialog
     } catch (error) {
       console.error("Error assigning organization", error);
@@ -145,7 +146,7 @@ const DepartmentList = () => {
     console.log(orgId, departmentId);
 
     try {
-      await dispatch(
+       const response= await dispatch(
         AssignDepartmentSubOrganization(AccessToken, orgId, departmentId)
       );
       console.log(response);
@@ -159,25 +160,25 @@ const DepartmentList = () => {
       toast.error("Failed to assign organization");
     }
   };
-  const handleUnassignSubOrganization = async (
-    AccessToken,
-    orgId,
-    departmentId
-  ) => {
-    try {
-      console.log(orgId, departmentId);
+  // const handleUnassignSubOrganization = async (
+  //   AccessToken,
+  //   orgId,
+  //   departmentId
+  // ) => {
+  //   try {
+  //     console.log(orgId, departmentId);
 
-      const response = await dispatch(
-        UnassignDepartmentSubOrganization(AccessToken, orgId, departmentId)
-      );
-      if (response?.status !== 200) throw new Error(response.data.message);
-      toast.success(response?.data?.message);
-      fetchDepartmentsList(selectedOrganization); // Refresh department list
-    } catch (error) {
-      console.error("Error unassigning organization", error);
-      toast.error("Failed to unassign organization");
-    }
-  };
+  //     const response = await dispatch(
+  //       UnassignDepartmentSubOrganization(AccessToken, orgId, departmentId)
+  //     );
+  //     if (response?.status !== 200) throw new Error(response.data.message);
+  //     toast.success(response?.data?.message);
+  //     fetchDepartmentsList(selectedOrganization); // Refresh department list
+  //   } catch (error) {
+  //     console.error("Error unassigning organization", error);
+  //     toast.error("Failed to unassign organization");
+  //   }
+  // };
   const fetchSubOrganization = async (orgId) => {
     console.log("org id", orgId);
 
@@ -210,7 +211,7 @@ const DepartmentList = () => {
     if (selectedOrganization) {
       fetchDepartmentsList(selectedOrganization);
     }
-  }, [selectedOrganization]);
+  }, [selectedOrganization,renderFlag]);
 
   function UnAssignAssignOrganizationHeaders() {
     let headerFlag;
@@ -239,7 +240,7 @@ const DepartmentList = () => {
     AllDepartments?.map((subOrg, index) => {
       const hasOrganization = subOrg?.branches?.length > 0;
       const organizationId = hasOrganization
-        ? subOrg.branches[0].BranchId
+        ? subOrg.branches[0].branchId
         : null;
       if (organizationId) {
         console.log("here");
@@ -416,7 +417,7 @@ const DepartmentList = () => {
                             </th>
                           )}
 
-                          {AssignSubOrganizationHeaderFlag ? (
+                          {/* {AssignSubOrganizationHeaderFlag ? (
                             <th
                               scope="col"
                               className="px-6 py-3"
@@ -432,7 +433,7 @@ const DepartmentList = () => {
                             >
                               Assign Sub Organization
                             </th>
-                          )}
+                          )} */}
                           <th
                             scope="col"
                             className="px-6 py-3"
@@ -501,7 +502,7 @@ const DepartmentList = () => {
                               </td>
                             )}
 
-                            {AssignSubOrganizationHeaderFlag ? (
+                            {/* {AssignSubOrganizationHeaderFlag ? (
                               <td className="px-6 py-4 ">
                                 <button
                                   data-testid="unassign-button"
@@ -530,7 +531,7 @@ const DepartmentList = () => {
                                   ASSIGN
                                 </button>
                               </td>
-                            )}
+                            )} */}
 
                             <td className="px-6 py-4 flex items-center justify-between w-1/2 gap-x-2">
                               <button

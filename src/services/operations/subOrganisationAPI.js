@@ -294,7 +294,6 @@ export const updateSubOrganisation = (AccessToken, data, suborganisationId) => {
       if (response?.status != 200) throw new Error(response?.data?.message);
       else {
         toast.success(response?.data?.message);
-        navigate("/organization/organization-list");
       }
     } catch (err) {
       if (err?.response?.data?.message) {
