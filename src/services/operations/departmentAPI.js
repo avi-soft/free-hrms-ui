@@ -15,7 +15,10 @@ const {
   UNASSIGN_DEPARTMENT_ORGANIZATION_API,
   UNASSIGN_DEPARTMENT_SUB_ORGANIZATION_API,
   UNASSIGNED_DEPARTMENTS_LIST_ORGANIZATION,
-  ASSIGN_DEPARTMENT_ORGANIZATION_API,ALL_DEPARTMENTS_LIST
+  ASSIGN_DEPARTMENT_ORGANIZATION_API,
+  ALL_DEPARTMENTS_LIST,
+  ASSIGN_DEPARTMENT_SUB_ORG_API,
+  UNASSIGN_DEPARTMENT_SUB_ORG_API,
 } = DepartmentEndpoints;
 
 export const Departmentlist = (AccessToken, selectedOrganization) => {
@@ -45,14 +48,9 @@ export const AllDepartmentlist = (AccessToken) => {
   return async (dispatch) => {
     try {
       console.log(AccessToken);
-      const response = await apiConnector(
-        "GET",
-        ALL_DEPARTMENTS_LIST,
-        null,
-        {
-          Authorization: `Bearer ${AccessToken}`,
-        }
-      );
+      const response = await apiConnector("GET", ALL_DEPARTMENTS_LIST, null, {
+        Authorization: `Bearer ${AccessToken}`,
+      });
 
       return response;
     } catch (err) {
@@ -65,8 +63,7 @@ export const AllDepartmentlist = (AccessToken) => {
   };
 };
 
-
-export const UnAssignedOrgDepartmentlist = (AccessToken, ) => {
+export const UnAssignedOrgDepartmentlist = (AccessToken) => {
   return async (dispatch) => {
     try {
       console.log(AccessToken);
@@ -106,10 +103,10 @@ export const addDepartment = (formData) => {
         }
       );
       console.log(response);
-      if (!response?.data?.success == "true"){
-        console.log("error")
+      if (!response?.data?.success == "true") {
+        console.log("error");
         throw new Error(response.data.message);
-      }else {
+      } else {
         console.log("Success");
         toast.success(response?.data?.message);
         dispatch(AddDepartment(response?.data?.Department));
@@ -172,7 +169,7 @@ export const deleteDepartment = (AccessToken, DepartmentId) => {
         }
       );
       console.log(response);
-      return response
+      return response;
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success("DEPARTMENT DELETED SUCCESSFULLY");
     } catch (err) {
@@ -182,10 +179,9 @@ export const deleteDepartment = (AccessToken, DepartmentId) => {
       } else {
         toast.error("Something went wrong.");
       }
-    }finally{
+    } finally {
       toast.dismiss(toastId);
     }
-    
   };
 };
 
@@ -213,7 +209,7 @@ export const DepartmentAttributeslist = (AccessToken) => {
   };
 };
 
-export const addDepartmentAttributes = (formData,AccessToken) => {
+export const addDepartmentAttributes = (formData, AccessToken) => {
   return async (dispatch) => {
     const toastId = toast.loading("Adding...");
     try {
@@ -227,10 +223,10 @@ export const addDepartmentAttributes = (formData,AccessToken) => {
         }
       );
       console.log(response);
-      if (!response?.data?.success == "true"){
-        console.log("error")
+      if (!response?.data?.success == "true") {
+        console.log("error");
         throw new Error(response.data.message);
-      }else {
+      } else {
         console.log("Success");
         toast.success(response?.data?.message);
       }
@@ -246,7 +242,11 @@ export const addDepartmentAttributes = (formData,AccessToken) => {
   };
 };
 
-export const updateDepartmentAttributes = (AccessToken, formData, DepartmentAttributeId) => {
+export const updateDepartmentAttributes = (
+  AccessToken,
+  formData,
+  DepartmentAttributeId
+) => {
   return async (dispatch) => {
     const toastId = toast.loading("Updating...");
 
@@ -273,7 +273,10 @@ export const updateDepartmentAttributes = (AccessToken, formData, DepartmentAttr
     toast.dismiss(toastId);
   };
 };
-export const deleteDepartmentAttributes = (AccessToken, DepartmentAttributeId) => {
+export const deleteDepartmentAttributes = (
+  AccessToken,
+  DepartmentAttributeId
+) => {
   return async (dispatch) => {
     const toastId = toast.loading("DELETING...");
     try {
@@ -286,7 +289,7 @@ export const deleteDepartmentAttributes = (AccessToken, DepartmentAttributeId) =
         }
       );
       console.log(response);
-      return response
+      return response;
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success("DEPARTMENT DELETED SUCCESSFULLY");
     } catch (err) {
@@ -296,26 +299,29 @@ export const deleteDepartmentAttributes = (AccessToken, DepartmentAttributeId) =
       } else {
         toast.error("Something went wrong.");
       }
-    }finally{
+    } finally {
       toast.dismiss(toastId);
     }
-    
   };
 };
 
-export const  AssignDepartmentOrganization=(AccessToken,organizationId,DepartmentId)=> {
+export const AssignDepartmentOrganization = (
+  AccessToken,
+  organizationId,
+  DepartmentId
+) => {
   return async (dispatch) => {
     try {
       const response = await apiConnector(
         "PATCH",
-         ASSIGN_DEPARTMENT_ORGANIZATION_API(organizationId,DepartmentId),
+        ASSIGN_DEPARTMENT_ORGANIZATION_API(organizationId, DepartmentId),
         null,
         {
           Authorization: `Bearer ${AccessToken}`,
         }
       );
       console.log(response);
-      return response
+      return response;
       // if (response?.status !== 200) throw new Error(response.data.message);
       // toast.success("DEPARTMENT DELETED SUCCESSFULLY");
     } catch (err) {
@@ -325,24 +331,27 @@ export const  AssignDepartmentOrganization=(AccessToken,organizationId,Departmen
       } else {
         toast.error("Something went wrong.");
       }
-    }finally{
+    } finally {
     }
-    
   };
-}
-export const UnassignDepartmentOrganization = (AccessToken, organizationId,DepartmentId) => {
+};
+export const UnassignDepartmentOrganization = (
+  AccessToken,
+  organizationId,
+  DepartmentId
+) => {
   return async (dispatch) => {
     try {
       const response = await apiConnector(
         "PATCH",
-         UNASSIGN_DEPARTMENT_ORGANIZATION_API(organizationId,DepartmentId),
+        UNASSIGN_DEPARTMENT_ORGANIZATION_API(organizationId, DepartmentId),
         null,
         {
           Authorization: `Bearer ${AccessToken}`,
         }
       );
       console.log(response);
-      return response
+      return response;
       // if (response?.status !== 200) throw new Error(response.data.message);
       // toast.success("DEPARTMENT DELETED SUCCESSFULLY");
     } catch (err) {
@@ -352,27 +361,30 @@ export const UnassignDepartmentOrganization = (AccessToken, organizationId,Depar
       } else {
         toast.error("Something went wrong.");
       }
-    }finally{
+    } finally {
     }
-    
   };
 };
 
+// DEPARTMENT SUB ORGANIZATION
 
-
-export const UnassignDepartmentSubOrganization = (AccessToken, SubOrganizationId,DepartmentId) => {
+export const AssignDepartmentSubOrganization = (
+  AccessToken,
+  subOrgId,
+  DepartmentId
+) => {
   return async (dispatch) => {
     try {
       const response = await apiConnector(
         "PATCH",
-         UNASSIGN_DEPARTMENT_SUB_ORGANIZATION_API(SubOrganizationId,DepartmentId),
+        ASSIGN_DEPARTMENT_SUB_ORG_API(subOrgId, DepartmentId),
         null,
         {
           Authorization: `Bearer ${AccessToken}`,
         }
       );
       console.log(response);
-      return response
+      return response;
       // if (response?.status !== 200) throw new Error(response.data.message);
       // toast.success("DEPARTMENT DELETED SUCCESSFULLY");
     } catch (err) {
@@ -382,8 +394,41 @@ export const UnassignDepartmentSubOrganization = (AccessToken, SubOrganizationId
       } else {
         toast.error("Something went wrong.");
       }
-    }finally{
+    } finally {
     }
-    
+  };
+};
+
+export const UnassignDepartmentSubOrganization = (
+  AccessToken,
+  SubOrganizationId,
+  DepartmentId
+) => {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector(
+        "PATCH",
+        UNASSIGN_DEPARTMENT_SUB_ORGANIZATION_API(
+          SubOrganizationId,
+          DepartmentId
+        ),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+      // if (response?.status !== 200) throw new Error(response.data.message);
+      // toast.success("DEPARTMENT DELETED SUCCESSFULLY");
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    } finally {
+    }
   };
 };

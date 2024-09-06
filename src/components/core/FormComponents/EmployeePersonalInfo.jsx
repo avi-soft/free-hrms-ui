@@ -46,42 +46,48 @@ const EmployeePersonalInfo = () => {
   );
 
   console.log(AllDepartments);
+  console.log(employees);
 
   const onSubmit = (data) => {
+    console.log("Form Data:", data);
+
     const trimmedData = {};
+    // Trim all fields
     for (const key in data) {
       if (Object.hasOwnProperty.call(data, key)) {
-        trimmedData[key] = data[key].trim();
+        trimmedData[key] = data[key]?.trim ? data[key].trim() : data[key];
       }
     }
 
+    // Create attributes object by matching keys from localAttributes with trimmedData
     const attributesObj = localAttributes.reduce((acc, obj) => {
-      const attributeName = obj.attributeKey.replace(/ /g, "");
-      acc[attributeName] = trimmedData[attributeName];
+      const attributeName = obj.attributeKey; // Don't modify the key
+      if (trimmedData[attributeName]) {
+        acc[attributeName] = trimmedData[attributeName]; // Use the original key
+      }
       return acc;
     }, {});
 
-    const employeeId = employees[0];
     const submissionData = {
       ...trimmedData,
       skillList: selectedSkills,
       designationList: selectedDesignations,
-      attributes: attributesObj,
+      attributes: attributesObj, // Include the attributes here
     };
 
-    console.log(submissionData);
+    console.log("Submission Data:", submissionData);
 
     if (isEditing) {
       dispatch(
         UpdateEmployeePersonalDetails(
           preEditedEmployeeDetails.employeeId,
-          submissionData,
+          submissionData, // Pass the correct submission data
           AccessToken
         )
       );
     } else {
       dispatch(
-        addEmployeePersonalDetails(employeeId, submissionData, AccessToken)
+        addEmployeePersonalDetails(employees, submissionData, AccessToken)
       );
     }
   };
@@ -106,7 +112,9 @@ const EmployeePersonalInfo = () => {
 
   useEffect(() => {
     getAttributes();
-    getDepartments();
+    if (!isEditing) {
+      getDepartments();
+    }
   }, [AccessToken, dispatch]);
 
   const getLocalAttributesValue = async () => {
@@ -122,16 +130,12 @@ const EmployeePersonalInfo = () => {
     return attributesObj;
   };
 
+
   useEffect(() => {
     if (isEditing && preEditedEmployeeDetails) {
-      console.log(preEditedEmployeeDetails);
-      console.log(localAttributes);
-      setSelectedDesignations(
-        preEditedEmployeeDetails.designations.map((item) => item.designation)
-      );
-      setSelectedSkills(
-        preEditedEmployeeDetails.skills.map((item) => item.skill)
-      );
+      setSelectedDesignations(preEditedEmployeeDetails.designations.map((item) => item.designation));
+      setSelectedSkills(preEditedEmployeeDetails.skills.map((item) => item.skill));
+
       getLocalAttributesValue().then((data) => {
         for (const [key, value] of Object.entries(preEditedEmployeeDetails)) {
           if (key === "skills" || key === "designations") {
@@ -140,6 +144,10 @@ const EmployeePersonalInfo = () => {
               ...data,
               skills: value.skills || [],
               designations: value.designations || [],
+            });
+          } else if (key === "attributes") {
+            Object.keys(value).forEach(attributeKey => {
+              setValue(attributeKey, value[attributeKey]);
             });
           } else {
             setValue(key, value);
@@ -252,8 +260,7 @@ const EmployeePersonalInfo = () => {
                   required: "First name is required",
                   pattern: {
                     value: /^[A-Za-z\s]+$/, // Allow only letters and spaces
-                    message:
-                      "First name should contain only letters and spaces",
+                    message: "First name should contain only letters",
                   },
                   validate: (value) =>
                     value.trim() !== "" || "First name cannot be empty",
@@ -286,7 +293,7 @@ const EmployeePersonalInfo = () => {
                   required: "Last name is required",
                   pattern: {
                     value: /^[A-Za-z\s]+$/, // Allow only letters and spaces
-                    message: "Last name should contain only letters and spaces",
+                    message: "Last name should contain only letters",
                   },
                   validate: (value) =>
                     value.trim() !== "" || "Last name cannot be empty",
@@ -336,40 +343,42 @@ const EmployeePersonalInfo = () => {
                 </p>
               )}
             </div>
-            <div className="mt-4">
-              <label
-                htmlFor="departmentId"
-                className={`block text-sm font-semibold ${
-                  darkMode ? "text-white" : "text-slate-900"
-                }`}
-              >
-                Department<sup className="text-red-900">*</sup>
-              </label>
-              <select
-                required
-                id="departmentId"
-                {...register("departmentId")}
-                disabled={AllDepartments?.length == 0}
-                className={`border rounded px-3 py-2 mt-2 w-full ${
-                  darkMode
-                    ? "border-slate-300 bg-gray-500 text-white"
-                    : "border-slate-300 bg-white text-black"
-                }`}
-                data-testid="department-select"
-              >
-                <option value="" disabled selected>
-                  Select Department
-                </option>
-                {AllDepartments.map((department) => (
-                  <option
-                    key={department?.departmentId}
-                    value={department?.departmentId}
-                  >
-                    {department?.department}
+            {!isEditing && (
+              <div className="mt-4">
+                <label
+                  htmlFor="departmentId"
+                  className={`block text-sm font-semibold ${
+                    darkMode ? "text-white" : "text-slate-900"
+                  }`}
+                >
+                  Department<sup className="text-red-900">*</sup>
+                </label>
+                <select
+                  required
+                  id="departmentId"
+                  {...register("departmentId")}
+                  disabled={AllDepartments?.length == 0}
+                  className={`border rounded px-3 py-2 mt-2 w-full ${
+                    darkMode
+                      ? "border-slate-300 bg-gray-500 text-white"
+                      : "border-slate-300 bg-white text-black"
+                  }`}
+                  data-testid="department-select"
+                >
+                  <option value="" disabled selected>
+                    Select Department
                   </option>
-                ))}
-              </select>
-            </div>
+                  {AllDepartments.map((department) => (
+                    <option
+                      key={department?.departmentId}
+                      value={department?.departmentId}
+                    >
+                      {department?.department}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             {localAttributes.map((attr) => {
@@ -377,19 +386,18 @@ const EmployeePersonalInfo = () => {
               return (
                 <div key={attr.attributeId} className="mt-4">
                   <label
-                    htmlFor={attributeName}
+                    htmlFor={attr?.attributeKey}
                     className={`block text-sm font-semibold ${
                       darkMode ? "text-white" : "text-slate-900"
                     }`}
                   >
                     {attributeName.charAt(0).toUpperCase() +
                       attributeName.slice(1).replace(/([A-Z])/g, " $1")}
-                    <sup className="text-red-900">*</sup>
                   </label>
                   <input
-                    id={attributeName}
+                    id={attr?.attributeKey}
                     type="text"
-                    {...register(attributeName, { required: true })}
+                    {...register(attr?.attributeKey)}
                     className={`border rounded px-3 py-2 mt-2 w-full ${
                       darkMode
                         ? "border-slate-300 bg-gray-500 text-white"

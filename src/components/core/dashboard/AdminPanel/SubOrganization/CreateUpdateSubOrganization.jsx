@@ -23,10 +23,10 @@ const CreateUpdateSubOrganization = () => {
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const { AllOrganizations } = useSelector((state) => state.Organisation);
   const { loading } = useSelector((state) => state.subOrganization);
-  
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const location = useLocation()
+  const location = useLocation();
   const {
     register,
     handleSubmit,
@@ -38,23 +38,24 @@ const CreateUpdateSubOrganization = () => {
     isEditing: false,
     department: null,
   };
-  const getLocalSubOrganizationAttributesValue=async()=>{
-    const attributes = await getSubOrganizationAttributes() ;
-    const attributesObj = attributes && attributes.reduce((acc, obj) => {
-    
-      acc[obj.attributeKey] = subOrganization.attributes[obj.attributeKey];
-      return acc;
-    }, {});
-   return attributesObj
-  }
-  console.log(subOrganization)
+  const getLocalSubOrganizationAttributesValue = async () => {
+    const attributes = await getSubOrganizationAttributes();
+    const attributesObj =
+      attributes &&
+      attributes.reduce((acc, obj) => {
+        acc[obj.attributeKey] = subOrganization.attributes[obj.attributeKey];
+        return acc;
+      }, {});
+    return attributesObj;
+  };
+  console.log(subOrganization);
   useEffect(() => {
     if (isEditing && subOrganization) {
       setValue("branchName", subOrganization.branchName);
-      getLocalSubOrganizationAttributesValue().then((data)=>{
-        console.log(data)
-      reset({...data})
-     })
+      getLocalSubOrganizationAttributesValue().then((data) => {
+        console.log(data);
+        reset({ ...data });
+      });
       setSelectedOrganization(organizationId);
     }
   }, [isEditing, subOrganization, setValue, reset]);
@@ -76,24 +77,24 @@ const CreateUpdateSubOrganization = () => {
     };
 
     try {
-        if (isEditing) {
-          await dispatch(
-            updateSubOrganisation(AccessToken, formData, subOrganization.branchId)
-          );
-          navigate("/suborganization/subOrganization-list", {
-            state: {
-              updatedSuborganization: true,
-              organizationId: selectedOrganization,
-            },
-          });
-        } else {
-      await dispatch(addSubOrganisation(AccessToken, formData));
-      navigate("/suborganization/subOrganization-list", {
-        state: {
-          updatedSuborganization: false,
-          organizationId: selectedOrganization,
-        },
-      });
+      if (isEditing) {
+        await dispatch(
+          updateSubOrganisation(AccessToken, formData, subOrganization.branchId)
+        );
+        navigate("/suborganization/subOrganization-list", {
+          state: {
+            updatedSuborganization: true,
+            organizationId: selectedOrganization,
+          },
+        });
+      } else {
+        await dispatch(addSubOrganisation(AccessToken, formData));
+        navigate("/suborganization/subOrganization-list", {
+          state: {
+            updatedSuborganization: false,
+            organizationId: selectedOrganization,
+          },
+        });
       }
     } catch (error) {
       console.error("Error during department submission:", error);
@@ -130,7 +131,7 @@ const CreateUpdateSubOrganization = () => {
   async function getSubOrganizationAttributes() {
     const res = await dispatch(getSubOrganisationAttributes(AccessToken));
     setBranchAttributes(res?.data.branchAttributes);
-    return res?.data.branchAttributes
+    return res?.data.branchAttributes;
   }
 
   const fetchOrganizationList = async () => {
@@ -180,8 +181,7 @@ const CreateUpdateSubOrganization = () => {
             darkMode ? "text-white" : ""
           }`}
         >
-           {isEditing ? "Edit Suborganization" : "Create Suborganization"}
-          
+          {isEditing ? "Edit Sub Organization" : "Create Sub Organization"}
         </div>
         <div>
           <p
@@ -190,7 +190,9 @@ const CreateUpdateSubOrganization = () => {
             }`}
           >
             Home / Dashboard /{" "}
-            <span className="text-yellow-700">{isEditing ? "Edit Suborganization" : "Create Suborganization"}</span>
+            <span className="text-yellow-700">
+              {isEditing ? "Edit Sub Organization" : "Create Sub Organization"}
+            </span>
           </p>
         </div>
       </div>
@@ -223,7 +225,7 @@ const CreateUpdateSubOrganization = () => {
               </Link>
             </div>
           </div>
-        ) : isAttribute? (
+        ) : isAttribute ? (
           <SubOrganizationAttribute
             NextHandler={() => {
               setIsAttribute(false);
@@ -238,50 +240,50 @@ const CreateUpdateSubOrganization = () => {
               darkMode ? "bg-slate-600" : "bg-white"
             }`}
           >
-           {
-            !isEditing  &&             <div className="mb-4">
-            <label
-              htmlFor="organization"
-              className={`block text-sm font-bold mb-2 ${
-                darkMode ? "text-white" : "text-gray-700"
-              }`}
-            >
-              Select Organization
-              <sup className="text-red-900 font-bold">*</sup>
-            </label>
-            <select
-              id="organization"
-              {...register("organization", {
-                required: "Organization is required",
-              })}
-              value={selectedOrganization}
-              onChange={(e) => {
-                setSelectedOrganization(e.target.value);
-              }}
-              className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                darkMode
-                  ? "bg-gray-700 border-gray-600 text-white"
-                  : "bg-white text-gray-700"
-              }`}
-            >
-              <option value="">Select Organization</option>
-              {AllOrganizations &&
-                AllOrganizations.map((org) => (
-                  <option
-                    key={org?.organizationId}
-                    value={org?.organizationId}
-                  >
-                    {org?.organizationName}
-                  </option>
-                ))}
-            </select>
-            {errors.organization && (
-              <p className="text-red-500 mt-1">
-                {errors.organization.message}
-              </p>
+            {!isEditing && (
+              <div className="mb-4">
+                <label
+                  htmlFor="organization"
+                  className={`block text-sm font-bold mb-2 ${
+                    darkMode ? "text-white" : "text-gray-700"
+                  }`}
+                >
+                  Select Organization
+                  <sup className="text-red-900 font-bold">*</sup>
+                </label>
+                <select
+                  id="organization"
+                  {...register("organization", {
+                    required: "Organization is required",
+                  })}
+                  value={selectedOrganization}
+                  onChange={(e) => {
+                    setSelectedOrganization(e.target.value);
+                  }}
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                    darkMode
+                      ? "bg-gray-700 border-gray-600 text-white"
+                      : "bg-white text-gray-700"
+                  }`}
+                >
+                  <option value="">Select Organization</option>
+                  {AllOrganizations &&
+                    AllOrganizations.map((org) => (
+                      <option
+                        key={org?.organizationId}
+                        value={org?.organizationId}
+                      >
+                        {org?.organizationName}
+                      </option>
+                    ))}
+                </select>
+                {errors.organization && (
+                  <p className="text-red-500 mt-1">
+                    {errors.organization.message}
+                  </p>
+                )}
+              </div>
             )}
-          </div>
-           }
             <div className="mb-4">
               <label
                 htmlFor="SubOrganization"
@@ -350,14 +352,17 @@ const CreateUpdateSubOrganization = () => {
                 darkMode ? "text-white" : "text-white"
               } hover:scale-95 transition-all duration-200`}
             >
-                  {isEditing ? "Update Suborganization" : "Create Suborganization"}
-              
+              {isEditing
+                ? "Update Sub Organization"
+                : "Create Sub Organization"}
             </button>
           </form>
         )}
       </div>
 
-      {confirmationModal  && !isEditing  && <ConfirmationModal modalData={confirmationModal} />}
+      {confirmationModal && !isEditing && (
+        <ConfirmationModal modalData={confirmationModal} />
+      )}
     </div>
   );
 };
