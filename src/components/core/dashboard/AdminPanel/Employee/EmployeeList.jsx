@@ -74,18 +74,6 @@ const EmployeeList = () => {
     }
   };
 
-  const fetchSubOrganizations = async () => {
-    try {
-      const response = await dispatch(getSubOrganizationList(AccessToken));
-      console.log("sub org resp", response);
-
-      setSubOrganizations(response?.data?.Branches?.content || []);
-      // setShowSubOrgs(response.data.subOrganizations.length > 0);
-    } catch (error) {
-      console.error("Error fetching sub-organizations", error);
-    }
-  };
-
   const fetchDepartmentsList = async () => {
     console.log("hi");
 
@@ -157,8 +145,8 @@ const EmployeeList = () => {
         },
       }
     );
-    console.log("response",response);
-    
+    console.log("response", response);
+
     const editedEmployeeData = response?.data?.Employee;
 
     console.log(editedEmployeeData);
@@ -169,6 +157,29 @@ const EmployeeList = () => {
   };
 
   console.log("sub org", selectedDepartment);
+
+  function UnAssignAssignDepartmentHeader() {
+    let headerFlag;
+    employees?.map((employee, index) => {
+      const hasDepartment = employee?.department?.length > 0;
+      const departmentId = hasDepartment
+        ? employee.department[0].departmentId
+        : null;
+      if (departmentId) {
+        console.log("here");
+
+        headerFlag = true;
+      } else {
+        console.log("here 2");
+
+        headerFlag = false;
+      }
+    });
+    return headerFlag;
+  }
+  const AssignDeptHeaderFlag = UnAssignAssignDepartmentHeader();
+
+  console.log("flag is", AssignDeptHeaderFlag);
 
   return (
     <div className={` h-lvh mb-2 rounded-md ${darkMode ? " text-white" : ""}`}>
@@ -360,6 +371,23 @@ const EmployeeList = () => {
                             >
                               Employee Code
                             </th>
+                            {AssignDeptHeaderFlag ? (
+                              <th
+                                scope="col"
+                                className="px-6 py-3"
+                                data-testid="Department-Description-header"
+                              >
+                                Unassign Department
+                              </th>
+                            ) : (
+                              <th
+                                scope="col"
+                                className="px-6 py-3"
+                                data-testid="Department-Description-header"
+                              >
+                                Assign Department
+                              </th>
+                            )}
                             <th
                               scope="col"
                               className="px-6 py-3"
@@ -405,13 +433,47 @@ const EmployeeList = () => {
                                       : "text-blue-500"
                                   }`}
                                 >
-                                  {employee?.firstName}  {employee?.lastName}
+                                  {employee?.firstName} {employee?.lastName}
                                 </Link>
                               </td>
-                              <td className="px-6 py-4">{employee?.email ? employee?.email : "CONFIDENTIAL"}</td>
+                              <td className="px-6 py-4">
+                                {employee?.user?.email
+                                  ? employee?.user?.email
+                                  : "CONFIDENTIAL"}
+                              </td>
                               <td className="px-6 py-4">
                                 {employee?.employeeId}
                               </td>
+                              {AssignDeptHeaderFlag ? (
+                                <td className="px-6 py-4 ">
+                                  <button
+                                    data-testid="unassign-button"
+                                    onClick={() =>
+                                      handleUnassignOrganization(
+                                        AccessToken,
+                                        selectedOrganization,
+                                        subOrganization.branchId
+                                      )
+                                    }
+                                    className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                  >
+                                    UNASSIGN
+                                  </button>
+                                </td>
+                              ) : (
+                                <td className="px-6 py-4 ">
+                                  <button
+                                    data-testid="assign-button"
+                                    onClick={() => {
+                                      setCurrentBranch(subOrganization);
+                                      setShowAssignDialog(true);
+                                    }}
+                                    className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                  >
+                                    ASSIGN
+                                  </button>
+                                </td>
+                              )}
                               <td className="px-6 py-4 flex gap-x-2">
                                 <button onClick={() => handleEdit(employee)}>
                                   <FaRegEdit
@@ -436,7 +498,7 @@ const EmployeeList = () => {
                                       btn1Handler: async () => {
                                         const response = await dispatch(
                                           EmployeeDelete(
-                                            employee?.employeeId,
+                                            employee?.user?.userId,
                                             AccessToken
                                           )
                                         );
@@ -482,7 +544,10 @@ const EmployeeList = () => {
                         </button>
                         <button
                           onClick={handleNextPage}
-                          disabled={currentPage === totalPages - 1 || employees.length < employeesPerPage}
+                          disabled={
+                            currentPage === totalPages - 1 ||
+                            employees.length < employeesPerPage
+                          }
                           className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
                             darkMode ? "bg-gray-600" : "bg-slate-400"
                           }`}
