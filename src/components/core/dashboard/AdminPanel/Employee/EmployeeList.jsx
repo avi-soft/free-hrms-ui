@@ -7,9 +7,11 @@ import { SiMicrosoftexcel } from "react-icons/si";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
+  AssignEmployeeDepartment,
   DepartmentEmployeesList,
   EmployeeDelete,
   EmployeesList,
+  UnAssignEmployeeDept,
 } from "../../../../../services/operations/employeeAPI";
 import {
   setEditing,
@@ -41,7 +43,6 @@ const EmployeeList = () => {
   const { darkMode } = useSelector((state) => state.theme);
   const [employees, setEmployees] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(0);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [totalPages, setTotalPages] = useState(0);
   const [selectedDepartment, setSelectedDepartment] = useState("");
@@ -49,8 +50,15 @@ const EmployeeList = () => {
   const [showSubOrgs, setShowSubOrgs] = useState(false);
   const [sortBy, setSortBy] = useState("");
   const employeesPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(0);
   const { AllOrganizations } = useSelector((state) => state.Organisation);
   const { AllDepartments } = useSelector((state) => state.department);
+  const [selectedAssignDepartment, setSelectedAssignDepartment] = useState("");
+  const [showDepartmentAssignDialog, setShowDepartmentAssignDialog] =
+    useState(false);
+  const [currentEmployee, setCurrentEmployee] = useState(null);
+  const [departmentError, setDepartmentError] = useState("");
+  const [renderFlag, setRenderFlag] = useState(false);
 
   const navigate = useNavigate();
 
@@ -126,7 +134,7 @@ const EmployeeList = () => {
     fetchEmployeesList(currentPage);
     fetchOrganizationList();
     // fetchSubOrganizations();
-  }, [currentPage, sortBy, selectedDepartment]);
+  }, [currentPage, sortBy, selectedDepartment, renderFlag]);
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
   };
@@ -159,11 +167,13 @@ const EmployeeList = () => {
   console.log("sub org", selectedDepartment);
 
   function UnAssignAssignDepartmentHeader() {
+    console.log(employees);
+
     let headerFlag;
     employees?.map((employee, index) => {
-      const hasDepartment = employee?.department?.length > 0;
+      const hasDepartment = employee?.departments?.length > 0;
       const departmentId = hasDepartment
-        ? employee.department[0].departmentId
+        ? employee.departments[0]?.departmentId
         : null;
       if (departmentId) {
         console.log("here");
@@ -180,6 +190,48 @@ const EmployeeList = () => {
   const AssignDeptHeaderFlag = UnAssignAssignDepartmentHeader();
 
   console.log("flag is", AssignDeptHeaderFlag);
+
+  const handleAssignDepartment = async (empId, departmentId) => {
+    if (!selectedAssignDepartment) {
+      setDepartmentError("Please select a sub-organization.");
+      return;
+    }
+    setDepartmentError("");
+
+    try {
+      const response = await dispatch(
+        AssignEmployeeDepartment(AccessToken, empId, departmentId)
+      );
+      console.log(response);
+
+      if (response?.status !== 200) throw new Error(response.data.message);
+      toast.success(response?.data?.message);
+      setShowDepartmentAssignDialog(false);
+      setSelectedAssignDepartment("");
+      setRenderFlag(true);
+    } catch (error) {
+      console.error("Error assigning organization", error);
+      toast.error("Failed to assign department");
+    }
+  };
+  const handleUnAssignDepartment = async (
+    AccessToken,
+    deptId,
+    employeeId
+  ) => {
+    try {
+
+      const response = await dispatch(
+        UnAssignEmployeeDept(AccessToken, deptId,employeeId )
+      );
+      if (response?.status !== 200) throw new Error(response.data.message);
+      toast.success(response?.data?.message);
+      fetchEmployeesList()
+    } catch (error) {
+      console.error("Error unassigning organization", error);
+      toast.error("Failed to unassign organization");
+    }
+  };
 
   return (
     <div className={` h-lvh mb-2 rounded-md ${darkMode ? " text-white" : ""}`}>
@@ -371,23 +423,13 @@ const EmployeeList = () => {
                             >
                               Employee Code
                             </th>
-                            {AssignDeptHeaderFlag ? (
                               <th
                                 scope="col"
                                 className="px-6 py-3"
                                 data-testid="Department-Description-header"
                               >
-                                Unassign Department
+                                 Department
                               </th>
-                            ) : (
-                              <th
-                                scope="col"
-                                className="px-6 py-3"
-                                data-testid="Department-Description-header"
-                              >
-                                Assign Department
-                              </th>
-                            )}
                             <th
                               scope="col"
                               className="px-6 py-3"
@@ -444,16 +486,16 @@ const EmployeeList = () => {
                               <td className="px-6 py-4">
                                 {employee?.employeeId}
                               </td>
-                              {AssignDeptHeaderFlag ? (
+                              {Array.isArray(employee?.departments) &&
+                              employee?.departments.length > 0 ? (
                                 <td className="px-6 py-4 ">
                                   <button
                                     data-testid="unassign-button"
                                     onClick={() =>
-                                      handleUnassignOrganization(
+                                      handleUnAssignDepartment(
                                         AccessToken,
-                                        selectedOrganization,
-                                        subOrganization.branchId
-                                      )
+                                        employee?.departments[0]?.departmentId,
+employee?.employeeId                                      )
                                     }
                                     className="bg-yellow-500 text-black py-1 px-4 rounded"
                                   >
@@ -465,8 +507,8 @@ const EmployeeList = () => {
                                   <button
                                     data-testid="assign-button"
                                     onClick={() => {
-                                      setCurrentBranch(subOrganization);
-                                      setShowAssignDialog(true);
+                                      setCurrentEmployee(employee);
+                                      setShowDepartmentAssignDialog(true);
                                     }}
                                     className="bg-yellow-500 text-black py-1 px-4 rounded"
                                   >
@@ -570,6 +612,82 @@ const EmployeeList = () => {
           )}
           {confirmationModal && (
             <ConfirmationModal modalData={confirmationModal} />
+          )}
+          {showDepartmentAssignDialog && (
+            <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+              <div
+                className={`p-6 rounded-lg shadow-lg max-w-sm w-full ${
+                  darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-700"
+                }`}
+              >
+                <h2 className="text-xl font-semibold mb-4">
+                  Assign Department
+                </h2>
+                <div className="mb-4">
+                  <label
+                    htmlFor="organization-select"
+                    className="block text-sm font-medium"
+                  >
+                    Select Department
+                  </label>
+                  <select
+                    id="organization-select"
+                    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                      darkMode
+                        ? "bg-gray-700 border-gray-600 text-white"
+                        : "bg-white border-gray-300 text-gray-700"
+                    } max-h-60 overflow-y-auto`}
+                    value={selectedAssignDepartment}
+                    onChange={(e) =>
+                      setSelectedAssignDepartment(e.target.value)
+                    }
+                  >
+                    <option value="">Select Department</option>
+                    {AllDepartments.map((dept) => (
+                      <option
+                        key={dept?.departmentId}
+                        value={dept?.departmentId}
+                      >
+                        {dept?.department}
+                      </option>
+                    ))}
+                  </select>
+                  {departmentError && (
+                    <p className="text-red-500 text-md mt-2">
+                      {organizationError}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex justify-end">
+                  <button
+                    className={`py-2 px-4 rounded mr-2 ${
+                      darkMode
+                        ? "bg-blue-500 text-white"
+                        : "bg-blue-600 text-white"
+                    }`}
+                    onClick={() =>
+                      handleAssignDepartment(
+                        currentEmployee?.employeeId,
+                        selectedAssignDepartment
+                      )
+                    }
+                  >
+                    Assign
+                  </button>
+                  <button
+                    className={`py-2 px-4 rounded ${
+                      darkMode
+                        ? "bg-gray-600 text-white"
+                        : "bg-gray-500 text-white"
+                    }`}
+                    onClick={() => setShowDepartmentAssignDialog(false)}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
           )}
         </div>
       )}
