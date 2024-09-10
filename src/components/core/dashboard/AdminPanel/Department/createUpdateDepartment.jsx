@@ -51,7 +51,7 @@ const CreateUpdateDepartment = () => {
     department: null,
   };
 
-  console.log(department?.branches[0]?.branchName);
+  // console.log(department?.branches[0]?.branchName);
   console.log("select org", selectedOrganization);
 
   const [selectedSubOrganization, setSelectedSubOrganization] = useState(""); // Added state
@@ -128,7 +128,7 @@ const CreateUpdateDepartment = () => {
     if (isEditing && department) {
       setValue("department", department.department);
       setValue("description", department.description);
-      setSelectedOrganization(department.organizationId);
+      setSelectedOrganization(department?.organizations[0]?.organizationId);
 
       // Set manager if exists
       if (department?.managerId) {
@@ -429,9 +429,7 @@ const CreateUpdateDepartment = () => {
                 <select
 
                   id="organization"
-                  {...register("organization", {
-                    required: "Organization is required",
-                  })}
+                  {...register("organization")}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-white"
@@ -456,65 +454,7 @@ const CreateUpdateDepartment = () => {
                 )}
               </div>
             )}
-            {isEditing && AssignSubOrganizationHeaderFlag ? (
-              <div className="mb-4">
-                <label
-                  htmlFor="organization-select"
-                  className="block text-sm font-medium"
-                >
-                  Select Sub Organization
-                </label>
-                <select
-                  id="organization-select"
-                  className={` mt-2 shadow appearance-none border rounded w-full py-2 px-3 ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white text-gray-700"
-                  } max-h-60 overflow-y-auto`}
-                  value={selectedSubOrganization}
-                  onChange={(e) => setSelectedSubOrganization(e.target.value)}
-                >
-                  <option value="">Select Sub Organization</option>
-                  {AllSubOrganization.map((subOrg) => (
-                    <option key={subOrg?.branchId} value={subOrg?.branchId}>
-                      {subOrg.branchName}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            ) : (
-              <div className="mb-4">
-                <label
-                  htmlFor="subOrganization"
-                  className="block text-sm font-medium"
-                >
-                  Select Sub Organization
-                </label>
-                <select
-                  id="subOrganization"
-                  {...register("subOrganization", {
-                    required: " Sub Organization is required",
-                  })}
-                  className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                    darkMode
-                      ? "bg-gray-700 border-gray-600 text-white"
-                      : "bg-white text-gray-700"
-                  } max-h-60 overflow-y-auto`}
-                >
-                  <option value="">Select Sub Organization</option>
-                  {AllSubOrganization.map((subOrg) => (
-                    <option key={subOrg?.branchId} value={subOrg?.branchId}>
-                      {subOrg.branchName}
-                    </option>
-                  ))}
-                </select>
-                {errors.subOrganization && (
-                  <p className="text-red-500 mt-1">
-                    {errors.subOrganization.message}
-                  </p>
-                )}
-              </div>
-            )}
+
             <div className="mb-4">
               <label
                 htmlFor="department"
@@ -674,9 +614,7 @@ const CreateUpdateDepartment = () => {
                     type="text"
                     data-testid={attribute.attributeKey}
                     placeholder={`${attribute.attributeKey}...`}
-                    {...register(attribute.attributeKey, {
-                      required: `${attribute.attributeKey} is required`,
-                    })}
+                    {...register(attribute.attributeKey)}
                     className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                       darkMode
                         ? "bg-gray-700 border-gray-600 text-white"

@@ -163,7 +163,6 @@ const PrimaryEmployeeDetails = () => {
               <p className="text-red-500 mt-1">{errors.organization.message}</p>
             )}
           </div>
-
           <div className="mt-4">
             <label
               htmlFor="email"
@@ -179,8 +178,15 @@ const PrimaryEmployeeDetails = () => {
               {...register("email", {
                 required: "Email is required",
                 pattern: {
-                  value: /^\S+@\S+$/i,
+                  value: /^[a-zA-Z0-9._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$/,
                   message: "Invalid email address",
+                },
+                validate: (value) => {
+                  const domain = value.split("@")[1];
+                  if (/\d/.test(domain)) {
+                    return "Domain must not contain any numbers";
+                  }
+                  return true;
                 },
               })}
               className={`border ${
@@ -211,6 +217,12 @@ const PrimaryEmployeeDetails = () => {
                 minLength: {
                   value: 6,
                   message: "Password must be at least 6 characters",
+                },
+                pattern: {
+                  value:
+                    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{6,}$/,
+                  message:
+                    "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character",
                 },
               })}
               type="password"

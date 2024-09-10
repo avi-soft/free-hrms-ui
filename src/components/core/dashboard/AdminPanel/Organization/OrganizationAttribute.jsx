@@ -18,10 +18,12 @@ const OrganizationAttributes = ({ NextHandler }) => {
   const [attribute, setAttribute] = useState({
     attributeId: "",
     attributeKey: "",
+    error: "",
   });
   const [editAttribute, setEditAttribute] = useState({
     attributeId: "",
     attributeKey: "",
+    error: "",
   });
   const [edit, setEdit] = useState(false);
   async function getRes() {
@@ -37,11 +39,18 @@ const OrganizationAttributes = ({ NextHandler }) => {
     return str.trim().replace(/\s+/g, ' '); 
   };
 
+  const validateAttributeKey = (key) => {
+    const regex = /^[A-Za-z\s]+$/;
+    return regex.test(key);
+  };
+
   const addAttributes = async () => {
     const normalizedAttributeKey = normalizeString(attribute.attributeKey);
 
     if (!normalizedAttributeKey) {
-      setAttribute({ ...attribute, error: "Attributes field is required" });
+      setAttribute({ ...attribute, error: "Attribute field is required" });
+    } else if (!validateAttributeKey(normalizedAttributeKey)) {
+      setAttribute({ ...attribute, error: "Attribute field must contain only letters" });
     } else {
       setAttribute({ ...attribute, attributeKey: normalizedAttributeKey, error: "" });
       try {
@@ -66,12 +75,13 @@ const OrganizationAttributes = ({ NextHandler }) => {
       error: "",
     });
   };
-
   const editAttributes = async (attributeId) => {
     const normalizedEditAttributeKey = normalizeString(editAttribute.attributeKey);
 
     if (!normalizedEditAttributeKey) {
-      setEditAttribute({ ...editAttribute, error: "Attributes field is required" });
+      setEditAttribute({ ...editAttribute, error: "Attribute field is required" });
+    } else if (!validateAttributeKey(normalizedEditAttributeKey)) {
+      setEditAttribute({ ...editAttribute, error: "Attribute field must contain only letters" });
     } else {
       setEditAttribute({ ...editAttribute, attributeKey: normalizedEditAttributeKey, error: "" });
       try {
@@ -82,8 +92,7 @@ const OrganizationAttributes = ({ NextHandler }) => {
         setEditAttribute({ ...editAttribute, error: "Failed to update attribute" });
       }
     }
-  };
-
+  }
   const handleDelete=async(attributeId)=>{
     await dispatch(
         deleteOrganisationAttributes(AccessToken,attributeId)
@@ -98,31 +107,31 @@ const OrganizationAttributes = ({ NextHandler }) => {
     >
       <div className="mb-4 ">
       <div className="flex gap-2">
-        <input
-          id="addAttribute"
-          type="text"
-          data-testid="addAttribute"
-          placeholder="Add Attributes..."
-          value={attribute.attributeKey}
-          className={`shadow appearance-none border rounded w-3/4 py-2 px-3 ${
-            darkMode
-              ? "bg-gray-700 border-gray-600 text-white"
-              : "bg-white text-gray-700"
-          }`}
-          onChange={(e) =>
-            setAttribute({
-              attributeId: 0,
-              attributeKey: e.target.value,
-            })
-          }
-        />
-        <button
-          type="submit"
-          className={`text-center w-1/4 text-sm md:text-base font-medium rounded-md py-2 px-5 bg-blue-700
-              text-white
-              hover:scale-95 transition-all duration-200`}
-          onClick={addAttributes}
-        >
+      <input
+            id="addAttribute"
+            type="text"
+            data-testid="addAttribute"
+            placeholder="Add Attributes..."
+            value={attribute.attributeKey}
+            className={`shadow appearance-none border rounded w-3/4 py-2 px-3 ${
+              darkMode
+                ? "bg-gray-700 border-gray-600 text-white"
+                : "bg-white text-gray-700"
+            }`}
+            onChange={(e) =>
+              setAttribute({
+                ...attribute,
+                attributeKey: e.target.value,
+              })
+            }
+          />
+          <button
+            type="submit"
+            className={`text-center w-1/4 text-sm md:text-base font-medium rounded-md py-2 px-5 bg-blue-700
+                text-white
+                hover:scale-95 transition-all duration-200`}
+            onClick={addAttributes}
+          >
           Add
         </button>
       </div>
@@ -139,39 +148,42 @@ const OrganizationAttributes = ({ NextHandler }) => {
                 darkMode ? "bg-slate-600" : "bg-white"
               }`}
             >
-              {edit == item.attributeId ? (
-                <div className="flex gap-2">
-                  <input
-                    id="addAttribute"
-                    type="text"
-                    data-testid="editAttribute"
-                    autoFocus
-                    value={editAttribute.attributeKey}
-                    className={`shadow appearance-none border rounded w-3/4 py-2 px-3 ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white text-gray-700"
-                    }`}
-                    onChange={(e) =>
-                      setEditAttribute({
-                        attributeId: 0,
-                        attributeKey: e.target.value,
-                      })
-                    }
-                  />{" "}
-                  <button
-                    type="submit"
-                    className={`text-center w-1/4 text-sm md:text-base font-medium rounded-md py-2 px-5 bg-blue-700
-            text-white
-            hover:scale-95 transition-all duration-200`}
-                    onClick={() => editAttributes(item.attributeId)}
-                  >
-                    Edit
-                  </button>
-                </div>
-              ) : (
-                <p className="text-lg">{item.attributeKey}</p>
-              )}
+{edit == item.attributeId ? (
+        <div className="flex flex-col ">
+            <div className="flex gap-2">
+    <input
+      type="text"
+      placeholder="Edit Attribute..."
+      value={editAttribute.attributeKey}
+      className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+        darkMode
+          ? "bg-gray-700 border-gray-600 text-white"
+          : "bg-white text-gray-700"
+      }`}
+      onChange={(e) =>
+        setEditAttribute({
+          ...editAttribute,
+          attributeKey: e.target.value,
+        })
+      }
+    />
+    <button
+      type="submit"
+      className={`text-center w-1/4 text-sm md:text-base font-medium rounded-md py-2 px-5 bg-blue-700
+          text-white
+          hover:scale-95 transition-all duration-200`}
+      onClick={() => editAttributes(item.attributeId)}
+    >
+      Edit
+    </button>
+  </div>
+  {editAttribute.error && <p className="text-red-500 mt-1">{editAttribute.error}</p>}
+
+   </div>
+
+) : (
+  <p className="text-lg">{item.attributeKey}</p>
+)}
 
               <div className="flex gap-4">
                 <FaEdit onClick={() => handleEdit(item)} />

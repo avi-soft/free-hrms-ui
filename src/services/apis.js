@@ -33,6 +33,9 @@ export const employeeEndpoints = {
   EMPLOYEE_SEARCH_API: (employeeName) =>
     BASE_URL + `/employee/searchEmployee?name=${employeeName}`,
   DEPARTMENT_EMPLOYEE_LIST: (deptId) => BASE_URL + `/department/${deptId}`,
+  ASSIGN_EMPLOYEE_DEPARTMENT: (empId,deptId)=> BASE_URL + `/department/${empId}/assignEmployeeToDepartment/${deptId}`,
+  UNASSIGN_EMPLOYEE_DEPARTMENT: (empId,deptId)=> BASE_URL + `/department/${empId}/removeEmployeeFromDepartment/${deptId}`
+
 };
 
 //Department Endpoints

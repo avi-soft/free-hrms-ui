@@ -110,7 +110,7 @@ export const updateOrganisation = (AccessToken, data,navigate, organisationId) =
   };
 };
 
-export const getOrganisation = (AccessToken) => {
+export const getOrganisation = (AccessToken,currentPage,organizationsPerPage) => {
   return async (dispatch) => {
     const toastId = toast.loading("Loading...");
     try {
@@ -120,6 +120,10 @@ export const getOrganisation = (AccessToken) => {
         null,
         {
           Authorization: `Bearer ${AccessToken}`,
+        },
+        {
+          page: currentPage,
+          size: organizationsPerPage,
         }
       );
       console.log(response);

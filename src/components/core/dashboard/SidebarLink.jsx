@@ -81,7 +81,7 @@ export default function SidebarLink({ link }) {
               <span
                 className={`block py-2 font-light text-md ${
                   darkMode ? "" : ""
-                } hover:text-white ${
+                } hover:text-black hover:font-medium ${
                   matchRoute(childLink.url)
                     ? `font-semibold ${
                         darkMode ? " text-orange-400" : "text-blue-800"

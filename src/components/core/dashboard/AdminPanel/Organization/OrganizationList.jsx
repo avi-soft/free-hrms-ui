@@ -25,17 +25,22 @@ const OrganizationList = () => {
   const { loading } = useSelector((state) => state.Organisation);
   const { AllOrganizations } = useSelector((state) => state.Organisation);
   const navigate = useNavigate();
+  const organizationsPerPage = 5;
+  const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+
 
   console.log(loading);
   console.log(AllOrganizations);
 
-  const fetchOrganizationList = async () => {
+  const fetchOrganizationList = async (currentPage) => {
     try {
       dispatch(setLoading(true));
-      const res = await dispatch(getOrganisation(AccessToken));
+      const res = await dispatch(getOrganisation(AccessToken,currentPage,organizationsPerPage));
       console.log(res);
       console.log(res?.data);
-      dispatch(setOrganization(res?.data));
+      dispatch(setOrganization(res?.data?.content));
+      setTotalPages(res?.data?.totalPages)
       dispatch(setLoading(false));
     } catch (error) {
       console.error("Error fetching AllOrganizations", error);
@@ -45,10 +50,16 @@ const OrganizationList = () => {
   };
 
   useEffect(() => {
-    fetchOrganizationList();
-  }, [dispatch, AccessToken]);
+    fetchOrganizationList(currentPage);
+  }, [dispatch, AccessToken,currentPage]);
 
+  const handleNextPage = () => {
+    setCurrentPage(currentPage + 1);
+  };
 
+  const handlePreviousPage = () => {
+    setCurrentPage((prevPage) => prevPage - 1);
+  };
   return (
     <div
       className={` mb-10 rounded shadow-lg ${
@@ -235,6 +246,29 @@ const OrganizationList = () => {
                     ))}
                   </tbody>
                 </table>
+                <div className="flex justify-between p-5">
+                        <button
+                          onClick={handlePreviousPage}
+                          disabled={currentPage === 0}
+                          className={` text-white p-2 rounded disabled:opacity-50 ${
+                            darkMode ? "bg-gray-600" : "bg-slate-400"
+                          }`}
+                        >
+                          Previous
+                        </button>
+                        <button
+                          onClick={handleNextPage}
+                          disabled={
+                            currentPage === totalPages - 1 ||
+                            AllOrganizations.length < organizationsPerPage
+                          }
+                          className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
+                            darkMode ? "bg-gray-600" : "bg-slate-400"
+                          }`}
+                        >
+                          Next
+                        </button>
+                      </div>
               </div>
             </div>
           )}

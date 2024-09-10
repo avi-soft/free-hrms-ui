@@ -26,7 +26,7 @@ const CreateUpdateOrganisation = () => {
     formState: { errors },
   } = useForm();
   const dispatch = useDispatch();
-  const          navigate = useNavigate();
+  const navigate = useNavigate();
   const location = useLocation();
   const inputRef = useRef(null);
   const [loading, setLoading] = useState(false);
@@ -309,7 +309,7 @@ const CreateUpdateOrganisation = () => {
                   <sup className="text-red-900 font-bold">*</sup>
                 </label>
                 <input
-                  id="organization"
+                  id="organizationName"
                   type="text"
                   placeholder="Organization Name..."
                   {...register("organizationName", {
@@ -319,13 +319,17 @@ const CreateUpdateOrganisation = () => {
                       message:
                         "Organization Name must be at least 3 characters",
                     },
+                    maxLength: {
+                      value: 50,
+                      message:
+                        "Organization Name must be at least 50 characters",
+                    },
                     validate: {
                       noNumbers: (value) =>
                         !/\d/.test(value) ||
                         "Organization Name must not contain numbers",
-
                       noSpecialChars: (value) =>
-                        /^[a-zA-Z0-9 ]*$/.test(value) ||
+                        /^[a-zA-Z\s]+$/.test(value) ||
                         "Organization Name must not contain special characters",
                       noExtraSpaces: (value) => {
                         const trimmedValue = value.trim();
@@ -346,6 +350,7 @@ const CreateUpdateOrganisation = () => {
                   </p>
                 )}
               </div>
+
               <div className="mb-4">
                 <label
                   htmlFor="organizationDescription"
@@ -364,6 +369,10 @@ const CreateUpdateOrganisation = () => {
                     minLength: {
                       value: 5,
                       message: "Description must be at least 5 characters",
+                    },
+                    maxLength: {
+                      value: 200,
+                      message: "Description must be atmost 200 characters",
                     },
                     validate: (value) =>
                       value.trim().length >= 5 ||
@@ -398,7 +407,26 @@ const CreateUpdateOrganisation = () => {
                       data-testid={attribute?.attributeKey}
                       placeholder={`${attribute?.attributeKey}...`}
                       {...register(attribute?.attributeKey, {
-                        required: `${attribute?.attributeKey} is required`,
+                        validate: {
+                          trimAndSingleSpace: (value) => {
+                            // Trim spaces from start and end
+                            const trimmedValue = value.trim();
+
+                            // Ensure only a single space between words
+                            const normalizedValue = trimmedValue.replace(
+                              /\s+/g,
+                              " "
+                            );
+
+                            // Return error if the normalized value is empty
+                            if (!normalizedValue) {
+                              return "This field is required";
+                            }
+
+                            // Optionally, you can add more specific checks here
+                            return true; // or any message if validation fails
+                          },
+                        },
                       })}
                       className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                         darkMode
@@ -580,6 +608,10 @@ const CreateUpdateOrganisation = () => {
                         value: 5,
                         message: "Description must be at least 5 characters",
                       },
+                      maxLength: {
+                        value: 200,
+                        message: "Description must be at atmost 200 characters",
+                      },
                       validate: (value) =>
                         value.trim().length >= 5 ||
                         "Description must not be empty or less than 5 characters",
@@ -605,16 +637,13 @@ const CreateUpdateOrganisation = () => {
                         }`}
                       >
                         {attribute.attributeKey}
-                        <sup className="text-red-900 font-bold">*</sup>
                       </label>
                       <input
                         id={attribute.attributeKey}
                         type="text"
                         data-testid={attribute.attributeKey}
                         placeholder={`${attribute.attributeKey}...`}
-                        {...register(attribute.attributeKey, {
-                          required: `${attribute.attributeKey} is required`,
-                        })}
+                        {...register(attribute.attributeKey)}
                         className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                           darkMode
                             ? "bg-gray-700 border-gray-600 text-white"
