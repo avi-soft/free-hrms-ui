@@ -18,7 +18,7 @@ const {
   ADD_EMPLOYEE_BANK_DETAILS_API,
   EDIT_EMPLOYEE_BANK_DETAILS_API,
   EMPLOYEE_SEARCH_API,
-  DEPARTMENT_EMPLOYEE_LIST
+  DEPARTMENT_EMPLOYEE_LIST,ASSIGN_EMPLOYEE_DEPARTMENT,UNASSIGN_EMPLOYEE_DEPARTMENT
 } = employeeEndpoints;
 const {
   GET_EmployeeAttributes_Endpoint,
@@ -659,3 +659,65 @@ export function DeleteEmployeeDesignation(id, AccessToken) {
     }
   };
 }
+
+
+export function AssignEmployeeDepartment(AccessToken,empId,deptId) {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector(
+        "PATCH",
+        ASSIGN_EMPLOYEE_DEPARTMENT(empId, deptId),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+      // if (response?.status !== 200) throw new Error(response.data.message);
+      // toast.success("DEPARTMENT DELETED SUCCESSFULLY");
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    } finally {
+    }
+  };
+}
+
+export const UnAssignEmployeeDept = (
+  AccessToken,
+  DepartmentId,
+  empId
+) => {
+  return async (dispatch) => {
+    try {
+      const response = await apiConnector(
+        "PATCH",
+        UNASSIGN_EMPLOYEE_DEPARTMENT(
+          empId,
+          DepartmentId
+        ),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      return response;
+      // if (response?.status !== 200) throw new Error(response.data.message);
+      // toast.success("DEPARTMENT DELETED SUCCESSFULLY");
+    } catch (err) {
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    } finally {
+    }
+  };
+};

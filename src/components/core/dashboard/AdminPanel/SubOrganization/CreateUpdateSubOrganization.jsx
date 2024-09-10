@@ -253,9 +253,7 @@ const CreateUpdateSubOrganization = () => {
                 </label>
                 <select
                   id="organization"
-                  {...register("organization", {
-                    required: "Organization is required",
-                  })}
+                  {...register("organization")}
                   value={selectedOrganization}
                   onChange={(e) => {
                     setSelectedOrganization(e.target.value);
