@@ -138,7 +138,7 @@ const CreateUpdateSubOrganization = () => {
     try {
       dispatch(setLoading(true));
       const res = await dispatch(getOrganisation(AccessToken));
-      dispatch(setOrganization(res?.data));
+      dispatch(setOrganization(res?.data?.content));
       dispatch(setLoading(false));
     } catch (error) {
       console.error("Error fetching organizations", error);
@@ -249,7 +249,6 @@ const CreateUpdateSubOrganization = () => {
                   }`}
                 >
                   Select Organization
-                  <sup className="text-red-900 font-bold">*</sup>
                 </label>
                 <select
                   id="organization"
@@ -319,16 +318,13 @@ const CreateUpdateSubOrganization = () => {
                     }`}
                   >
                     {attribute.attributeKey}
-                    <sup className="text-red-900 font-bold">*</sup>
                   </label>
                   <input
                     id={attribute.attributeKey}
                     type="text"
                     data-testid={attribute.attributeKey}
                     placeholder={`${attribute.attributeKey}...`}
-                    {...register(attribute.attributeKey, {
-                      required: `${attribute.attributeKey} is required`,
-                    })}
+                    {...register(attribute.attributeKey)}
                     className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                       darkMode
                         ? "bg-gray-700 border-gray-600 text-white"

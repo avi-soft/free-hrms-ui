@@ -11,7 +11,8 @@ const {
   GET_ORGANIZATION_ATTRIBUTES_REQUEST,
   ADD_ORGANIZATION_ATTRIBUTES_REQUEST,
   UPDATE_ORGANIZATION_ATTRIBUTES_REQUEST,
-  DELETE_ORGANIZATION_ATTRIBUTES_REQUEST
+  DELETE_ORGANIZATION_ATTRIBUTES_REQUEST,
+  REMOVE_ORGANISATION_LOGO_REQUEST
 } = OrganisationEndpoints;
 
 export const uploadOrganisationLogo = (
@@ -275,6 +276,38 @@ export const deleteOrganisationAttributes = (AccessToken, organisationId) => {
       const response = await apiConnector(
         "DELETE",
         DELETE_ORGANIZATION_ATTRIBUTES_REQUEST(organisationId),
+        null,
+        {
+          Authorization: `Bearer ${AccessToken}`,
+        }
+      );
+      console.log(response);
+      if (response?.status != 200) throw new Error(response?.data?.message);
+      else {
+        return response;
+      }
+    } catch (err) {
+      console.log(err);
+      if (err?.response?.data?.message) {
+        toast.error(err?.response?.data?.message);
+        console.log(err);
+      } else {
+        toast.error("Something went wrong.");
+      }
+    } finally {
+      toast.dismiss(toastId);
+    }
+  };
+};
+
+export const RemoveOrganisationLogo = (AccessToken, organisationId) => {
+  return async (dispatch) => {
+    const toastId = toast.loading("Removing...");
+    try {
+      console.log(AccessToken);
+      const response = await apiConnector(
+        "DELETE",
+        REMOVE_ORGANISATION_LOGO_REQUEST(organisationId),
         null,
         {
           Authorization: `Bearer ${AccessToken}`,

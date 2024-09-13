@@ -2,6 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import MenuItems from "../../../constants/menu";
 import SidebarLink from "./SidebarLink";
+import { NavLink } from "react-router-dom";
 
 function Sidebar() {
   const { darkMode } = useSelector((state) => state.theme);
@@ -32,6 +33,7 @@ function Sidebar() {
               }`}
             >
               {menuItems[0]?.label}
+              
             </div>
             {slicedMenuItems.map((link) => (
               <SidebarLink key={link.key} link={link} darkMode={darkMode} />

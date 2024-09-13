@@ -27,6 +27,10 @@ import CreateUpdateOrganisation from "./components/core/dashboard/AdminPanel/Org
 import AddEmployeeAttributes from "./components/core/dashboard/AdminPanel/Employee/AddEmployeeAttributes";
 import CreateUpdateSubOrganization from "./components/core/dashboard/AdminPanel/SubOrganization/CreateUpdateSubOrganization";
 import SubOrganizationList from "./components/core/dashboard/AdminPanel/SubOrganization/SubOrganizationList";
+import DashboardContent from "./components/core/dashboard/MainDashboard/DashboardContent";
+import AttendenceShift from "./components/core/dashboard/AdminPanel/Attendence/AttendenceShift";
+import AttendenceLocation from "./components/core/dashboard/AdminPanel/Attendence/AttendenceLocation";
+import AttendenceConfiguration from "./components/core/dashboard/AdminPanel/Attendence/AttendenceConfiguration";
 
 function App() {
   const { darkMode } = useSelector((state) => state.theme);
@@ -55,6 +59,7 @@ function App() {
               </PrivateRoute>
             }
           >
+            <Route path="/dashboard" element={<DashboardContent />} />
             <Route
               path="/organization/organization-list"
               element={<OrganizationList />}
@@ -63,9 +68,9 @@ function App() {
               path="/organization/organization-create-update"
               element={<CreateUpdateOrganisation />}
             />
-              <Route
+            <Route
               path="/suborganization/suborganization-list"
-              element={<SubOrganizationList/>}
+              element={<SubOrganizationList />}
             />
             <Route
               path="/suborganization/suborganization-create-update"
@@ -94,6 +99,11 @@ function App() {
               path="/department/department-list"
               element={<DepartmentList />}
             />
+            <Route
+              path="/attendence/Configure-Attendence"
+              element={<AttendenceConfiguration />}
+            />
+
             <Route path="/performance/all-reviews" element={<AllReviews />} />
             <Route
               path="/performance/add-review"

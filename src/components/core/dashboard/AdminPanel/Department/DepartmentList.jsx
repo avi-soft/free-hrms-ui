@@ -56,7 +56,7 @@ const DepartmentList = () => {
   const location = useLocation();
 
   console.log(AllDepartments);
-  console.log(selectedAssignOrganization, "SELECTED ASSIGN ");
+  console.log(AllOrganizations, "SELECTED ASSIGN ");
 
   const fetchOrganizationList = async () => {
     try {
@@ -316,7 +316,7 @@ const DepartmentList = () => {
               <button>Add Department</button>
             </Link>
           </div>
-          {AllOrganizations.length === 0 ? (
+          {AllOrganizations?.content?.length === 0 ? (
             <div className="p-5 mt-32 flex flex-col items-center justify-center">
               <div
                 className={`text-xl font-semibold ${
