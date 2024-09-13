@@ -3,7 +3,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { BiBorderRadius } from "react-icons/bi";
 import { LuClock3 } from "react-icons/lu";
 import { IoLocationOutline } from "react-icons/io5";
-
+import { FaCheckCircle, FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
+import { fetchElevation } from "../../../../utils/utility.functions";
 
 const AttendenceSection = () => {
   const { darkMode } = useSelector((state) => state.theme);
@@ -13,18 +14,17 @@ const AttendenceSection = () => {
     longitude: null,
     altitude: null,
   });
-  const [locationLoader,setLocationLoader]=useState(false);
-  const dispatch=useDispatch()
+  const [locationLoader, setLocationLoader] = useState(false);
+  const dispatch = useDispatch();
   const { AccessToken } = useSelector((state) => state.auth);
-  const [locationsData,setLocationData]=useState(null)
-
+  const [locationsData, setLocationData] = useState(null);
 
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
 
-    return () => clearInterval(timer); 
+    return () => clearInterval(timer);
   }, []);
 
   const formatTime = (date) => {
@@ -32,7 +32,7 @@ const AttendenceSection = () => {
   };
 
   const handleLocationClick = () => {
-    setLocationLoader(true)
+    setLocationLoader(true);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
@@ -46,7 +46,19 @@ const AttendenceSection = () => {
           });
 
           // Fetch the elevation data using Open-Elevation API
-          fetchElevation(latitude, longitude);
+           const fetchedElevation=fetchElevation(latitude, longitude);
+
+           if (fetchedElevation=== null) {
+            setLoading(false);
+            toast.error("Failed to retrieve Location Data.");
+            return;
+          }
+
+          const locationData = {
+            latitude: Number(latitude),
+            longitude: Number(longitude),
+            elevation: fetchedElevation,
+          };
         },
         (error) => {
           console.error("Error fetching location: ", error.message);
@@ -58,49 +70,24 @@ const AttendenceSection = () => {
   };
 
   // Function to fetch elevation data from Open-Elevation API
-  const fetchElevation = async (latitude, longitude) => {
-    try {
-      const response = await fetch(
-        `https://api.open-elevation.com/api/v1/lookup?locations=${latitude},${longitude}`
-      );
-  
-      const data = await response.json();
-      console.log(data);
-      
-      if (data.results && data.results[0]) {
-        const elevation = data.results[0].elevation;
-  
-        setLocation((prevLocation) => ({
-          ...prevLocation,
-          elevation: elevation,
-        }));
-  
-        // Send the location data to backend
-        sendLocationToBackend({ latitude, longitude, elevation });
-      }
-    } catch (error) {
-      console.error("Error fetching elevation: ", error);
-    }
-  };
-  
-  
+
+
   const sendLocationToBackend = async (locationData) => {
+    console.log(locationData);
+    setLocationLoader(false);
 
-      console.log(locationData);
-      setLocationLoader(false)
-      
     try {
-      const response = await dispatch(AddEmployeeLocation(locationData,AccessToken))
-
+      const response = await dispatch(
+        AddEmployeeLocation(locationData, AccessToken)
+      );
 
       console.log(response);
-      
 
-    //   if (response.ok) {
-    //     console.log("Location sent successfully!");
-    //   } else {
-    //     console.error("Failed to send location.");
-    //   }
+      //   if (response.ok) {
+      //     console.log("Location sent successfully!");
+      //   } else {
+      //     console.error("Failed to send location.");
+      //   }
     } catch (error) {
       console.error("Error sending location to backend: ", error);
     }
@@ -108,7 +95,7 @@ const AttendenceSection = () => {
   return (
     <div className="flex justify-center items-center  h-auto mb-10 mt-5">
       <div
-        className={`pb-9 pt-5 px-6 w-full  max-w-lg rounded ${
+        className={`pb-9 pt-5 px-6 w-[400px]  max-w-lg rounded ${
           darkMode ? "bg-slate-700 text-white" : "bg-slate-100 text-black"
         }`}
       >
@@ -120,18 +107,16 @@ const AttendenceSection = () => {
         </div>
         {/* Attendance Header */}
         <div className="flex items-center justify-between mt-2 mb-4">
-        <button
-  className={`px-4 py-2 rounded-full font-semibold ${
-    darkMode ? "bg-green-600" : "bg-green-400 text-white"
-  } flex justify-between items-center gap-2`}
-  onClick={handleLocationClick}
-  disabled={locationLoader} // Disable the button when location is loading
->
-  <IoLocationOutline />
-  <span>
-    {locationLoader ? "please wait.." : "Location"} {/* Show loader text */}
-  </span>
-</button>
+          <button
+            className={`px-4 py-2 rounded-full font-semibold ${
+              darkMode ? "bg-green-600" : "bg-green-400 text-white"
+            } flex justify-between items-center gap-2`}
+            onClick={handleLocationClick}
+            disabled={locationLoader}
+          >
+            <IoLocationOutline />
+            <span>{locationLoader ? "please wait.." : "Location"}</span>
+          </button>
 
           <div className="text-gray-500 text-sm">00:00 Hrs</div>
         </div>
@@ -146,26 +131,34 @@ const AttendenceSection = () => {
             }`}
           />
           <button
-            className={`w-full flex flex-row items-center  justify-between gap-x-5 py-2 px-4 text-white rounded-md font-medium ${
-              darkMode ? ' bg-green-500' : "bg-green-400"
+            className={`w-full flex flex-row items-center  justify-center gap-x-5 py-2 px-4 text-white rounded-md font-medium ${
+              darkMode ? " bg-green-500" : "bg-green-400"
             }`}
           >
-            <div className="ml-3">
-            <LuClock3 />
-            </div>
-
-           <p className="ml-3 font-semibold"> Check-in <span className=" text-gray-500 text-sm">{formatTime(currentTime)}</span>
-           </p>
+              <div className="flex  items-center  gap-1">
+                <p className="ml-3 font-semibold"> Check-in</p>
+                <div>
+                  <FaSignInAlt />
+                </div>
+              </div>
+              <div className=" text-gray-500 text-sm">
+                {formatTime(currentTime)}
+              </div>
           </button>
-
         </div>
-                {/* Location display */}
-                {location.latitude && (
+        {/* Location display */}
+        {location.latitude && (
           <div className="text-center mt-4">
-            <p className="text-sm text-gray-500">Latitude: {location.latitude}</p>
-            <p className="text-sm text-gray-500">Longitude: {location.longitude}</p>
-            <p className="text-sm text-gray-500">Elevation: {location.elevation} meters</p>
-            </div>
+            <p className="text-sm text-gray-500">
+              Latitude: {location.latitude}
+            </p>
+            <p className="text-sm text-gray-500">
+              Longitude: {location.longitude}
+            </p>
+            <p className="text-sm text-gray-500">
+              Elevation: {location.elevation} meters
+            </p>
+          </div>
         )}
 
         {/* Time Details */}
