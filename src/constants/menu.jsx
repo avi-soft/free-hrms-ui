@@ -141,49 +141,64 @@ const MenuItems = () => {
                 ],
             },
             {
-                key: "Performance Review",
-                label: t("Performance Review"),
+                key: "Attendence",
+                label: t("Attendence"),
                 isTitle: false,
                 icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
                 children: [
                     {
-                        key: "All Reviews",
-                        label: t("All Reviews"),
-                        url: "/performance/all-reviews",
-                        parentKey: "Performance Review",
+                        key: "Configure-Shift-Timings",
+                        label: t("Configure Shift Timings"),
+                        url: "/attendence/Configure-Attendence",
+                        parentKey: "Attendence",
                         icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
-                    },
-                    {
-                        key: "Add Performance Review",
-                        label: t("Add Performance Review"),
-                        url: "/performance/add-review",
-                        parentKey: "Performance Review",
-                        icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
-                    },
-                    {
-                        key: "Performance Review List",
-                        label: t("Performance Review List"),
-                        url: "/performance/review-list",
-                        parentKey: "Performance Review",
-                        icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
-                    },
+                    }
                 ],
             },
-            {
-                key: "Leave",
-                label: t("Leave"),
-                isTitle: false,
-                icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
-                children: [
-                    {
-                        key: "Requested Leaves List",
-                        label: t("Requested Leaves List"),
-                        url: "/leave/Requested-leaves-list",
-                        parentKey: "Leave",
-                        icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
-                    },
-                ],
-            },
+            // {
+            //     key: "Performance Review",
+            //     label: t("Performance Review"),
+            //     isTitle: false,
+            //     icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+            //     children: [
+            //         {
+            //             key: "All Reviews",
+            //             label: t("All Reviews"),
+            //             url: "/performance/all-reviews",
+            //             parentKey: "Performance Review",
+            //             icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+            //         },
+            //         {
+            //             key: "Add Performance Review",
+            //             label: t("Add Performance Review"),
+            //             url: "/performance/add-review",
+            //             parentKey: "Performance Review",
+            //             icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+            //         },
+            //         {
+            //             key: "Performance Review List",
+            //             label: t("Performance Review List"),
+            //             url: "/performance/review-list",
+            //             parentKey: "Performance Review",
+            //             icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+            //         },
+            //     ],
+            // },
+            // {
+            //     key: "Leave",
+            //     label: t("Leave"),
+            //     isTitle: false,
+            //     icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+            //     children: [
+            //         {
+            //             key: "Requested Leaves List",
+            //             label: t("Requested Leaves List"),
+            //             url: "/leave/Requested-leaves-list",
+            //             parentKey: "Leave",
+            //             icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+            //         },
+            //     ],
+            // },
         ];
     };
 
@@ -333,7 +348,7 @@ const MenuItems = () => {
     };
 
     const getMenuItems = () => {
-        if (user?.roles[0]?.role === "Manager") {
+        if (user?.roles[0]?.role === "SuperAdmin") {
             return adminMenuItems();
         } else {
             return userMenuItems();

@@ -121,6 +121,8 @@ export const OrganisationEndpoints = {
   ADD_ORGANISATION_REQUEST: BASE_URL + "/organization",
   ADD_ORGANISATION_LOGO_REQUEST: (organisationId) =>
     BASE_URL + `/organization/${organisationId}/uploadImage`,
+  REMOVE_ORGANISATION_LOGO_REQUEST: (organisationId) =>
+    BASE_URL + `/organization/${organisationId}/removeImage`,
   DELETE_ORGANISATION_REQUEST: (organisationId) =>
     BASE_URL + `/organization/${organisationId}`,
   GET_ORGANIZATION_ATTRIBUTES_REQUEST: BASE_URL + "/organizationAttribute",
@@ -180,3 +182,12 @@ export const SubOrganizationEndPoints = {
   ASSIGN_SUBORGANIZATION_TO_ORGANIZATION: (OrgId, SuborganizationId) =>
     BASE_URL + `/branch/${OrgId}/assignBranch/${SuborganizationId}`,
 };
+
+
+//Attendence api
+export const LocationEndPoints = {
+  ADD_SHIFT_TIMINGS : BASE_URL + '/shiftDuration',
+  DELETE_SHIFT_TIMINGS :(shiftId)=> BASE_URL + `/shiftDuration/${shiftId}`,
+UPDATE_DELETE_ATTENDENCE_LOCATION :(attendenceLocationId)=> BASE_URL + `/attendanceLocation/${attendenceLocationId}`,
+ATTENDENCE_LOCATION : BASE_URL + '/attendanceLocation',
+}

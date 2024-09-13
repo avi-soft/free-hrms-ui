@@ -112,7 +112,7 @@ const CreateUpdateDepartment = () => {
       try {
         dispatch(setLoading(true));
         const res = await dispatch(getOrganisation(AccessToken));
-        dispatch(setOrganization(res?.data));
+        dispatch(setOrganization(res?.data?.content));
         dispatch(setLoading(false));
       } catch (error) {
         console.error("Error fetching organizations", error);
@@ -424,7 +424,6 @@ const CreateUpdateDepartment = () => {
                   }`}
                 >
                   Select Organization
-                  <sup className="text-red-900 font-bold">*</sup>
                 </label>
                 <select
 
@@ -607,7 +606,6 @@ const CreateUpdateDepartment = () => {
                     }`}
                   >
                     {attribute.attributeKey}
-                    <sup className="text-red-900 font-bold">*</sup>
                   </label>
                   <input
                     id={attribute.attributeKey}

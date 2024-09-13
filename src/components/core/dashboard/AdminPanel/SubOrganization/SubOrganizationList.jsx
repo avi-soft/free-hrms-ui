@@ -27,10 +27,10 @@ const SubOrganizationList = () => {
   const [updatedOrganization, setUpdatedOrganization] = useState("");
   const [showAssignDialog, setShowAssignDialog] = useState(false); // State for dialog visibility
   const [currentBranch, setCurrentBranch] = useState(null);
-  const [selectedAssignOrganization, setSelectedAssignOrganization] =useState("");
-  const [renderFlag,setRenderFlag]=useState(false)
-  const [organizationError, setOrganizationError] = useState('');
-
+  const [selectedAssignOrganization, setSelectedAssignOrganization] =
+    useState("");
+  const [renderFlag, setRenderFlag] = useState(false);
+  const [organizationError, setOrganizationError] = useState("");
 
   const { loading, AllSubOrganization } = useSelector(
     (state) => state.subOrganization
@@ -42,7 +42,6 @@ const SubOrganizationList = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  
 
   const fetchOrganizationList = async () => {
     try {
@@ -52,17 +51,15 @@ const SubOrganizationList = () => {
       dispatch(setOrganization(organizations));
       if (organizations.length > 0) {
         // Set the updated organization if available
-        const orgId = updatedOrganization ;
+        const orgId = updatedOrganization;
 
-        if(orgId) {
+        if (orgId) {
           setSelectedOrganization(orgId);
           fetchSubOrganization(orgId);
-        }
-        else{
+        } else {
           setSelectedOrganization("unassigned");
           fetchSubOrganization("unassigned");
         }
-
       }
       dispatch(setLoading(false));
     } catch (error) {
@@ -95,17 +92,17 @@ const SubOrganizationList = () => {
 
   const handleAssignOrganization = async (orgId, branchId) => {
     if (!selectedAssignOrganization) {
-      setOrganizationError('Please select an organization.');
+      setOrganizationError("Please select an organization.");
       return;
     }
-    setOrganizationError('');
+    setOrganizationError("");
     try {
       const response = await dispatch(
         AssignSubOrganizationToOrganization(AccessToken, orgId, branchId)
       );
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success(response?.data?.message);
-      setRenderFlag(true)
+      setRenderFlag(true);
       setShowAssignDialog(false); // Close dialog
     } catch (error) {
       console.error("Error assigning organization", error);
@@ -153,8 +150,6 @@ const SubOrganizationList = () => {
 
   console.log("flag is", AssignOrganizationHeaderFlag);
 
-
-
   useEffect(() => {
     if (location.state?.updatedSuborganization) {
       setUpdatedOrganization(location.state.organizationId);
@@ -169,7 +164,7 @@ const SubOrganizationList = () => {
     if (selectedOrganization) {
       fetchSubOrganization(selectedOrganization);
     }
-  }, [selectedOrganization,setSelectedOrganization,renderFlag]);
+  }, [selectedOrganization, setSelectedOrganization, renderFlag]);
   return (
     <div
       className={`mb-10 rounded shadow-lg ${
@@ -290,6 +285,15 @@ const SubOrganizationList = () => {
                         } text-xs uppercase`}
                       >
                         <tr>
+                          {selectedOrganization == "unassigned" && (
+                            <th
+                              scope="col"
+                              className="px-6 py-3"
+                              data-testid="Department-Description-header"
+                            >
+                              Sub Organization Id
+                            </th>
+                          )}
                           <th
                             scope="col"
                             className="px-6 py-3"
@@ -337,6 +341,11 @@ const SubOrganizationList = () => {
                                 : "bg-gray-100 text-black"
                             }
                           >
+                            {selectedOrganization == "unassigned" && (
+                              <td className="px-6 py-4">
+                                {subOrganization.branchId}
+                              </td>
+                            )}
                             <td className="px-6 py-4">
                               {subOrganization.branchName}
                             </td>
@@ -438,69 +447,68 @@ const SubOrganizationList = () => {
       )}
       {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
       {showAssignDialog && (
-  <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
-    <div
-      className={`p-6 rounded-lg shadow-lg max-w-sm w-full ${
-        darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-700"
-      }`}
-    >
-      <h2 className="text-xl font-semibold mb-4">Assign Organization</h2>
-      <div className="mb-4">
-        <label
-          htmlFor="organization-select"
-          className="block text-sm font-medium"
-        >
-          Select Organization
-        </label>
-        <select
-          id="organization-select"
-          className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-            darkMode
-              ? "bg-gray-700 border-gray-600 text-white"
-              : "bg-white border-gray-300 text-gray-700"
-          } max-h-60 overflow-y-auto`} // Apply max-height and scrolling
-          value={selectedAssignOrganization}
-          onChange={(e) => setSelectedAssignOrganization(e.target.value)}
-        >
-          <option value="">Select Organization</option>
-          {AllOrganizations.map((org) => (
-            <option key={org?.organizationId} value={org?.organizationId}>
-              {org.organizationName}
-            </option>
-          ))}
-        </select>
-        {organizationError && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+          <div
+            className={`p-6 rounded-lg shadow-lg max-w-sm w-full ${
+              darkMode ? "bg-gray-800 text-white" : "bg-white text-gray-700"
+            }`}
+          >
+            <h2 className="text-xl font-semibold mb-4">Assign Organization</h2>
+            <div className="mb-4">
+              <label
+                htmlFor="organization-select"
+                className="block text-sm font-medium"
+              >
+                Select Organization
+              </label>
+              <select
+                id="organization-select"
+                className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white border-gray-300 text-gray-700"
+                } max-h-60 overflow-y-auto`} // Apply max-height and scrolling
+                value={selectedAssignOrganization}
+                onChange={(e) => setSelectedAssignOrganization(e.target.value)}
+              >
+                <option value="">Select Organization</option>
+                {AllOrganizations.map((org) => (
+                  <option key={org?.organizationId} value={org?.organizationId}>
+                    {org.organizationName}
+                  </option>
+                ))}
+              </select>
+              {organizationError && (
                 <p className="text-red-500 text-md mt-2">{organizationError}</p>
               )}
-      </div>
+            </div>
 
-      <div className="flex justify-end">
-        <button
-          className={`py-2 px-4 rounded mr-2 ${
-            darkMode ? "bg-blue-500 text-white" : "bg-blue-600 text-white"
-          }`}
-          onClick={() =>
-            handleAssignOrganization(
-              selectedAssignOrganization,
-              currentBranch.branchId
-            )
-          }
-        >
-          Assign
-        </button>
-        <button
-          className={`py-2 px-4 rounded ${
-            darkMode ? "bg-gray-600 text-white" : "bg-gray-500 text-white"
-          }`}
-          onClick={() => setShowAssignDialog(false)}
-        >
-          Cancel
-        </button>
-      </div>
-    </div>
-  </div>
-)}
-
+            <div className="flex justify-end">
+              <button
+                className={`py-2 px-4 rounded mr-2 ${
+                  darkMode ? "bg-blue-500 text-white" : "bg-blue-600 text-white"
+                }`}
+                onClick={() =>
+                  handleAssignOrganization(
+                    selectedAssignOrganization,
+                    currentBranch.branchId
+                  )
+                }
+              >
+                Assign
+              </button>
+              <button
+                className={`py-2 px-4 rounded ${
+                  darkMode ? "bg-gray-600 text-white" : "bg-gray-500 text-white"
+                }`}
+                onClick={() => setShowAssignDialog(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -32,10 +32,28 @@ const PrimaryEmployeeDetails = () => {
 
   console.log(AllOrganizations);
 
+  const fetchOrganizations = async () => {
+    try {
+      setLoading(true);
+      const res = await dispatch(getOrganisation(AccessToken));
+      console.log(res);
+      if(res?.status == true) {
+        const res = await dispatch(getOrganisation(AccessToken));
+        console.log(res);
+        dispatch(setOrganization(res?.data?.content));
+        dispatch(setLoading(false));
+      }
+    } catch (error) {
+      console.error("Error fetching organizations", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchRoles();
     fetchOrganizations();
-  }, []);
+  }, [AllOrganizations]);
 
   const fetchRoles = async () => {
     try {
@@ -49,18 +67,7 @@ const PrimaryEmployeeDetails = () => {
     }
   };
 
-  const fetchOrganizations = async () => {
-    try {
-      setLoading(true);
-      const res = await dispatch(getOrganisation(AccessToken));
-      console.log(res);
-      dispatch(setOrganization(res?.data));
-    } catch (error) {
-      console.error("Error fetching organizations", error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const onSubmit = async (data) => {
     data.navigate = navigate;
@@ -98,7 +105,7 @@ const PrimaryEmployeeDetails = () => {
     >
       {loading ? (
         <Spinner />
-      ) : AllOrganizations.length === 0 ? (
+      ) : AllOrganizations?.length === 0 ? (
         <div className="p-5 mt-32 flex flex-col items-center justify-center">
           <div
             className={`text-xl font-semibold ${
@@ -153,7 +160,7 @@ const PrimaryEmployeeDetails = () => {
               data-testid="organization-select"
             >
               <option value="">Select Organization</option>
-              {AllOrganizations?.map((org) => (
+              {AllOrganizations?.content?.map((org) => (
                 <option key={org?.organizationId} value={org?.organizationId}>
                   {org?.organizationName}
                 </option>

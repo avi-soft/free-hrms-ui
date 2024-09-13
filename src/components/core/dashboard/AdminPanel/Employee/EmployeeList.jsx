@@ -558,7 +558,8 @@ employee?.employeeId                                      )
                                           toast.success(
                                             response?.data?.message
                                           );
-                                          fetchEmployeesList();
+                                          setCurrentPage(0)
+                                          fetchEmployeesList(currentPage);
                                           setConfirmationModal(null);
                                         }
                                       },
