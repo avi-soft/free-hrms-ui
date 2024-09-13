@@ -13,6 +13,7 @@ import defaultImage from "../../../../../assets/Images/placeholder.jpg";
 import toast from "react-hot-toast";
 import { setShowOption } from "../../../../../slices/OrganisationSlice";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
+import { FaTimesCircle } from "react-icons/fa";
 
 const CreateUpdateOrganisation = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -33,6 +34,7 @@ const CreateUpdateOrganisation = () => {
   const [selectedImage, setSelectedImage] = useState(null);
   const [existingImage, setExistingImage] = useState(null); 
   const [confirmationModal, setConfirmationModal] = useState(null);
+  const [fileError, setFileError] = useState(""); // State for file validation errors
 
   const { isEditing, organization } = location.state || {
     isEditing: false,
@@ -92,6 +94,12 @@ const CreateUpdateOrganisation = () => {
   }, []);
 
   const handleOrganizationSubmit = async (data) => {
+    // Check for file errors before proceeding
+    if (fileError) {
+      toast.error(fileError);
+      return;
+    }
+
     const formData = new FormData();
 
     // Create an object with all the organization data (excluding the logo)
@@ -143,7 +151,24 @@ const CreateUpdateOrganisation = () => {
 
   const handleFileChange = (e) => {
     if (!e.target.files[0]) return;
-    setSelectedImage(e.target.files[0]); // Update local state for selected image
+    const file = e.target.files[0];
+    // Validate file type and size
+    const validTypes = ["image.jpeg", "image.png"];
+    if (!validTypes.includes(file.type)) {
+      setFileError("Only JPEG and PNG images are allowed.");
+      setSelectedImage(file)
+      // setSelectedImage(null);
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) { // 5MB limit
+      setFileError("File size must not exceed 5MB.");
+      setSelectedImage(file)
+
+      // setSelectedImage(null);
+      return;
+    }
+    setFileError(""); // Clear error if file is valid
+    setSelectedImage(file); // Update local state for selected image
   };
 
   const handleRemoveImage = async () => {
@@ -155,6 +180,8 @@ const CreateUpdateOrganisation = () => {
         // if (response?.status === 200) {
           // toast.success(response?.data?.message);
           setExistingImage(null); 
+          setSelectedImage(null)
+          setFileError("");
         }
        catch (error) {
         console.error("Error removing image:", error);
@@ -162,28 +189,23 @@ const CreateUpdateOrganisation = () => {
     } else {
       // Clear selected image in creation mode
       setSelectedImage(null);
+      setFileError("");
     }
   };
 
   return (
     <div
-      className={`pb-9 h-auto mb-10 mt-5 bg-slate-100 rounded ${
-        darkMode ? "bg-slate-700 text-white" : ""
-      }`}
+      className={`pb-9 h-auto mb-10 mt-5 bg-slate-100 rounded ${darkMode ? "bg-slate-700 text-white" : ""}`}
     >
       <div className="p-5 flex items-center justify-between">
         <div
-          className={`md:text-xl text-slate-600 font-semibold ${
-            darkMode ? "text-white" : ""
-          }`}
+          className={`md:text-xl text-slate-600 font-semibold ${darkMode ? "text-white" : ""}`}
         >
           {isEditing ? "Edit Organization" : "Create Organization"}
         </div>
         <div>
           <p
-            className={`text-slate-950 md:text-xl left-6 font-semibold ${
-              darkMode ? "text-white" : ""
-            }`}
+            className={`text-slate-950 md:text-xl left-6 font-semibold ${darkMode ? "text-white" : ""}`}
           >
             Home / Dashboard /{" "}
             <span className="text-yellow-700">
@@ -193,11 +215,7 @@ const CreateUpdateOrganisation = () => {
         </div>
       </div>
       <div className={`container mx-auto mt-8`}>
-        <div
-          className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
-            darkMode ? "bg-slate-600" : "bg-white"
-          }`}
-        >
+        <div className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${darkMode ? "bg-slate-600" : "bg-white"}`}>
           <form role="form" onSubmit={handleSubmit(handleOrganizationSubmit)}>
             {/* Logo Section */}
             <div className="mb-4">
@@ -213,9 +231,7 @@ const CreateUpdateOrganisation = () => {
                 />
                 <div className="w-[80%] flex gap-4 ml-5 flex-col">
                   <p
-                    className={`font-normal text-lg ${
-                      darkMode ? "text-white" : "text-zinc-800"
-                    }`}
+                    className={`font-normal text-lg ${darkMode ? "text-white" : "text-zinc-800"}`}
                   >
                     {isEditing
                       ? "Edit Organization Logo"
@@ -233,11 +249,7 @@ const CreateUpdateOrganisation = () => {
                     <button
                       type="button"
                       onClick={() => inputRef.current.click()}
-                      className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
-                        darkMode
-                          ? "bg-slate-400 text-black"
-                          : "bg-gray-900 text-white"
-                      } py-1 px-5`}
+                      className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${darkMode ? "bg-slate-400 text-black" : "bg-gray-900 text-white"} py-1 px-5`}
                       disabled={loading}
                     >
                       Select
@@ -246,17 +258,16 @@ const CreateUpdateOrganisation = () => {
                       <button
                         type="button"
                         onClick={handleRemoveImage}
-                        className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
-                          darkMode
-                            ? "bg-red-600 text-white"
-                            : "bg-red-500 text-white"
-                        } py-1 px-5`}
+                        className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${darkMode ? "bg-red-600 text-white" : "bg-red-500 text-white"} py-1 px-5`}
                         disabled={loading}
                       >
                         Remove
                       </button>
                     ) : null}
                   </div>
+                  {fileError && (
+                    <p className="text-red-500 mt-1">{fileError}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -265,9 +276,7 @@ const CreateUpdateOrganisation = () => {
             <div className="mb-4">
               <label
                 htmlFor="organizationName"
-                className={`block text-gray-700 text-sm font-bold mb-2 ${
-                  darkMode ? "text-white" : ""
-                }`}
+                className={`block text-gray-700 text-sm font-bold mb-2 ${darkMode ? "text-white" : ""}`}
               >
                 Organization Name
                 <sup className="text-red-900 font-bold">*</sup>
@@ -310,9 +319,7 @@ const CreateUpdateOrganisation = () => {
                     },
                   },
                 })}
-                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                  darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
-                }`}
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`}
               />
               {errors.organizationName && (
                 <p className="text-red-500 mt-1">
@@ -325,9 +332,7 @@ const CreateUpdateOrganisation = () => {
             <div className="mb-4">
               <label
                 htmlFor="organizationDescription"
-                className={`block text-gray-700 text-sm font-bold mb-2 ${
-                  darkMode ? "text-white" : ""
-                }`}
+                className={`block text-gray-700 text-sm font-bold mb-2 ${darkMode ? "text-white" : ""}`}
               >
                 Organization Description
                 <sup className="text-red-900 font-bold">*</sup>
@@ -349,9 +354,7 @@ const CreateUpdateOrganisation = () => {
                     value.trim().length >= 5 ||
                     "Description must not be empty or less than 5 characters",
                 })}
-                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                  darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
-                }`}
+                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${darkMode ? "bg-gray-700 border-gray-600 text-white" : ""}`}
                 rows={3}
               />
               {errors.organizationDescription && (
@@ -367,9 +370,7 @@ const CreateUpdateOrganisation = () => {
                 <div className="mb-4" key={attribute.attributeId}>
                   <label
                     htmlFor={attribute.attributeKey}
-                    className={`block text-sm font-bold mb-2 ${
-                      darkMode ? "text-white" : "text-gray-700"
-                    }`}
+                    className={`block text-sm font-bold mb-2 ${darkMode ? "text-white" : "text-gray-700"}`}
                   >
                     {attribute.attributeKey}
                   </label>
@@ -379,11 +380,7 @@ const CreateUpdateOrganisation = () => {
                     data-testid={attribute.attributeKey}
                     placeholder={`${attribute.attributeKey}...`}
                     {...register(attribute.attributeKey)}
-                    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white text-gray-700"
-                    }`}
+                    className={`shadow appearance-none border rounded w-full py-2 px-3 ${darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"}`}
                   />
                   {errors[attribute.attributeKey] && (
                     <p className="text-red-500 mt-1">
@@ -395,15 +392,13 @@ const CreateUpdateOrganisation = () => {
 
             {/* Submit Button */}
             <button
-              type="submit"
-              className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
-                darkMode
-                  ? "primary-gradient text-white"
-                  : "bg-blue-700 text-white"
-              } hover:scale-95 transition-all duration-200`}
-            >
-              {isEditing ? "Update Organization" : "Submit Organization"}
-            </button>
+      type="submit"
+      className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${darkMode ? "primary-gradient text-white" : fileError ? "bg-red-300 text-red-600" : "bg-blue-700 text-white"} hover:scale-95 transition-all duration-200 ${fileError ? "cursor-not-allowed" : ""}`}
+      disabled={fileError} 
+    >
+
+      {isEditing ? "Update Organization" : "Submit Organization"}
+    </button>
           </form>
         </div>
       </div>

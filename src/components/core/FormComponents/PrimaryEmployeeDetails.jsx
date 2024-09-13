@@ -160,7 +160,7 @@ const PrimaryEmployeeDetails = () => {
               data-testid="organization-select"
             >
               <option value="">Select Organization</option>
-              {AllOrganizations?.content?.map((org) => (
+              {AllOrganizations?.map((org) => (
                 <option key={org?.organizationId} value={org?.organizationId}>
                   {org?.organizationName}
                 </option>
