@@ -25,7 +25,7 @@ const OrganizationList = () => {
   const { loading } = useSelector((state) => state.Organisation);
   const { AllOrganizations } = useSelector((state) => state.Organisation);
   const navigate = useNavigate();
-  const organizationsPerPage = 5;
+  const organizationsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
@@ -103,7 +103,7 @@ const OrganizationList = () => {
 
           {/* add two numbers */}
 
-          {AllOrganizations.length === 0 ? (
+          {AllOrganizations?.length === 0 ? (
             <div>
               <h1 className="text-center text-2xl mt-10">
                 No Organizations Found
@@ -230,7 +230,8 @@ const OrganizationList = () => {
                                   if (response?.status != 200) return null;
                                   else {
                                     toast.success(response?.data?.message);
-                                    fetchOrganizationList();
+                                    setCurrentPage(0)
+                                    fetchOrganizationList(currentPage);
                                     setConfirmationModal(null);
                                   }
                                 },

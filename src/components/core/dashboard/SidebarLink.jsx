@@ -16,40 +16,73 @@ export default function SidebarLink({ link }) {
   const matchRoute = (route) => {
     return matchPath(route, location.pathname);
   };
+console.log("link",link);
 
   return (
     <div>
-      <div
-        className={`flex items-center cursor-pointer rounded ml-2 p-2 ${
-          darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50 hover:text-black"
-        } `}
-        onClick={toggleChildren}
-      >
-        <div className="flex items-center  gap-x-2">
-          <div
-            className={`text-xl mt-3 ${
-              darkMode ? "text-white" : "text-black"
-            } `}
-          >
-            {link.icon}
-          </div>
-          <span
-            className={`text-lg ${
-              darkMode ? "text-white" : "text-gray-600"
-            } font-medium mt-3 ${darkMode ? "font-bold" : ""} `}
-          >
-            {link.label}
-          </span>
-        </div>
-        {link.children && (
-          <Icons.VscChevronRight
-            data-testid="chevron-icon"
-            className={`ml-auto text-xl mt-3 ${
-              darkMode ? "text-white" : "text-black"
-            } ${showChildren ? "transform rotate-90" : ""}`}
-          />
-        )}
-      </div>
+
+
+{
+  link?.key=="Dashboard" ?      <NavLink 
+
+  className={`flex items-center rounded-md gap-x-2 ml-4 ${
+    darkMode
+      ? "hover:bg-slate-800 hover:text-white text-white"
+      : "hover:bg-slate-200 "
+  }`}
+  to={link?.url}
+
+>
+  
+  <div
+    className={`text-xl mt-3 ${
+      darkMode ? "text-white" : "text-black"
+    } `}
+  >
+    {link?.icon}
+  </div>
+  <span
+    className={`text-lg ${
+      darkMode ? "text-white" : "text-gray-600"
+    } font-medium mt-3 ${darkMode ? "font-bold" : ""} `}
+  >
+    {link?.label}
+  </span>
+
+</NavLink>
+  : 
+  <div
+  className={`flex items-center cursor-pointer rounded ml-2 p-2 ${
+    darkMode ? "hover:bg-slate-800" : "hover:bg-slate-50 hover:text-black"
+  } `}
+  onClick={toggleChildren}
+>
+  <div className="flex items-center  gap-x-2">
+    <div
+      className={`text-xl mt-3 ${
+        darkMode ? "text-white" : "text-black"
+      } `}
+    >
+      {link.icon}
+    </div>
+    <span
+      className={`text-lg ${
+        darkMode ? "text-white" : "text-gray-600"
+      } font-medium mt-3 ${darkMode ? "font-bold" : ""} `}
+    >
+      {link.label}
+    </span>
+  </div>
+  {link.children && (
+    <Icons.VscChevronRight
+      data-testid="chevron-icon"
+      className={`ml-auto text-xl mt-3 ${
+        darkMode ? "text-white" : "text-black"
+      } ${showChildren ? "transform rotate-90" : ""}`}
+    />
+  )}
+</div>
+}
       {showChildren && link.children && (
         <div className=" ml-8 rounded-full">
           {link.children.map((childLink) => (
