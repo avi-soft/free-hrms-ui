@@ -175,6 +175,7 @@ const AttendenceLocation = () => {
           } mt-10 pt-5 text-2xl`}
         >
           Add Attendance Location
+          
         </h1>
 
         {/* Location Form */}

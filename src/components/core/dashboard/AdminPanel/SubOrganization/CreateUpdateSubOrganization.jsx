@@ -75,11 +75,17 @@ const CreateUpdateSubOrganization = () => {
       AccessToken,
       attributes: attributesObj,
     };
+    const EditedFormData = {
+      branchName: trimmedSubOrganizationName,
+      AccessToken,
+      attributes: attributesObj,
+    };
+
 
     try {
       if (isEditing) {
         await dispatch(
-          updateSubOrganisation(AccessToken, formData, subOrganization.branchId)
+          updateSubOrganisation(AccessToken,EditedFormData, subOrganization.branchId)
         );
         navigate("/suborganization/subOrganization-list", {
           state: {

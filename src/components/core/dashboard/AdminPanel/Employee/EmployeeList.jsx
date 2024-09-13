@@ -69,7 +69,7 @@ const EmployeeList = () => {
       const res = await dispatch(getOrganisation(AccessToken));
       console.log(res, "response is");
 
-      dispatch(setOrganization(res?.data));
+      dispatch(setOrganization(res?.data?.content));
       // if (organizations.length > 0) {
       //   // Set the updated organization if available
       //   const orgId = updatedOrganization || organizations[0].organizationId;
