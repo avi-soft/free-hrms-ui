@@ -16,6 +16,7 @@ import {
   getOrganisation,
 } from "../../../../../services/operations/OrganisationAPI.js";
 import toast from "react-hot-toast";
+import { setStep } from "../../../../../slices/employeeSlice.js";
 
 const OrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -29,18 +30,19 @@ const OrganizationList = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
 
-
   console.log(loading);
   console.log(AllOrganizations);
 
   const fetchOrganizationList = async (currentPage) => {
     try {
       dispatch(setLoading(true));
-      const res = await dispatch(getOrganisation(AccessToken,currentPage,organizationsPerPage));
+      const res = await dispatch(
+        getOrganisation(AccessToken, currentPage, organizationsPerPage)
+      );
       console.log(res);
       console.log(res?.data);
       dispatch(setOrganization(res?.data?.content));
-      setTotalPages(res?.data?.totalPages)
+      setTotalPages(res?.data?.totalPages);
       dispatch(setLoading(false));
     } catch (error) {
       console.error("Error fetching AllOrganizations", error);
@@ -50,8 +52,12 @@ const OrganizationList = () => {
   };
 
   useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
+
+  useEffect(() => {
     fetchOrganizationList(currentPage);
-  }, [dispatch, AccessToken,currentPage]);
+  }, [dispatch, AccessToken, currentPage]);
 
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
@@ -230,7 +236,7 @@ const OrganizationList = () => {
                                   if (response?.status != 200) return null;
                                   else {
                                     toast.success(response?.data?.message);
-                                    setCurrentPage(0)
+                                    setCurrentPage(0);
                                     fetchOrganizationList(currentPage);
                                     setConfirmationModal(null);
                                   }
@@ -248,28 +254,28 @@ const OrganizationList = () => {
                   </tbody>
                 </table>
                 <div className="flex justify-between p-5">
-                        <button
-                          onClick={handlePreviousPage}
-                          disabled={currentPage === 0}
-                          className={` text-white p-2 rounded disabled:opacity-50 ${
-                            darkMode ? "bg-gray-600" : "bg-slate-400"
-                          }`}
-                        >
-                          Previous
-                        </button>
-                        <button
-                          onClick={handleNextPage}
-                          disabled={
-                            currentPage === totalPages - 1 ||
-                            AllOrganizations.length < organizationsPerPage
-                          }
-                          className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
-                            darkMode ? "bg-gray-600" : "bg-slate-400"
-                          }`}
-                        >
-                          Next
-                        </button>
-                      </div>
+                  <button
+                    onClick={handlePreviousPage}
+                    disabled={currentPage === 0}
+                    className={` text-white p-2 rounded disabled:opacity-50 ${
+                      darkMode ? "bg-gray-600" : "bg-slate-400"
+                    }`}
+                  >
+                    Previous
+                  </button>
+                  <button
+                    onClick={handleNextPage}
+                    disabled={
+                      currentPage === totalPages - 1 ||
+                      AllOrganizations.length < organizationsPerPage
+                    }
+                    className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
+                      darkMode ? "bg-gray-600" : "bg-slate-400"
+                    }`}
+                  >
+                    Next
+                  </button>
+                </div>
               </div>
             </div>
           )}

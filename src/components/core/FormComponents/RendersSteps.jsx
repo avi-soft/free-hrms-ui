@@ -1,14 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { FaCheck } from "react-icons/fa";
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import EmployeeAdditionalDetails from "./EmployeeAdditionalDetails";
 import EmployeePersonalInfo from "./EmployeePersonalInfo";
 import PrimaryEmployeeDetails from "./PrimaryEmployeeDetails";
+import { setStep } from "../../../slices/employeeSlice";
 
 function RenderSteps() {
   const { step } = useSelector((state) => state.employee);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const darkMode = useSelector((state) => state.theme?.darkMode) || false;
 
   const steps = [
@@ -25,7 +27,6 @@ function RenderSteps() {
       title: "Additional Details",
     },
   ];
-
   return (
     <div>
       <div className="flex justify-center items-center">

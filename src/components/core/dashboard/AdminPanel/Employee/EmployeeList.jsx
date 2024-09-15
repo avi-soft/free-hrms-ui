@@ -59,6 +59,7 @@ const EmployeeList = () => {
   const [currentEmployee, setCurrentEmployee] = useState(null);
   const [departmentError, setDepartmentError] = useState("");
   const [renderFlag, setRenderFlag] = useState(false);
+  const [lastPage, setLastPage] = useState(false);
 
   const navigate = useNavigate();
 
@@ -121,6 +122,7 @@ const EmployeeList = () => {
         );
         setEmployees(res?.data?.Employees?.content);
         setTotalPages(res.data.totalPages);
+        setLastPage(res?.data?.Employees?.last);
       }
     } catch (error) {
       console.error("Error fetching employees", error);
@@ -135,6 +137,10 @@ const EmployeeList = () => {
     fetchOrganizationList();
     // fetchSubOrganizations();
   }, [currentPage, sortBy, selectedDepartment, renderFlag]);
+
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
   const handleNextPage = () => {
     setCurrentPage(currentPage + 1);
   };
@@ -214,24 +220,21 @@ const EmployeeList = () => {
       toast.error("Failed to assign department");
     }
   };
-  const handleUnAssignDepartment = async (
-    AccessToken,
-    deptId,
-    employeeId
-  ) => {
+  const handleUnAssignDepartment = async (AccessToken, deptId, employeeId) => {
     try {
-
       const response = await dispatch(
-        UnAssignEmployeeDept(AccessToken, deptId,employeeId )
+        UnAssignEmployeeDept(AccessToken, deptId, employeeId)
       );
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success(response?.data?.message);
-      fetchEmployeesList()
+      fetchEmployeesList();
     } catch (error) {
       console.error("Error unassigning organization", error);
       toast.error("Failed to unassign organization");
     }
   };
+
+  console.log(lastPage);
 
   return (
     <div className={` h-lvh mb-2 rounded-md ${darkMode ? " text-white" : ""}`}>
@@ -423,13 +426,13 @@ const EmployeeList = () => {
                             >
                               Employee Code
                             </th>
-                              <th
-                                scope="col"
-                                className="px-6 py-3"
-                                data-testid="Department-Description-header"
-                              >
-                                 Department
-                              </th>
+                            <th
+                              scope="col"
+                              className="px-6 py-3"
+                              data-testid="Department-Description-header"
+                            >
+                              Department
+                            </th>
                             <th
                               scope="col"
                               className="px-6 py-3"
@@ -495,7 +498,8 @@ const EmployeeList = () => {
                                       handleUnAssignDepartment(
                                         AccessToken,
                                         employee?.departments[0]?.departmentId,
-employee?.employeeId                                      )
+                                        employee?.employeeId
+                                      )
                                     }
                                     className="bg-yellow-500 text-black py-1 px-4 rounded"
                                   >
@@ -558,7 +562,7 @@ employee?.employeeId                                      )
                                           toast.success(
                                             response?.data?.message
                                           );
-                                          setCurrentPage(0)
+                                          setCurrentPage(0);
                                           fetchEmployeesList(currentPage);
                                           setConfirmationModal(null);
                                         }
@@ -588,8 +592,7 @@ employee?.employeeId                                      )
                         <button
                           onClick={handleNextPage}
                           disabled={
-                            currentPage === totalPages - 1 ||
-                            employees.length < employeesPerPage
+                            currentPage === totalPages - 1 || lastPage == true
                           }
                           className={` text-white p-2 disabled:opacity-50 text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
                             darkMode ? "bg-gray-600" : "bg-slate-400"

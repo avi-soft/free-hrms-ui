@@ -19,6 +19,7 @@ import DepartmentAttributes from "./DepartmentAttributes";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
 import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice";
+import { setStep } from "../../../../../slices/employeeSlice";
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -107,6 +108,11 @@ const CreateUpdateDepartment = () => {
       dispatch(setLoading(false));
     }
   };
+
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
+
   useEffect(() => {
     const fetchOrganizationList = async () => {
       try {
@@ -426,7 +432,6 @@ const CreateUpdateDepartment = () => {
                   Select Organization
                 </label>
                 <select
-
                   id="organization"
                   {...register("organization")}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 ${

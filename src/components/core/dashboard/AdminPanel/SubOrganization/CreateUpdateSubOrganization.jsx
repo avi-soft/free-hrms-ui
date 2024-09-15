@@ -13,6 +13,7 @@ import { setLoading } from "../../../../../slices/departmentSlice";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { setStep } from "../../../../../slices/employeeSlice";
 
 const CreateUpdateSubOrganization = () => {
   const { darkMode } = useSelector((state) => state.theme);
@@ -81,11 +82,14 @@ const CreateUpdateSubOrganization = () => {
       attributes: attributesObj,
     };
 
-
     try {
       if (isEditing) {
         await dispatch(
-          updateSubOrganisation(AccessToken,EditedFormData, subOrganization.branchId)
+          updateSubOrganisation(
+            AccessToken,
+            EditedFormData,
+            subOrganization.branchId
+          )
         );
         navigate("/suborganization/subOrganization-list", {
           state: {
@@ -156,6 +160,10 @@ const CreateUpdateSubOrganization = () => {
     getSubOrganizationAttributes();
     fetchOrganizationList();
   }, [dispatch, AccessToken]);
+
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
 
   useEffect(() => {
     setConfirmationModal({

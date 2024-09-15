@@ -24,6 +24,7 @@ import { getOrganisation } from "../../../../../services/operations/Organisation
 import toast from "react-hot-toast";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice.js";
 import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI.js";
+import { setStep } from "../../../../../slices/employeeSlice.js";
 
 const DepartmentList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -222,6 +223,10 @@ const DepartmentList = () => {
       fetchDepartmentsList(selectedOrganization);
     }
   }, [selectedOrganization, renderFlag]);
+
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
 
   function UnAssignAssignOrganizationHeaders() {
     let headerFlag;

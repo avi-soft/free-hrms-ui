@@ -14,6 +14,7 @@ import {
   updateRole,
 } from "../../../../../services/operations/roleAPI";
 import { useLocation, useNavigate } from "react-router-dom";
+import { setStep } from "../../../../../slices/employeeSlice";
 
 const CreateUpdateRole = () => {
   const [selectedPrivileges, setSelectedPrivileges] = useState([]);
@@ -66,6 +67,10 @@ const CreateUpdateRole = () => {
       },
     },
   };
+
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
 
   useEffect(() => {
     if (role) {
