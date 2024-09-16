@@ -191,3 +191,9 @@ export const LocationEndPoints = {
 UPDATE_DELETE_ATTENDENCE_LOCATION :(attendenceLocationId)=> BASE_URL + `/attendanceLocation/${attendenceLocationId}`,
 ATTENDENCE_LOCATION : BASE_URL + '/attendanceLocation',
 }
+
+export const AttendenceEndpoints = {
+   CLOCK_IN_API: BASE_URL + '/attendance/start',
+   CLOCK_OUT_API: BASE_URL + '/attendance/stop',
+
+}

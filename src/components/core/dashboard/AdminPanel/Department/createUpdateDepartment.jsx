@@ -19,6 +19,7 @@ import DepartmentAttributes from "./DepartmentAttributes";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
 import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice";
+import { setStep } from "../../../../../slices/employeeSlice";
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -107,6 +108,11 @@ const CreateUpdateDepartment = () => {
       dispatch(setLoading(false));
     }
   };
+
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
+
   useEffect(() => {
     const fetchOrganizationList = async () => {
       try {
@@ -263,28 +269,6 @@ const CreateUpdateDepartment = () => {
     debounceSearch(e.target.value);
   };
 
-  useEffect(() => {
-    setConfirmationModal({
-      text1: "Do you want to add new attributes?",
-      text2: "This action will redirect you to the Attributes creation page.",
-      btn1Text: "Yes",
-      btn2Text: "Skip",
-      btn1Handler: () => {
-        setIsAttribute(true);
-        // Set showOption to true after the action
-        setConfirmationModal(null);
-      },
-      btn2Handler: () => {
-        setIsAttribute(false); // Ensure showOption is true to prevent future prompts
-        setConfirmationModal(null);
-      },
-    });
-    return () => {
-      if (debounceTimeoutRef.current) {
-        clearTimeout(debounceTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleSelectManager = (manager) => {
     if (selectedManager?.userId === manager.userId) {
@@ -372,6 +356,14 @@ const CreateUpdateDepartment = () => {
         </div>
       </div>
       <div className="container mx-auto mt-8">
+      <button
+    onClick={() => setIsAttribute(true)}  // Change the state to show the SubOrganizationAttribute
+    className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+      ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
+      hover:scale-95 transition-all duration-200 `}
+  >
+    Add Attributes
+  </button>
         {AllOrganizations && AllOrganizations.length === 0 ? (
           <div className="p-5 mt-32 flex flex-col items-center justify-center">
             <div
@@ -426,7 +418,6 @@ const CreateUpdateDepartment = () => {
                   Select Organization
                 </label>
                 <select
-
                   id="organization"
                   {...register("organization")}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 ${
@@ -639,9 +630,7 @@ const CreateUpdateDepartment = () => {
           </form>
         )}
       </div>
-      {confirmationModal && !isEditing && (
-        <ConfirmationModal modalData={confirmationModal} />
-      )}
+
     </div>
   );
 };

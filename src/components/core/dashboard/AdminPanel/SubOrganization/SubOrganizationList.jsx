@@ -20,6 +20,7 @@ import {
 } from "../../../../../slices/subOrganizationSlice.js";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
+import { setStep } from "../../../../../slices/employeeSlice.js";
 const SubOrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [selectedOrganization, setSelectedOrganization] =
@@ -159,6 +160,10 @@ const SubOrganizationList = () => {
     }
     fetchOrganizationList();
   }, [dispatch, AccessToken, location.state, updatedOrganization]);
+
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
 
   useEffect(() => {
     if (selectedOrganization) {

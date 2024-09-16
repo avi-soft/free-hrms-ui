@@ -37,12 +37,8 @@ const PrimaryEmployeeDetails = () => {
       setLoading(true);
       const res = await dispatch(getOrganisation(AccessToken));
       console.log(res);
-      if(res?.status == true) {
-        const res = await dispatch(getOrganisation(AccessToken));
-        console.log(res);
-        dispatch(setOrganization(res?.data?.content));
-        dispatch(setLoading(false));
-      }
+      dispatch(setOrganization(res?.data?.content));
+      dispatch(setLoading(false));
     } catch (error) {
       console.error("Error fetching organizations", error);
     } finally {
@@ -53,7 +49,7 @@ const PrimaryEmployeeDetails = () => {
   useEffect(() => {
     fetchRoles();
     fetchOrganizations();
-  }, [AllOrganizations]);
+  }, []);
 
   const fetchRoles = async () => {
     try {
@@ -66,8 +62,6 @@ const PrimaryEmployeeDetails = () => {
       setLoading(false);
     }
   };
-
-
 
   const onSubmit = async (data) => {
     data.navigate = navigate;
