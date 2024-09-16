@@ -165,23 +165,7 @@ const CreateUpdateSubOrganization = () => {
     dispatch(setStep(1));
   }, [dispatch]);
 
-  useEffect(() => {
-    setConfirmationModal({
-      text1: "Do you want to add new attributes?",
-      text2: "This action will redirect you to the Attributes creation page.",
-      btn1Text: "Yes",
-      btn2Text: "Skip",
-      btn1Handler: () => {
-        setIsAttribute(true);
-        // Set showOption to true after the action
-        setConfirmationModal(null);
-      },
-      btn2Handler: () => {
-        setIsAttribute(false); // Ensure showOption is true to prevent future prompts
-        setConfirmationModal(null);
-      },
-    });
-  }, []);
+
 
   return (
     <div
@@ -211,6 +195,14 @@ const CreateUpdateSubOrganization = () => {
         </div>
       </div>
       <div className={`container mx-auto mt-8`}>
+      <button
+    onClick={() => setIsAttribute(true)}  // Change the state to show the SubOrganizationAttribute
+    className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+      ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
+      hover:scale-95 transition-all duration-200 `}
+  >
+    Add Attributes
+  </button>
         {AllOrganizations && AllOrganizations.length === 0 ? (
           <div className="p-5 mt-32 flex flex-col items-center justify-center">
             <div
@@ -368,9 +360,9 @@ const CreateUpdateSubOrganization = () => {
         )}
       </div>
 
-      {confirmationModal && !isEditing && (
+      {/* {confirmationModal && !isEditing && (
         <ConfirmationModal modalData={confirmationModal} />
-      )}
+      )} */}
     </div>
   );
 };

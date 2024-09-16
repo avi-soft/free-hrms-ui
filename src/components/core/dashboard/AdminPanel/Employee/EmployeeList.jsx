@@ -350,7 +350,7 @@ const EmployeeList = () => {
                         : "bg-slate-200 text-black"
                     } p-2 rounded-lg`}
                   >
-                    <option value="">Select Department</option>
+                    <option value="">All Employees</option>
 
                     {AllDepartments.map((dept) => (
                       <option

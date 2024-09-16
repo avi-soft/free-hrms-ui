@@ -1,29 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { BiBorderRadius } from "react-icons/bi";
-import { LuClock3 } from "react-icons/lu";
 import { IoLocationOutline } from "react-icons/io5";
-import { FaCheckCircle, FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
+import { FaSignInAlt, FaSignOutAlt } from "react-icons/fa";
 import { fetchElevation } from "../../../../utils/utility.functions";
+import toast from "react-hot-toast";
+import { AttendenceClockIn, AttendenceClockOut } from "../../../../services/operations/AttendenceAPI";
 
 const AttendenceSection = () => {
   const { darkMode } = useSelector((state) => state.theme);
   const [currentTime, setCurrentTime] = useState(new Date());
-  const [location, setLocation] = useState({
-    latitude: null,
-    longitude: null,
-    altitude: null,
-  });
   const [locationLoader, setLocationLoader] = useState(false);
+  const { user } = useSelector((state) => state.profile);
+
+  const [isCheckedIn, setIsCheckedIn] = useState(false); // Check-in status
+  const [workDuration, setWorkDuration] = useState(0); // Time duration after check-in
+  const [timerInterval, setTimerInterval] = useState(null); // Timer for work duration
   const dispatch = useDispatch();
   const { AccessToken } = useSelector((state) => state.auth);
-  const [locationsData, setLocationData] = useState(null);
+  const [locationsData, setLocationData] = useState({
+    latitude: null,
+    longitude: null,
+    elevation: null,
+  });
 
+
+  console.log(user);
+  
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
 
@@ -31,81 +38,80 @@ const AttendenceSection = () => {
     return date.toLocaleTimeString();
   };
 
+  const formatDuration = (duration) => {
+    const hours = Math.floor(duration / 3600);
+    const minutes = Math.floor((duration % 3600) / 60);
+    const seconds = duration % 60;
+    return `${hours}h ${minutes}m ${seconds}s`;
+  };
+
   const handleLocationClick = () => {
-    setLocationLoader(true);
     if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        const { latitude, longitude } = position.coords;
+        const elevation = await fetchElevation(latitude, longitude);
 
-          // Set the location state with latitude and longitude
-          setLocation({
-            latitude,
-            longitude,
-            elevation: null, // Fetch elevation next
+        if (elevation != null) {
+          setLocationData({
+            latitude: latitude,
+            longitude: longitude,
+            elevation: elevation,
+            userId: user?.userId
           });
-
-          // Fetch the elevation data using Open-Elevation API
-           const fetchedElevation=fetchElevation(latitude, longitude);
-
-           if (fetchedElevation=== null) {
-            setLoading(false);
-            toast.error("Failed to retrieve Location Data.");
-            return;
-          }
-
-          const locationData = {
-            latitude: Number(latitude),
-            longitude: Number(longitude),
-            elevation: fetchedElevation,
-          };
-        },
-        (error) => {
-          console.error("Error fetching location: ", error.message);
+          toast.success("Location fetched successfully");
+        } else {
+          toast.error("Error retrieving location");
         }
-      );
+      });
+    }
+  };
+
+  const handleCheckIn = async () => {
+    if (
+      !locationsData.latitude ||
+      !locationsData.longitude ||
+      !locationsData.elevation
+    ) {
+      toast.error("Please fetch your location before checking in.");
     } else {
-      alert("Geolocation is not supported by this browser.");
-    }
-  };
-
-  // Function to fetch elevation data from Open-Elevation API
-
-
-  const sendLocationToBackend = async (locationData) => {
-    console.log(locationData);
-    setLocationLoader(false);
-
-    try {
-      const response = await dispatch(
-        AddEmployeeLocation(locationData, AccessToken)
+      const checkInResponse = await dispatch(
+        AttendenceClockIn(locationsData, AccessToken)
       );
-
-      console.log(response);
-
-      //   if (response.ok) {
-      //     console.log("Location sent successfully!");
-      //   } else {
-      //     console.error("Failed to send location.");
-      //   }
-    } catch (error) {
-      console.error("Error sending location to backend: ", error);
+      if (checkInResponse.status === 200) {
+        toast.success("Clock In Successful");
+        setIsCheckedIn(true);
+        const interval = setInterval(() => {
+          setWorkDuration((prevDuration) => prevDuration + 1);
+        }, 1000);
+        setTimerInterval(interval); // Start the work duration timer
+      }
     }
   };
+
+  const handleCheckOut = async () => {
+    const checkOutResponse = await dispatch(
+      AttendenceClockOut(locationsData, AccessToken)
+    );
+    if (checkOutResponse.status === 200) {
+      toast.success("Clock Out Successful");
+      setIsCheckedIn(false);
+      clearInterval(timerInterval); // Stop the timer
+      setWorkDuration(0); // Reset work duration after check-out
+    }
+  };
+
   return (
-    <div className="flex justify-center items-center  h-auto mb-10 mt-5">
+    <div className="flex justify-center items-center h-auto mb-10 mt-5">
       <div
-        className={`pb-9 pt-5 px-6 w-[400px]  max-w-lg rounded ${
+        className={`pb-9 pt-5 px-6 w-[400px] max-w-lg rounded ${
           darkMode ? "bg-slate-700 text-white" : "bg-slate-100 text-black"
         }`}
       >
-        <div
-          className={`p-x-2 border-b-[2px]  flex justify-start items-center   `}
-        >
+        <div className={`p-x-2 border-b-[2px] flex justify-start items-center`}>
           <BiBorderRadius />
-          <p className="ml-4">Attendence</p>
+          <p className="ml-4">Attendance</p>
         </div>
-        {/* Attendance Header */}
+
         <div className="flex items-center justify-between mt-2 mb-4">
           <button
             className={`px-4 py-2 rounded-full font-semibold ${
@@ -115,13 +121,14 @@ const AttendenceSection = () => {
             disabled={locationLoader}
           >
             <IoLocationOutline />
-            <span>{locationLoader ? "please wait.." : "Location"}</span>
+            <span>{locationLoader ? "Please wait.." : "Location"}</span>
           </button>
 
-          <div className="text-gray-500 text-sm">00:00 Hrs</div>
+          <div className="text-gray-500 text-sm">
+            {formatDuration(workDuration)}
+          </div>
         </div>
 
-        {/* Attendance Box */}
         <div className="text-center border border-gray-300 rounded-lg p-4 mb-4 mt-3">
           <input
             type="text"
@@ -130,49 +137,32 @@ const AttendenceSection = () => {
               darkMode ? "bg-slate-600 text-white" : "bg-white text-black"
             }`}
           />
-          <button
-            className={`w-full flex flex-row items-center  justify-center gap-x-5 py-2 px-4 text-white rounded-md font-medium ${
-              darkMode ? " bg-green-500" : "bg-green-400"
-            }`}
-          >
-              <div className="flex  items-center  gap-1">
-                <p className="ml-3 font-semibold"> Check-in</p>
-                <div>
-                  <FaSignInAlt />
-                </div>
-              </div>
-              <div className=" text-gray-500 text-sm">
-                {formatTime(currentTime)}
-              </div>
-          </button>
-        </div>
-        {/* Location display */}
-        {location.latitude && (
-          <div className="text-center mt-4">
-            <p className="text-sm text-gray-500">
-              Latitude: {location.latitude}
-            </p>
-            <p className="text-sm text-gray-500">
-              Longitude: {location.longitude}
-            </p>
-            <p className="text-sm text-gray-500">
-              Elevation: {location.elevation} meters
-            </p>
-          </div>
-        )}
+<button
+  className={`w-full flex flex-row items-center justify-center gap-x-5 py-2 px-4 text-white rounded-md font-medium ${
+    isCheckedIn ? "bg-red-500" : darkMode ? "bg-green-500" : "bg-green-400"
+  }`}
+  onClick={isCheckedIn ? handleCheckOut : handleCheckIn}
+>
+  <div className="flex items-center gap-1">
+    <p className="ml-3 font-semibold">
+      {isCheckedIn ? "Check-out" : "Check-in"}
+    </p>
+    <div>{isCheckedIn ? <FaSignOutAlt /> : <FaSignInAlt />}</div>
+  </div>
+  <div className="text-gray-500 text-sm">{formatTime(currentTime)}</div>
+</button>
 
-        {/* Time Details */}
+        </div>
         <div className="text-center">
-          <p className="text-lg font-bold">00:00 Hrs</p>
-          <p className="text-sm text-gray-500">10 Sep 2024</p>
-          <p className="text-sm text-red-500">Yet to Check-in</p>
+          <p className="text-lg font-bold">{formatDuration(workDuration)}</p>
+          <p className="text-sm text-gray-500">{formatTime(currentTime)}</p>
+          <p className="text-sm text-red-500">
+            {isCheckedIn ? "Checked in" : "Yet to Check-in"}
+          </p>
         </div>
 
-        {/* Schedule Bar */}
-        <div className="flex justify-between items-center mt-6">
-          <p className="text-gray-500 text-sm">10</p>
-          <p className="text-gray-500 text-sm">IT Consultant - HD</p>
-          <p className="text-gray-500 text-sm">14:30</p>
+        <div className="flex justify-center items-center mt-6">
+          <p className="text-gray-500 text-sm">{user?.roles[0]?.role}</p>
         </div>
       </div>
     </div>

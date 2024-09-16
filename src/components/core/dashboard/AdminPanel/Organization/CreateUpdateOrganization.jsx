@@ -15,6 +15,7 @@ import { setShowOption } from "../../../../../slices/OrganisationSlice";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
 import { FaTimesCircle } from "react-icons/fa";
 import { setStep } from "../../../../../slices/employeeSlice";
+import OrganizationAttributes from "./OrganizationAttribute";
 
 const CreateUpdateOrganisation = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -157,34 +158,30 @@ const CreateUpdateOrganisation = () => {
   const handleFileChange = (e) => {
     if (!e.target.files[0]) return;
     const file = e.target.files[0];
+  
     // Validate file type and size
-    const validTypes = ["image.jpeg", "image.png"];
+    const validTypes = ["image/jpeg", "image/jpg", "image/png"];
     if (!validTypes.includes(file.type)) {
       setFileError("Only JPEG and PNG images are allowed.");
-      setSelectedImage(file);
-      // setSelectedImage(null);
+      setSelectedImage(file);  // Ensure this is null if invalid
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       // 5MB limit
       setFileError("File size must not exceed 5MB.");
-      setSelectedImage(file);
-
-      // setSelectedImage(null);
+      setSelectedImage(file);  // Ensure this is null if invalid
       return;
     }
+  
     setFileError(""); // Clear error if file is valid
     setSelectedImage(file); // Update local state for selected image
   };
+  
 
   const handleRemoveImage = async () => {
     if (isEditing && existingImage) {
       try {
-        // const response = await dispatch(
-        //   RemoveOrganisationLogo(AccessToken, organization.organizationId)
-        // );
-        // if (response?.status === 200) {
-        // toast.success(response?.data?.message);
+        // Logic for removing image from server, if necessary
         setExistingImage(null);
         setSelectedImage(null);
         setFileError("");
@@ -196,7 +193,11 @@ const CreateUpdateOrganisation = () => {
       setSelectedImage(null);
       setFileError("");
     }
+    
+    // Reset the file input so the same file can be selected again
+    inputRef.current.value = null;
   };
+  
 
   return (
     <div
@@ -226,11 +227,25 @@ const CreateUpdateOrganisation = () => {
         </div>
       </div>
       <div className={`container mx-auto mt-8`}>
-        <div
-          className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
-            darkMode ? "bg-slate-600" : "bg-white"
-          }`}
-        >
+      <button
+    onClick={() => setIsAttribute(true)}  // Change the state to show the SubOrganizationAttribute
+    className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+      ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
+      hover:scale-95 transition-all duration-200 ${fileError ? "cursor-not-allowed" : ""}`}
+  >
+    Add Attributes
+  </button>
+
+
+   { isAttribute ? (
+  <OrganizationAttributes
+    NextHandler={() => {
+      setIsAttribute(false);
+      getOrganisationAttributes();
+    }}
+  />
+)  :
+        <div className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${darkMode ? "bg-slate-600" : "bg-white"}`}>
           <form role="form" onSubmit={handleSubmit(handleOrganizationSubmit)}>
             {/* Logo Section */}
             <div className="mb-4">
@@ -306,7 +321,7 @@ const CreateUpdateOrganisation = () => {
                 }`}
               >
                 Organization Name
-                <sup className="text-red-900 font-bold">*</sup>
+                  
               </label>
               <input
                 id="organizationName"
@@ -447,11 +462,10 @@ const CreateUpdateOrganisation = () => {
             </button>
           </form>
         </div>
+}
       </div>
 
-      {confirmationModal && !isEditing && (
-        <ConfirmationModal modalData={confirmationModal} />
-      )}
+
     </div>
   );
 };
