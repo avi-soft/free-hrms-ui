@@ -12,21 +12,26 @@ import {
 import { FaRegEdit } from "react-icons/fa";
 import { RiDeleteBin6Line } from "react-icons/ri";
 import toast from "react-hot-toast";
-import { setRoles,setLoading } from "../../../../../slices/roleSlice";
+import { setRoles, setLoading } from "../../../../../slices/roleSlice";
+import { setStep } from "../../../../../slices/employeeSlice";
 
 const RoleList = () => {
   const dispatch = useDispatch();
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
-  const { loading,roles } = useSelector((state) => state.role);
+  const { loading, roles } = useSelector((state) => state.role);
 
   const [confirmationModal, setConfirmationModal] = useState(null);
-  console.log(confirmationModal)
+  console.log(confirmationModal);
   const navigate = useNavigate();
 
   useEffect(() => {
     fetchRoles();
   }, []);
+
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
 
   const fetchRoles = async () => {
     try {
@@ -54,11 +59,11 @@ const RoleList = () => {
     <div className={` mb-2 rounded-md ${darkMode ? "text-white" : ""}`}>
       {loading ? (
         <div
-        data-testid="spinner"
-        className="absolute grid place-content-center mt-60 w-[85%]"
-      >
-        <Spinner />
-      </div>
+          data-testid="spinner"
+          className="absolute grid place-content-center mt-60 w-[85%]"
+        >
+          <Spinner />
+        </div>
       ) : (
         <div
           className={`pb-9 ${
@@ -179,7 +184,7 @@ const RoleList = () => {
                               />
                             </button>
                             <button
-                               data-testid="deleteBtn"
+                              data-testid="deleteBtn"
                               className={`${
                                 darkMode ? "text-red-400" : "text-red-600"
                               } text-lg`}
@@ -223,8 +228,7 @@ const RoleList = () => {
           </div>
           {confirmationModal && (
             <div data-testid="ConfirmationModal">
-            <ConfirmationModal  modalData={confirmationModal} />
-
+              <ConfirmationModal modalData={confirmationModal} />
             </div>
           )}
         </div>

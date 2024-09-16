@@ -1,10 +1,16 @@
-import React from "react";
+import React, { useEffect } from "react";
 import AttendenceShift from "./AttendenceShift";
 import AttendenceLocation from "./AttendenceLocation";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { setStep } from "../../../../../slices/employeeSlice";
 
 const AttendenceConfiguration = () => {
   const { darkMode } = useSelector((state) => state.theme);
+  const dispatch=useDispatch()
+
+  useEffect(() => {
+    dispatch(setStep(1));
+  }, [dispatch]);
 
   return (
     <div>

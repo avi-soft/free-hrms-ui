@@ -13,6 +13,7 @@ import { setLoading } from "../../../../../slices/departmentSlice";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { setStep } from "../../../../../slices/employeeSlice";
 
 const CreateUpdateSubOrganization = () => {
   const { darkMode } = useSelector((state) => state.theme);
@@ -81,11 +82,14 @@ const CreateUpdateSubOrganization = () => {
       attributes: attributesObj,
     };
 
-
     try {
       if (isEditing) {
         await dispatch(
-          updateSubOrganisation(AccessToken,EditedFormData, subOrganization.branchId)
+          updateSubOrganisation(
+            AccessToken,
+            EditedFormData,
+            subOrganization.branchId
+          )
         );
         navigate("/suborganization/subOrganization-list", {
           state: {
@@ -158,22 +162,10 @@ const CreateUpdateSubOrganization = () => {
   }, [dispatch, AccessToken]);
 
   useEffect(() => {
-    setConfirmationModal({
-      text1: "Do you want to add new attributes?",
-      text2: "This action will redirect you to the Attributes creation page.",
-      btn1Text: "Yes",
-      btn2Text: "Skip",
-      btn1Handler: () => {
-        setIsAttribute(true);
-        // Set showOption to true after the action
-        setConfirmationModal(null);
-      },
-      btn2Handler: () => {
-        setIsAttribute(false); // Ensure showOption is true to prevent future prompts
-        setConfirmationModal(null);
-      },
-    });
-  }, []);
+    dispatch(setStep(1));
+  }, [dispatch]);
+
+
 
   return (
     <div
@@ -203,6 +195,14 @@ const CreateUpdateSubOrganization = () => {
         </div>
       </div>
       <div className={`container mx-auto mt-8`}>
+      <button
+    onClick={() => setIsAttribute(true)}  // Change the state to show the SubOrganizationAttribute
+    className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+      ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
+      hover:scale-95 transition-all duration-200 `}
+  >
+    Add Attributes
+  </button>
         {AllOrganizations && AllOrganizations.length === 0 ? (
           <div className="p-5 mt-32 flex flex-col items-center justify-center">
             <div
@@ -360,9 +360,9 @@ const CreateUpdateSubOrganization = () => {
         )}
       </div>
 
-      {confirmationModal && !isEditing && (
+      {/* {confirmationModal && !isEditing && (
         <ConfirmationModal modalData={confirmationModal} />
-      )}
+      )} */}
     </div>
   );
 };
