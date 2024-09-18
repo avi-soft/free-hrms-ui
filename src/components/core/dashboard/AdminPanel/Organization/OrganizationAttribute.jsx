@@ -9,12 +9,15 @@ import {
   updateDepartmentAttributes,
 } from "../../../../../services/operations/departmentAPI";
 import { addOrganisationAttributes, deleteOrganisationAttributes, getOrganisationAttributes, updateOrganisationAttributes } from "../../../../../services/operations/OrganisationAPI";
+import ConfirmationModal from "../../../../common/ConfirmationModal";
 
 const OrganizationAttributes = ({ NextHandler }) => {
   const dispatch = useDispatch();
   const { darkMode } = useSelector((state) => state.theme);
   const { AccessToken } = useSelector((state) => state.auth);
   const [organizationAttribute, setOrganizationAttributes] = useState([]);
+  const [confirmationModal, setConfirmationModal] = useState(null);
+
   const [attribute, setAttribute] = useState({
     attributeId: "",
     attributeKey: "",
@@ -140,7 +143,7 @@ const OrganizationAttributes = ({ NextHandler }) => {
 
 
       <div className="mt-4">
-        {organizationAttribute &&
+        {organizationAttribute.length>0 ?
           organizationAttribute.map((item) => (
             <div
               key={item.attributeId}
@@ -187,10 +190,33 @@ const OrganizationAttributes = ({ NextHandler }) => {
 
               <div className="flex gap-4">
                 <FaEdit onClick={() => handleEdit(item)} />
-                <MdDelete onClick={() => handleDelete(item.attributeId)}/>
+                <MdDelete onClick={() => 
+                                                setConfirmationModal({
+                                                  text1: "Are You Sure?",
+                                                  text2:
+                                                    "You want to Delete this Organization Attribute. Deleting this Organization organization may affect other functionalities. Are you sure you want to proceed?",
+                                                  btn1Text: "Delete Attribute",
+                                                  btn2Text: "Cancel",
+                                                  btn1Handler: async () => {
+                                                    await dispatch(
+                                                      deleteOrganisationAttributes(AccessToken,item.attributeId)
+                                                  );
+                                                  setConfirmationModal(null)
+                                                  getRes();
+                                                  },
+                                                  btn2Handler: () => setConfirmationModal(null),
+                                                })  
+                                                }/>
               </div>
             </div>
-          ))}
+          ))
+          :
+          (
+            <p className={`text-sm  mb-3 ${darkMode ? "text-white" : "text-gray-700"}`}>
+              No attributes available
+            </p>
+          )
+          }
       </div>
       <button
         className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 bg-blue-700
@@ -199,6 +225,9 @@ const OrganizationAttributes = ({ NextHandler }) => {
       >
         Next
       </button>
+      {confirmationModal && (
+            <ConfirmationModal modalData={confirmationModal} />
+          )}
     </div>
   );
 };

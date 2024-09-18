@@ -157,6 +157,8 @@ const CreateUpdateSubOrganization = () => {
   };
 
   useEffect(() => {
+    console.log("executed");
+    
     getSubOrganizationAttributes();
     fetchOrganizationList();
   }, [dispatch, AccessToken]);

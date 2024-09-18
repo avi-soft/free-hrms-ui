@@ -222,6 +222,9 @@ export const addOrganisationAttributes = (AccessToken, body) => {
         }
       );
       console.log(response);
+      if(response?.status==201) {
+        toast.success(response?.data?.message)
+      }
       return response;
     } catch (err) {
       if (err?.response?.data?.message) {
@@ -316,6 +319,7 @@ export const RemoveOrganisationLogo = (AccessToken, organisationId) => {
       console.log(response);
       if (response?.status != 200) throw new Error(response?.data?.message);
       else {
+        toast.success(response?.data?.message)
         return response;
       }
     } catch (err) {
