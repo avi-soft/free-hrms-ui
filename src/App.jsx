@@ -59,7 +59,7 @@ function App() {
               </PrivateRoute>
             }
           >
-            <Route path="/dashboard" element={<DashboardContent />} />
+            <Route path="/" element={<DashboardContent />} />
             <Route
               path="/organization/organization-list"
               element={<OrganizationList />}

@@ -222,13 +222,16 @@ const CreateUpdateDepartment = () => {
           },
         });
       } else {
-        await dispatch(addDepartment(formData));
-        navigate("/department/department-list", {
-          state: {
-            updatedDepartment: false,
-            organizationId: selectedOrganization,
-          },
-        });
+        const response=await dispatch(addDepartment(formData));
+        if(response?.status==201) {
+          navigate("/department/department-list", {
+            state: {
+              updatedDepartment: false,
+              organizationId: selectedOrganization,
+            },
+          });
+        }
+ 
       }
     } catch (error) {
       console.error("Error during department submission:", error);

@@ -88,10 +88,9 @@ export const UnAssignedOrgDepartmentlist = (AccessToken) => {
 };
 export const addDepartment = (formData) => {
   return async (dispatch) => {
-    const toastId = toast.loading("Adding...");
     try {
       console.log(formData);
-      const { AccessToken, navigate, organizationId } = formData;
+      const { AccessToken,organizationId } = formData;
       console.log(AccessToken);
       console.log(organizationId);
       const response = await apiConnector(
@@ -105,11 +104,11 @@ export const addDepartment = (formData) => {
       console.log(response);
       if (!response?.data?.success == "true") {
         console.log("error");
-        throw new Error(response.data.message);
       } else {
         console.log("Success");
         toast.success(response?.data?.message);
         dispatch(AddDepartment(response?.data?.Department));
+        return response
       }
     } catch (err) {
       if (err?.response?.data?.message) {
@@ -289,9 +288,8 @@ export const deleteDepartmentAttributes = (
         }
       );
       console.log(response);
+      toast.success(response?.data?.message)
       return response;
-      if (response?.status !== 200) throw new Error(response.data.message);
-      toast.success("DEPARTMENT DELETED SUCCESSFULLY");
     } catch (err) {
       if (err?.response?.data?.message) {
         toast.error(err?.response?.data?.message);

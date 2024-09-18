@@ -43,7 +43,7 @@ const NavBar = () => {
             <img src="https://avisoft.io/logo.svg" alt="Logo" />
           </Link>
         </div>
-        {
+        {/* {
           AccessToken &&
           <form
           onSubmit={handleSubmit(onSubmit)}
@@ -71,7 +71,7 @@ const NavBar = () => {
             Search
           </button>
         </form>
-        }
+        } */}
 
         <div className="flex justify-between items-center gap-2">
           <button

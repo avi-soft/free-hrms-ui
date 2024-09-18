@@ -310,7 +310,7 @@ const EmployeeList = () => {
               </div>
             </div>
           </div>
-          {AllOrganizations.length === 0 ? (
+          {AllOrganizations?.length === 0 ? (
             <div className="p-5 mt-32 flex flex-col items-center justify-center">
               <div
                 className={`text-xl font-semibold ${
@@ -365,6 +365,7 @@ const EmployeeList = () => {
 
                 <select
                   value={sortBy}
+                  disabled={AllDepartments?.length==0}
                   onChange={(e) => setSortBy(e.target.value)}
                   className={`${
                     darkMode

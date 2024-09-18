@@ -47,6 +47,13 @@ const CreateUpdateOrganisation = () => {
   const [isAttribute, setIsAttribute] = useState(false);
   const [organizationAttributes, setOrganizationAttributes] = useState(null);
 
+
+  useEffect(() => {
+    console.log("executed");
+    
+getRes()
+  }, [dispatch, AccessToken,navigate]);
+
   useEffect(() => {
     dispatch(setStep(1));
   }, [dispatch]);
@@ -77,27 +84,12 @@ const CreateUpdateOrganisation = () => {
 
   async function getRes() {
     const res = await dispatch(getOrganisationAttributes(AccessToken));
+    console.log(res);
+    
     setOrganizationAttributes(res?.data);
+    return res?.data
   }
 
-  useEffect(() => {
-    getRes();
-    setConfirmationModal({
-      text1: "Do you want to add new attributes?",
-      text2: "This action will redirect you to the Attributes creation page.",
-      btn1Text: "Yes",
-      btn2Text: "Skip",
-      btn1Handler: () => {
-        setIsAttribute(true);
-        // Set showOption to true after the action
-        setConfirmationModal(null);
-      },
-      btn2Handler: () => {
-        setIsAttribute(false); // Ensure showOption is true to prevent future prompts
-        setConfirmationModal(null);
-      },
-    });
-  }, []);
 
   const handleOrganizationSubmit = async (data) => {
     // Check for file errors before proceeding
@@ -241,7 +233,7 @@ const CreateUpdateOrganisation = () => {
   <OrganizationAttributes
     NextHandler={() => {
       setIsAttribute(false);
-      getOrganisationAttributes();
+      getRes();
     }}
   />
 )  :
@@ -450,8 +442,6 @@ const CreateUpdateOrganisation = () => {
               className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
                 darkMode
                   ? "primary-gradient text-white"
-                  : fileError
-                  ? "bg-red-300 text-red-600"
                   : "bg-blue-700 text-white"
               } hover:scale-95 transition-all duration-200 ${
                 fileError ? "cursor-not-allowed" : ""
