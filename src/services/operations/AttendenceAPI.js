@@ -144,7 +144,7 @@ export function AttendenceClockIn(body,AccessToken,userId) {
   return async () => {
     try {
       const response = await apiConnector("POST", CLOCK_IN_API, body, {
-        Authorization: `Bearer ${AccessToken}`,
+        Authorization: `Bear      er ${AccessToken}`,
       });
       console.log(response);
       return response;

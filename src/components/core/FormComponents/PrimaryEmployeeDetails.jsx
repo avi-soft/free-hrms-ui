@@ -144,13 +144,20 @@ const PrimaryEmployeeDetails = () => {
               Select Organization<sup className="text-red-900">*</sup>
             </label>
             <select
+              disabled={
+                AllOrganizations?.length === 0 || AllOrganizations == undefined
+              }
               id="organization"
               {...register("organization", {
                 required: "Organization is required",
               })}
               className={`border ${
                 darkMode ? "bg-gray-500 text-white" : ""
-              } rounded px-3 py-2 mt-2 w-full`}
+              } rounded px-3 py-2 mt-2 w-full ${
+                AllOrganizations?.length === 0 || AllOrganizations == undefined
+                  ? "cursor-not-allowed"
+                  : ""
+              }`}
               data-testid="organization-select"
             >
               <option value="">Select Organization</option>
@@ -160,6 +167,7 @@ const PrimaryEmployeeDetails = () => {
                 </option>
               ))}
             </select>
+
             {errors.organization && (
               <p className="text-red-500 mt-1">{errors.organization.message}</p>
             )}
@@ -248,20 +256,24 @@ const PrimaryEmployeeDetails = () => {
               Role<sup className="text-red-900">*</sup>
             </label>
             <select
-              id="role"
-              {...register("role", { required: "Role is required" })}
-              className={`border ${
-                darkMode ? "bg-gray-500 text-white" : ""
-              } rounded px-3 py-2 mt-2 w-full max-h-40 overflow-y-auto`}
-              data-testid="role-select"
-            >
-              <option value="">Select Role</option>
-              {roles.map((role) => (
-                <option key={role.roleId} value={role.role}>
-                  {role.role}
-                </option>
-              ))}
-            </select>
+  disabled={roles?.length === 0 || roles == undefined}
+  id="role"
+  {...register("role", { required: "Role is required" })}
+  className={`border ${
+    darkMode ? "bg-gray-500 text-white" : ""
+  } rounded px-3 py-2 mt-2 w-full max-h-40 overflow-y-auto ${
+    roles?.length === 0 || roles == undefined ? "cursor-not-allowed" : ""
+  }`}
+  data-testid="role-select"
+>
+  <option value="">Select Role</option>
+  {roles?.map((role) => (
+    <option key={role.roleId} value={role.role}>
+      {role.role}
+    </option>
+  ))}
+</select>
+
             {errors.role && (
               <p className="text-red-500 mt-1">{errors.role.message}</p>
             )}

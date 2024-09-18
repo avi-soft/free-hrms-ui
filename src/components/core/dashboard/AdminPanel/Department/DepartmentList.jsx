@@ -52,12 +52,17 @@ const DepartmentList = () => {
   const [renderFlag, setRenderFlag] = useState(false);
   const [organizationError, setOrganizationError] = useState("");
   const [subOrganizationError, setSubOrganizationError] = useState("");
+  const { user } = useSelector((state) => state.profile);
 
+  const hasAddDepartmentPrivilege = user?.roles?.[0]?.privilege?.includes("ADD_DEPARTMENT");
   const navigate = useNavigate();
   const location = useLocation();
 
   console.log(AllDepartments);
   console.log(AllOrganizations, "SELECTED ASSIGN ");
+
+  console.log("user",user);
+  
 
   const fetchOrganizationList = async () => {
     try {
@@ -309,18 +314,23 @@ const DepartmentList = () => {
           </div>
           {/* Section 2 */}
           <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
-            <Link
-              to="/department/department-create-update"
-              className={`flex items-center gap-x-1 ${
-                darkMode ? "primary-gradient " : "bg-red-600"
-              } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
-            >
-              <span>
-                <HiOutlinePlusCircle />
-              </span>
-              <button>Add Department</button>
-            </Link>
-          </div>
+  <Link
+    to={hasAddDepartmentPrivilege ? "/department/department-create-update" : "#"}
+    className={`flex items-center gap-x-1 ${
+      darkMode ? "primary-gradient" : "bg-red-600"
+    } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white ${
+      hasAddDepartmentPrivilege ? "" : "cursor-not-allowed opacity-50"
+    }`}
+    onClick={(e) => {
+      if (!hasAddDepartmentPrivilege) e.preventDefault(); // Prevent navigation if no privilege
+    }}
+  >
+    <span>
+      <HiOutlinePlusCircle />
+    </span>
+    <button disabled={!hasAddDepartmentPrivilege}>Add Department</button>
+  </Link>
+</div>
           {AllOrganizations?.content?.length === 0 ? (
             <div className="p-5 mt-32 flex flex-col items-center justify-center">
               <div
@@ -351,25 +361,26 @@ const DepartmentList = () => {
           ) : (
             <>
               <div className="flex justify-start p-5">
-                <select
-                  value={selectedOrganization}
-                  onChange={(e) => setSelectedOrganization(e.target.value)}
-                  className={`${
-                    darkMode
-                      ? "bg-slate-700 text-white"
-                      : "bg-slate-200 text-black"
-                  } p-2 rounded-lg`}
-                >
-                  <option value="unassigned">Unassigned Departments</option>
-                  {AllOrganizations?.map((org) => (
-                    <option
-                      key={org?.organizationId}
-                      value={org?.organizationId}
-                    >
-                      {org.organizationName}
-                    </option>
-                  ))}
-                </select>
+              <select
+  value={selectedOrganization}
+  onChange={(e) => setSelectedOrganization(e.target.value)}
+  disabled={AllOrganizations?.length === 0 || AllOrganizations == undefined}
+  className={`${
+    darkMode ? "bg-slate-700 text-white" : "bg-slate-200 text-black"
+  } p-2 rounded-lg ${
+    AllOrganizations?.length === 0 || AllOrganizations == undefined
+      ? "cursor-not-allowed"
+      : ""
+  }`}
+>
+  <option value="unassigned">Unassigned Departments</option>
+  {AllOrganizations?.map((org) => (
+    <option key={org?.organizationId} value={org?.organizationId}>
+      {org.organizationName}
+    </option>
+  ))}
+</select>
+
               </div>
               {/* Section 3 */}
               {AllDepartments?.length === 0 ? (
