@@ -60,6 +60,9 @@ const EmployeeList = () => {
   const [departmentError, setDepartmentError] = useState("");
   const [renderFlag, setRenderFlag] = useState(false);
   const [lastPage, setLastPage] = useState(false);
+  const { user } = useSelector((state) => state.profile);
+  const hasAddDepartmentPrivilege = user?.roles?.[0]?.privilege?.includes("ADD_DEPARTMENT");
+
 
   const navigate = useNavigate();
 

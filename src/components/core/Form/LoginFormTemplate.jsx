@@ -66,7 +66,7 @@ const LoginFormTemplate = () => {
           }
         }
         else{
-          navigate("/dashboard");
+          navigate("/");
         }
       }
     } catch (error) {

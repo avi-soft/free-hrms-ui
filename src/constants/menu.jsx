@@ -208,7 +208,7 @@ const MenuItems = () => {
             {
                 key: "Dashboard",
                 label: t("Dashboard"),
-                url: "/dashboard",
+                url: "/",
                 isTitle: false,
                 icon: <RiDashboardLine className="side-bar-item-icon" />,
             },
