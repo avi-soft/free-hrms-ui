@@ -4,7 +4,7 @@ import { AttendenceEndpoints, LocationEndPoints } from "../apis";
 
 const { ATTENDENCE_LOCATION,UPDATE_DELETE_ATTENDENCE_LOCATION, ADD_SHIFT_TIMINGS,DELETE_SHIFT_TIMINGS } = LocationEndPoints;
 
-const  {CLOCK_IN_API,CLOCK_OUT_API}=AttendenceEndpoints
+const  {CLOCK_IN_API,CLOCK_OUT_API,EMPLOYEE_ATTENDENCE_STATUS}=AttendenceEndpoints
 
 export function AddShiftTimings(body, AccessToken) {
   return async () => {
@@ -161,6 +161,23 @@ export function AttendenceClockOut(body,AccessToken) {
   return async () => {
     try {
       const response = await apiConnector("POST", CLOCK_OUT_API, body, {
+        Authorization: `Bearer ${AccessToken}`,
+      });
+      console.log(response);
+      return response;
+    } catch (err) {
+      console.log(err);
+      toast.error(err?.response?.data?.message)
+    }
+  };
+}
+
+
+
+export function EmployeeAttendenceStatus(AccessToken,userId) {
+  return async () => {
+    try {
+      const response = await apiConnector("GET", EMPLOYEE_ATTENDENCE_STATUS(userId), null, {
         Authorization: `Bearer ${AccessToken}`,
       });
       console.log(response);
