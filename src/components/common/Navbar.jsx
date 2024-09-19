@@ -43,7 +43,9 @@ const NavBar = () => {
             <img src="https://avisoft.io/logo.svg" alt="Logo" />
           </Link>
         </div>
-        <form
+        {/* {
+          AccessToken &&
+          <form
           onSubmit={handleSubmit(onSubmit)}
           className="ml-10 flex items-center"
         >
@@ -69,22 +71,24 @@ const NavBar = () => {
             Search
           </button>
         </form>
+        } */}
+
         <div className="flex justify-between items-center gap-2">
-          <button onClick={handleThemeToggle} className="mt-1">
+          <button
+            onClick={handleThemeToggle}
+            className="mt-1"
+            data-testid="themeToggle"
+          >
             {darkMode ? (
-              <img className="active-theme" src={Sun} height={30} width={30} />
+              <img className="active-theme" src={Sun} height={30} width={30} alt="Sun" />
             ) : (
-              <img className="active-theme" src={Moon} height={30} width={30} />
+              <img className="active-theme" src={Moon} height={30} width={30} alt="Moon" />
             )}
           </button>
-          <div className="">
-            {AccessToken === null ? (
-              <div className="flex gap-x-4 mr-5">
-                <LogBtn link={"/login"} text={"Log In"} />
-              </div>
-            ) : (
-              <div  data-testid="profile-dropdown">
-               <ProfileDropDown />
+          <div className="mr-5">
+            {AccessToken  && (
+              <div data-testid="profile-dropdown">
+                <ProfileDropDown />
               </div>
             )}
           </div>

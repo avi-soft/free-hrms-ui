@@ -20,11 +20,26 @@ import DeclinedLeaveList from "./components/core/dashboard/Leave/DeclinedLeaveLi
 import RequestedLeaveList from "./components/core/dashboard/Leave/RequestedLeaveList";
 import AllReviews from "./components/core/dashboard/AdminPanel/Performance/AllReviews";
 import { useSelector } from "react-redux";
+import CreateUpdateRole from "./components/core/dashboard/AdminPanel/Role/CreateUpdateRole";
+import RoleList from "./components/core/dashboard/AdminPanel/Role/RoleList";
+import OrganizationList from "./components/core/dashboard/AdminPanel/Organization/OrganizationList";
+import CreateUpdateOrganisation from "./components/core/dashboard/AdminPanel/Organization/CreateUpdateOrganization";
+import AddEmployeeAttributes from "./components/core/dashboard/AdminPanel/Employee/AddEmployeeAttributes";
+import CreateUpdateSubOrganization from "./components/core/dashboard/AdminPanel/SubOrganization/CreateUpdateSubOrganization";
+import SubOrganizationList from "./components/core/dashboard/AdminPanel/SubOrganization/SubOrganizationList";
+import DashboardContent from "./components/core/dashboard/MainDashboard/DashboardContent";
+import AttendenceShift from "./components/core/dashboard/AdminPanel/Attendence/AttendenceShift";
+import AttendenceLocation from "./components/core/dashboard/AdminPanel/Attendence/AttendenceLocation";
+import AttendenceConfiguration from "./components/core/dashboard/AdminPanel/Attendence/AttendenceConfiguration";
 
 function App() {
   const { darkMode } = useSelector((state) => state.theme);
   return (
-    <div className={`flex flex-col  min-h-screen ${darkMode ? " bg-slate-600" : "bg-slate-200"}`}>
+    <div
+      className={`flex flex-col  min-h-screen ${
+        darkMode ? " bg-slate-600" : "bg-slate-200"
+      }`}
+    >
       <NavBar />
       <div>
         <Routes>
@@ -44,11 +59,38 @@ function App() {
               </PrivateRoute>
             }
           >
+            <Route path="/" element={<DashboardContent />} />
+            <Route
+              path="/organization/organization-list"
+              element={<OrganizationList />}
+            />
+            <Route
+              path="/organization/organization-create-update"
+              element={<CreateUpdateOrganisation />}
+            />
+            <Route
+              path="/suborganization/suborganization-list"
+              element={<SubOrganizationList />}
+            />
+            <Route
+              path="/suborganization/suborganization-create-update"
+              element={<CreateUpdateSubOrganization />}
+            />
+
             <Route path="/employee/employee-list" element={<EmployeeList />} />
             <Route
               path="/employee/employee-create-update"
               element={<CreateUpdateEmployee />}
             />
+            <Route
+              path="/employee/employee-attributes"
+              element={<AddEmployeeAttributes />}
+            />
+            <Route
+              path="/role/role-create-update"
+              element={<CreateUpdateRole />}
+            />
+            <Route path="role/role-list" element={<RoleList />} />
             <Route
               path="/department/department-create-update"
               element={<CreateUpdateDepartment />}
@@ -57,6 +99,11 @@ function App() {
               path="/department/department-list"
               element={<DepartmentList />}
             />
+            <Route
+              path="/attendence/Configure-Attendence"
+              element={<AttendenceConfiguration />}
+            />
+
             <Route path="/performance/all-reviews" element={<AllReviews />} />
             <Route
               path="/performance/add-review"
