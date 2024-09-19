@@ -25,6 +25,7 @@ import toast from "react-hot-toast";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice.js";
 import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI.js";
 import { setStep } from "../../../../../slices/employeeSlice.js";
+import { hasAddDepartmentPrivilege, hasGetAllBranchPrivilege } from "../../../../../utils/privileges.js";
 
 const DepartmentList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -52,9 +53,9 @@ const DepartmentList = () => {
   const [renderFlag, setRenderFlag] = useState(false);
   const [organizationError, setOrganizationError] = useState("");
   const [subOrganizationError, setSubOrganizationError] = useState("");
-  const { user } = useSelector((state) => state.profile);
+ const { user } = useSelector((state) => state.profile);
 
-  const hasAddDepartmentPrivilege = user?.roles?.[0]?.privilege?.includes("ADD_DEPARTMENT");
+
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -63,32 +64,36 @@ const DepartmentList = () => {
 
   console.log("user",user);
   
+  
 
   const fetchOrganizationList = async () => {
-    try {
-      dispatch(setLoading(true));
-      const res = await dispatch(getOrganisation(AccessToken));
-      const organizations = res?.data?.content;
-      dispatch(setOrganization(organizations));
-      if (organizations.length > 0) {
-        // Set the updated organization if available
-        const orgId = updatedOrganization;
-        console.log(orgId, "orgid");
-
-        if (orgId) {
-          setSelectedOrganization(orgId);
-          fetchDepartmentsList(orgId);
-        } else {
-          setSelectedOrganization("unassigned");
-          fetchDepartmentsList("unassigned");
+    if(hasAddDepartmentPrivilege) {
+      try {
+        dispatch(setLoading(true));
+        const res = await dispatch(getOrganisation(AccessToken));
+        const organizations = res?.data?.content;
+        dispatch(setOrganization(organizations));
+        if (organizations.length > 0) {
+          // Set the updated organization if available
+          const orgId = updatedOrganization;
+          console.log(orgId, "orgid");
+  
+          if (orgId) {
+            setSelectedOrganization(orgId);
+            fetchDepartmentsList(orgId);
+          } else {
+            setSelectedOrganization("unassigned");
+            fetchDepartmentsList("unassigned");
+          }
         }
+        dispatch(setLoading(false));
+      } catch (error) {
+        console.error("Error fetching AllOrganizations", error);
+        dispatch(setLoading(false));
       }
-      dispatch(setLoading(false));
-    } catch (error) {
-      console.error("Error fetching AllOrganizations", error);
-      dispatch(setLoading(false));
+    };
     }
-  };
+
 
   const fetchDepartmentsList = async (orgId) => {
     try {
@@ -123,6 +128,7 @@ const DepartmentList = () => {
       );
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success(response?.data?.message);
+      setSelectedAssignOrganization("")
       setRenderFlag(true);
       setShowOrganizationAssignDialog(false); // Close dialog
     } catch (error) {
@@ -194,8 +200,7 @@ const DepartmentList = () => {
     }
   };
   const fetchSubOrganization = async (orgId) => {
-    console.log("org id", orgId);
-
+   if(hasGetAllBranchPrivilege) {
     try {
       dispatch(setLoading(true));
 
@@ -209,7 +214,11 @@ const DepartmentList = () => {
       console.error("Error fetching departments", error);
       dispatch(setLoading(false));
     }
+   }
+
   };
+
+  
   useEffect(() => {
     fetchSubOrganization();
     if (location.state?.updatedDepartment) {
@@ -221,12 +230,16 @@ const DepartmentList = () => {
     fetchOrganizationList();
   }, [dispatch, AccessToken, location.state, updatedOrganization]);
 
+  console.log(renderFlag);
+  
+
   useEffect(() => {
     console.log("inside  useeffeccttt");
 
     if (selectedOrganization) {
       fetchDepartmentsList(selectedOrganization);
     }
+    // fetchDepartmentsList
   }, [selectedOrganization, renderFlag]);
 
   useEffect(() => {

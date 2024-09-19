@@ -1,7 +1,7 @@
 // const BASE_URL = "http://localhost:5555/api/v1"
 
 const BASE_URL =
-  "http://ec2-16-16-249-120.eu-north-1.compute.amazonaws.com/api/v1";
+  "https://www.avihtech.com/api/v1";
 //Auth ENDPOINTS
 export const authEndpoints = {
   LOGIN_API: BASE_URL + "/user/login",
@@ -195,5 +195,5 @@ ATTENDENCE_LOCATION : BASE_URL + '/attendanceLocation',
 export const AttendenceEndpoints = {
    CLOCK_IN_API: BASE_URL + '/attendance/start',
    CLOCK_OUT_API: BASE_URL + '/attendance/stop',
-
+   EMPLOYEE_ATTENDENCE_STATUS :(userId)=> BASE_URL + `/attendance/userStatus/${userId}`
 }
