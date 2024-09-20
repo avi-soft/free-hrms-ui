@@ -322,28 +322,6 @@ const MenuItems = () => {
                     },
                 ].filter(Boolean),
             },
-            {
-                key: "Emergency Contacts",
-                label: t("Emergency Contacts"),
-                isTitle: false,
-                icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
-                children: [
-                    hasPrivilege("ADD_EMERGENCY_CONTACT") && {
-                        key: "NewEmergencyContact",
-                        label: t("New Emergency Contact"),
-                        url: "/emergencycontact/emergencycontact-create-update",
-                        parentKey: "Emergency Contacts",
-                        icon: <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />,
-                    },
-                    hasPrivilege("GET_EMPLOYEE_EMERGENCY_CONTACT") && {
-                        key: "EmergencyContactList",
-                        label: t("Emergency Contact List"),
-                        url: "/emergencycontact/emergencycontact-list",
-                        parentKey: "Emergency Contacts",
-                        icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
-                    },
-                ].filter(Boolean),
-            },
         ];
     };
 

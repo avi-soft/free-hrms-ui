@@ -46,11 +46,10 @@ const CreateUpdateOrganisation = () => {
   const [showLogoUploadDialog, setShowLogoUploadDialog] = useState(false);
   const [isAttribute, setIsAttribute] = useState(false);
   const [organizationAttributes, setOrganizationAttributes] = useState(null);
-
+  const [renderFlag,setRenderFlag]=useState(false)
 
   useEffect(() => {
-    console.log("executed");
-    
+    console.log("executed"); 
 getRes()
   }, [dispatch, AccessToken,navigate]);
 
@@ -76,17 +75,25 @@ getRes()
         });
       }
     } else {
+      console.log("inside else");
+      
       reset();
       setSelectedImage(null);
       setExistingImage(null);
+      setFileError("") 
     }
-  }, [isEditing, organization, organizationAttributes]);
+  }, [isEditing, organization, organizationAttributes,renderFlag]);
+
+  console.log(renderFlag);
+  
 
   async function getRes() {
+    console.log("called");
+    
     const res = await dispatch(getOrganisationAttributes(AccessToken));
     console.log(res);
-    
     setOrganizationAttributes(res?.data);
+    setRenderFlag(!renderFlag)
     return res?.data
   }
 
