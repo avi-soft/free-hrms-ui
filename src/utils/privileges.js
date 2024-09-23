@@ -1,5 +1,7 @@
 
-const  user  = localStorage.getItem("user");
+const  user  = JSON.parse(localStorage.getItem("user"));
+
+console.log("user",user)
 
 // Employee privileges
 export const hasAddEmployeePrivilege = user?.roles?.[0]?.privilege?.includes("ADD_EMPLOYEE");
