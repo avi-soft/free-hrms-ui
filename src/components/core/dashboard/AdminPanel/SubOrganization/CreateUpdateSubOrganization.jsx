@@ -14,6 +14,7 @@ import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { setStep } from "../../../../../slices/employeeSlice";
+import { hasGetAllOrganizationsPrivilege } from "../../../../../utils/privileges";
 
 const CreateUpdateSubOrganization = () => {
   const { darkMode } = useSelector((state) => state.theme);
@@ -49,7 +50,7 @@ const CreateUpdateSubOrganization = () => {
       }, {});
     return attributesObj;
   };
-  console.log(subOrganization);
+  console.log(AllOrganizations);
   useEffect(() => {
     if (isEditing && subOrganization) {
       setValue("branchName", subOrganization.branchName);
@@ -158,16 +159,14 @@ const CreateUpdateSubOrganization = () => {
 
   useEffect(() => {
     console.log("executed");
-    
+
     getSubOrganizationAttributes();
-    fetchOrganizationList();
+      fetchOrganizationList();
   }, [dispatch, AccessToken]);
 
   useEffect(() => {
     dispatch(setStep(1));
   }, [dispatch]);
-
-
 
   return (
     <div
@@ -197,14 +196,17 @@ const CreateUpdateSubOrganization = () => {
         </div>
       </div>
       <div className={`container mx-auto mt-8`}>
-      <button
-    onClick={() => setIsAttribute(true)}  // Change the state to show the SubOrganizationAttribute
-    className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+        {
+
+        }
+        <button
+          onClick={() => setIsAttribute(true)} // Change the state to show the SubOrganizationAttribute
+          className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
       ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
       hover:scale-95 transition-all duration-200 `}
-  >
-    Add Attributes
-  </button>
+        >
+          Add Attributes
+        </button>
         {AllOrganizations && AllOrganizations.length === 0 ? (
           <div className="p-5 mt-32 flex flex-col items-center justify-center">
             <div
@@ -219,7 +221,7 @@ const CreateUpdateSubOrganization = () => {
                 darkMode ? "text-white" : "text-gray-700"
               }`}
             >
-              You need to create an organization before adding a department.
+              You need to create an organization before adding a Sub Organization.
             </p>
             <div className="flex justify-center">
               <Link
@@ -259,6 +261,7 @@ const CreateUpdateSubOrganization = () => {
                   Select Organization
                 </label>
                 <select
+                disabled={AllOrganizations?.length ==0 ||  AllOrganizations ==  undefined}
                   id="organization"
                   {...register("organization")}
                   value={selectedOrganization}

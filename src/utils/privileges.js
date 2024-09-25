@@ -117,6 +117,7 @@ export const hasAssignBranchPrivilege = user?.roles?.[0]?.privilege?.includes("A
 export const hasRemoveBranchPrivilege = user?.roles?.[0]?.privilege?.includes("REMOVE_BRANCH");
 export const hasAssignDepartmentToBranchPrivilege = user?.roles?.[0]?.privilege?.includes("ASSIGN_DEPARTMENT_TO_BRANCH");
 export const hasRemoveDepartmentFromBranchPrivilege = user?.roles?.[0]?.privilege?.includes("REMOVE_DEPARTMENT_FROM_BRANCH");
+export const hasCreateSubOrganizationAttributePrivilege = user?.roles?.[0]?.privilege?.includes("CREATE_BRANCH_ATTRIBUTE");
 
 // Attendance privileges
 export const hasGetAllAttendancePrivilege = user?.roles?.[0]?.privilege?.includes("GET_ALL_ATTENDANCE");

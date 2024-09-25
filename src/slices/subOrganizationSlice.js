@@ -3,7 +3,7 @@ import { createSlice } from '@reduxjs/toolkit';
 const initialState = {
   subOrganization: [],
   loading: false,
-  AllSubOrganization: []
+  AllSubOrganization:  null
 };
 
 const subOrganizationSlice = createSlice({
