@@ -9,6 +9,12 @@ import {
   updateDepartmentAttributes,
 } from "../../../../../services/operations/departmentAPI";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
+import {
+  hasCreateDepartmentAttributePrivilege,
+  hasDeleteDepartmentAttributePrivilege,
+  hasGetAllDepartmentAttributesPrivilege,
+  hasUpdateDepartmentAttributePrivilege,
+} from "../../../../../utils/privileges";
 
 const DepartmentAttributes = ({ NextHandler }) => {
   const dispatch = useDispatch();
@@ -25,9 +31,14 @@ const DepartmentAttributes = ({ NextHandler }) => {
     attributeKey: "",
   });
   const [edit, setEdit] = useState(false);
+
+  console.log(hasGetAllDepartmentAttributesPrivilege);
+  
   async function getRes() {
-    const res = await dispatch(DepartmentAttributeslist(AccessToken));
-    setDepartmentAttributes(res?.data);
+    if (hasGetAllDepartmentAttributesPrivilege) {
+      const res = await dispatch(DepartmentAttributeslist(AccessToken));
+      setDepartmentAttributes(res?.data);
+    }
   }
   useEffect(() => {
     getRes();
@@ -111,10 +122,6 @@ const DepartmentAttributes = ({ NextHandler }) => {
     }
   };
 
-  const handleDelete = async (attributeId) => {
-    await dispatch(deleteDepartmentAttributes(AccessToken, attributeId));
-    getRes();
-  };
   return (
     <div
       className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
@@ -157,8 +164,7 @@ const DepartmentAttributes = ({ NextHandler }) => {
       </div>
 
       <div className="mb-4">
-        {
-        departmentAttribute.length>0 ? (
+        {departmentAttribute.length > 0 ? (
           departmentAttribute.map((item) => (
             <div
               key={item.attributeId}
@@ -202,23 +208,28 @@ const DepartmentAttributes = ({ NextHandler }) => {
 
               <div className="flex gap-4">
                 <FaEdit onClick={() => handleEdit(item)} />
-                <MdDelete onClick={() =>
-                                                    setConfirmationModal({
-                                                      text1: "Are You Sure?",
-                                                      text2:
-                                                        "You want to Delete this Department Attribute. This Department Attribute may contain important Information. Deleting this department attribute will remove all the details associated with it.",
-                                                      btn1Text: "Delete Department",
-                                                      btn2Text: "Cancel",
-                                                      btn1Handler: async () => {
-                                                        await dispatch(deleteDepartmentAttributes(AccessToken, item.attributeId));
-                                                        setConfirmationModal(null);
-                                                        getRes();
-
-                                                      },
-                                                      btn2Handler: () =>
-                                                        setConfirmationModal(null),
-                                                    })
-                  } />
+                <MdDelete
+                  onClick={() =>
+                    setConfirmationModal({
+                      text1: "Are You Sure?",
+                      text2:
+                        "You want to Delete this Department Attribute. This Department Attribute may contain important Information. Deleting this department attribute will remove all the details associated with it.",
+                      btn1Text: "Delete Department",
+                      btn2Text: "Cancel",
+                      btn1Handler: async () => {
+                        await dispatch(
+                          deleteDepartmentAttributes(
+                            AccessToken,
+                            item.attributeId
+                          )
+                        );
+                        setConfirmationModal(null);
+                        getRes();
+                      },
+                      btn2Handler: () => setConfirmationModal(null),
+                    })
+                  }
+                />
               </div>
             </div>
           ))
@@ -236,7 +247,6 @@ const DepartmentAttributes = ({ NextHandler }) => {
         Next
       </button>
       {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
-
     </div>
   );
 };

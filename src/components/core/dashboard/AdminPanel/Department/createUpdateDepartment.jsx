@@ -20,6 +20,14 @@ import ConfirmationModal from "../../../../common/ConfirmationModal";
 import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice";
 import { setStep } from "../../../../../slices/employeeSlice";
+import {
+  hasCreateDepartmentAttributePrivilege,
+  hasDeleteDepartmentAttributePrivilege,
+  hasGetAllDepartmentAttributesPrivilege,
+  hasUpdateDepartmentAttributePrivilege,
+  hasUpdateDepartmentPrivilege,
+} from "../../../../../utils/privileges";
+
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -175,8 +183,10 @@ const CreateUpdateDepartment = () => {
   }, [isEditing, department, departmentAttribute, setValue, reset]);
 
   async function getRes() {
-    const res = await dispatch(DepartmentAttributeslist(AccessToken));
-    setDepartmentAttributes(res?.data);
+    if (hasGetAllDepartmentAttributesPrivilege) {
+      const res = await dispatch(DepartmentAttributeslist(AccessToken));
+      setDepartmentAttributes(res?.data);
+    }
   }
 
   useEffect(() => {
@@ -202,7 +212,7 @@ const CreateUpdateDepartment = () => {
     const formData = {
       department: trimmedDepartmentName,
       description: trimmedDescription,
-      managerId: selectedManager?.userId || null,
+      managerId: selectedManager?.employeeId || null,
       organizationId: data?.organization,
       branchId: data?.subOrganization,
       AccessToken,
@@ -222,8 +232,8 @@ const CreateUpdateDepartment = () => {
           },
         });
       } else {
-        const response=await dispatch(addDepartment(formData));
-        if(response?.status==201) {
+        const response = await dispatch(addDepartment(formData));
+        if (response?.status == 201) {
           navigate("/department/department-list", {
             state: {
               updatedDepartment: false,
@@ -231,7 +241,6 @@ const CreateUpdateDepartment = () => {
             },
           });
         }
- 
       }
     } catch (error) {
       console.error("Error during department submission:", error);
@@ -271,7 +280,6 @@ const CreateUpdateDepartment = () => {
     setSelectedManager(null);
     debounceSearch(e.target.value);
   };
-
 
   const handleSelectManager = (manager) => {
     if (selectedManager?.userId === manager.userId) {
@@ -360,13 +368,17 @@ const CreateUpdateDepartment = () => {
       </div>
       <div className="container mx-auto mt-8">
       <button
-    onClick={() => setIsAttribute(true)}  // Change the state to show the SubOrganizationAttribute
-    className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
-      ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
-      hover:scale-95 transition-all duration-200 `}
-  >
-    Add Attributes
-  </button>
+  disabled={!hasUpdateDepartmentAttributePrivilege && !hasCreateDepartmentAttributePrivilege}
+  onClick={() => setIsAttribute(true)} 
+  className={`w-[220px] py-2 text-md font-medium rounded-md mb-4 
+    ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
+    hover:scale-95 transition-all duration-200 
+    ${(!hasUpdateDepartmentAttributePrivilege && !hasCreateDepartmentAttributePrivilege) ? "opacity-50 cursor-not-allowed" : ""}`}
+>
+  Add Attributes
+</button>
+
+
         {AllOrganizations && AllOrganizations.length === 0 ? (
           <div className="p-5 mt-32 flex flex-col items-center justify-center">
             <div
@@ -541,14 +553,14 @@ const CreateUpdateDepartment = () => {
             {showCheckbox && searchResults?.length > 0 ? (
               <div className="mb-4">
                 {searchResults.slice(0, 1).map((result) => (
-                  <div key={result.userId} className="flex items-center mb-2">
+                  <div key={result.employeeId} className="flex items-center mb-2">
                     <input
                       type="checkbox"
-                      id={`employee_${result.userId}`}
+                      id={`employee_${result.employeeId}`}
                       name="selectedEmployee"
                       required
-                      value={result?.userId}
-                      checked={selectedManager?.userId === result.userId}
+                      value={result?.employeeId}
+                      checked={selectedManager?.employeeId === result.employeeId}
                       onChange={() => handleSelectManager(result)}
                       className="mr-2"
                     />
@@ -557,7 +569,7 @@ const CreateUpdateDepartment = () => {
                       className={`text-sm font-semibold ${
                         darkMode ? "text-white" : "text-gray-700"
                       }`}
-                      data-testid={`search-result-item-label-${result.userId}`}
+                      data-testid={`search-result-item-label-${result.employeeId}`}
                     >
                       {result.firstName} {result.lastName}
                     </label>
@@ -633,7 +645,6 @@ const CreateUpdateDepartment = () => {
           </form>
         )}
       </div>
-
     </div>
   );
 };
