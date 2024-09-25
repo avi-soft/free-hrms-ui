@@ -8,6 +8,11 @@ import {
   performancePrivileges,
   emergencyContactPrivileges,
   employeePrivileges,
+  attendancePrivileges,
+  branchPrivileges,
+  organizationPrivileges,personalProfilePrivileges,
+  rolePrivileges,
+  addressPrivileges
 } from "../../../../../constants/Roles";
 import {
   addRole,
@@ -160,12 +165,19 @@ const CreateUpdateRole = () => {
   };
 
   const privilegeGroups = {
-    department: departmentPrivileges,
     employee: employeePrivileges,
-    performance: performancePrivileges,
+    address: addressPrivileges,
     emergencyContact: emergencyContactPrivileges,
+    performance: performancePrivileges,
     leave: leavePrivileges,
-  };
+    role: rolePrivileges,
+    personalProfile: personalProfilePrivileges,
+    organization: organizationPrivileges,
+    department: departmentPrivileges,
+    branch: branchPrivileges,
+    attendance: attendancePrivileges
+};
+
 
   return (
     <div className="container mx-auto p-5">

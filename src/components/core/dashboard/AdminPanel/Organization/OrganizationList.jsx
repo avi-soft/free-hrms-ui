@@ -17,6 +17,12 @@ import {
 } from "../../../../../services/operations/OrganisationAPI.js";
 import toast from "react-hot-toast";
 import { setStep } from "../../../../../slices/employeeSlice.js";
+import {
+  hasCreateOrganizationPrivilege,
+  hasDeleteOrganizationPrivilege,
+  hasUpdateOrganizationAttributePrivilege,
+  hasUpdateOrganizationPrivilege,
+} from "../../../../../utils/privileges.js";
 
 const OrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -91,17 +97,48 @@ const OrganizationList = () => {
             </div>
           </div>
           {/* Section 2 */}
-          <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
-            <Link to="/organization/organization-create-update">
+          {}
+          <div
+            className={`m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5 ${
+              hasCreateOrganizationPrivilege
+                ? ""
+                : "cursor-not-allowed opacity-50"
+            }`}
+          >
+            <Link
+              to="/organization/organization-create-update"
+              className={`${
+                hasCreateOrganizationPrivilege
+                  ? ""
+                  : "cursor-not-allowed opacity-50"
+              }`}
+              onClick={(e) => {
+                if (!hasCreateOrganizationPrivilege) e.preventDefault(); // Prevent navigation if no privilege
+              }}
+            >
               <div
                 className={`flex items-center gap-x-1 ${
                   darkMode ? "primary-gradient " : "bg-red-600"
-                } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
+                } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white  ${
+                  hasCreateOrganizationPrivilege
+                    ? ""
+                    : "cursor-not-allowed opacity-50"
+                }`}
               >
-                <span>
+                <span                className={`${
+                hasCreateOrganizationPrivilege
+                  ? ""
+                  : "cursor-not-allowed opacity-50"
+              }`}>
                   <HiOutlinePlusCircle />
                 </span>
-                <button>Add Organization</button>
+                <button
+                              className={`${
+                                hasCreateOrganizationPrivilege
+                                  ? ""
+                                  : "cursor-not-allowed opacity-50"
+                              }`}
+                >Add Organization</button>
               </div>
             </Link>
           </div>
@@ -202,7 +239,12 @@ const OrganizationList = () => {
 
                         <td className="px-6 py-4 flex gap-x-2">
                           <button
-                            className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
+                            disabled={!hasUpdateOrganizationPrivilege}
+                            className={`text-lg text-blue-600 dark:text-blue-500 hover:underline   ${
+                              hasUpdateOrganizationPrivilege
+                                ? "text-blue-600 dark:text-blue-500 hover:underline"
+                                : " opacity-50 cursor-not-allowed"
+                            }`}
                             onClick={() =>
                               navigate(
                                 `/organization/organization-create-update`,
@@ -217,7 +259,8 @@ const OrganizationList = () => {
                           >
                             <FaRegEdit />
                           </button>
-                          <Link
+                          <button
+                            disabled={!hasDeleteOrganizationPrivilege}
                             onClick={() =>
                               setConfirmationModal({
                                 text1: "Are You Sure?",
@@ -244,10 +287,14 @@ const OrganizationList = () => {
                                 btn2Handler: () => setConfirmationModal(null),
                               })
                             }
-                            className="text-red-600 text-lg"
+                            className={`text-red-600 text-lg   ${
+                              hasDeleteOrganizationPrivilege
+                                ? "text-red-600 text-lg"
+                                : "opacity-50 hover:cursor-not-allowed"
+                            }`}
                           >
                             <RiDeleteBin6Line />
-                          </Link>
+                          </button>
                         </td>
                       </tr>
                     ))}
