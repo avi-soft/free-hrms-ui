@@ -10,6 +10,7 @@ import {
 } from "../../../../../services/operations/employeeAPI";
 import { useNavigate } from "react-router-dom";
 import { setStep } from "../../../../../slices/employeeSlice";
+import { hasGetAllEmployeeAttributesPrivilege } from "../../../../../utils/privileges";
 
 const EmployeeAttributes = () => {
   const { darkMode } = useSelector((state) => state.theme);
@@ -24,9 +25,12 @@ const EmployeeAttributes = () => {
   const navigate = useNavigate();
 
   async function getAttributes() {
-    const attributes = await dispatch(GetEmployeeAttributes(AccessToken));
-    console.log(attributes?.data);
-    setLocalAttributes(attributes?.data); // Sync with Redux state
+    if(hasGetAllEmployeeAttributesPrivilege) {
+      const attributes = await dispatch(GetEmployeeAttributes(AccessToken));
+      console.log(attributes?.data);
+      setLocalAttributes(attributes?.data); // Sync with Redux state
+    }
+
   }
 
   useEffect(() => {

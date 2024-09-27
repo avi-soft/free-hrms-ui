@@ -36,6 +36,8 @@ import {
   AllDepartmentlist,
   Departmentlist,
 } from "../../../../../services/operations/departmentAPI";
+import { BASE_URL } from "../../../../../services/apis";
+import { hasAddEmployeePrivilege, hasAssignDepartmentToEmployeePrivilege, hasDeleteEmployeeAttributePrivilege, hasDeleteEmployeePrivilege, hasGetAllDepartmentsPrivilege, hasGetEmployeesOfDepartmentPrivilege, hasRemoveDepartmentFromEmployeePrivilege } from "../../../../../utils/privileges";
 
 const EmployeeList = () => {
   const dispatch = useDispatch();
@@ -61,8 +63,8 @@ const EmployeeList = () => {
   const [renderFlag, setRenderFlag] = useState(false);
   const [lastPage, setLastPage] = useState(false);
   const { user } = useSelector((state) => state.profile);
-  const hasAddDepartmentPrivilege = user?.roles?.[0]?.privilege?.includes("ADD_DEPARTMENT");
-
+  const hasAddDepartmentPrivilege =
+    user?.roles?.[0]?.privilege?.includes("ADD_DEPARTMENT");
 
   const navigate = useNavigate();
 
@@ -154,23 +156,30 @@ const EmployeeList = () => {
 
   const handleEdit = async (employee) => {
     console.log(employee?.employeeId);
-    const response = await axios.get(
-      `http://ec2-16-16-249-120.eu-north-1.compute.amazonaws.com/api/v1/employee/${employee.employeeId}`,
-      {
-        headers: {
-          Authorization: `Bearer ${AccessToken}`,
-        },
-      }
-    );
-    console.log("response", response);
+    try{
+      const response = await axios.get(
+        `${BASE_URL}/employee/${employee.employeeId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${AccessToken}`,
+          },
+        }
+      );
+      console.log("response", response);
 
-    const editedEmployeeData = response?.data?.Employee;
+  
+      const editedEmployeeData = response?.data?.Employee?.employee;
+  
+      console.log(editedEmployeeData);
+      dispatch(setEditing(true));
+      dispatch(setPreEditedEmployeeDetails(editedEmployeeData));
+      navigate("/employee/employee-create-update", { state: { employee } });
+      dispatch(setStep(2));
+    }catch(err) {
+       console.log("errr")
+       toast.error("You cannot update employee details because you do not have the necessary privileges to access all employee information by ID.")
+    }
 
-    console.log(editedEmployeeData);
-    dispatch(setEditing(true));
-    dispatch(setPreEditedEmployeeDetails(editedEmployeeData));
-    navigate("/employee/employee-create-update", { state: { employee } });
-    dispatch(setStep(2));
   };
 
   console.log("sub org", selectedDepartment);
@@ -272,17 +281,30 @@ const EmployeeList = () => {
           </div>
           <div className="m-5 flex items-center justify-between rounded p-5">
             <div
-              className={`flex items-center   ${
+              className={`flex items-center ${
                 darkMode ? "primary-gradient" : ""
-              } text-white gap-x-1 bg-red-600 w-fit p-2 rounded-lg`}
+              } text-white gap-x-1 bg-red-600 w-fit p-2 rounded-lg ${
+                !hasAddEmployeePrivilege ? "opacity-50 cursor-not-allowed" : ""
+              }`}
             >
               <span>
                 <HiOutlinePlusCircle />
               </span>
-              <button>
-                <Link to="/employee/employee-create-update">New Employee</Link>
-              </button>
+              <Link
+                to={
+                  hasAddEmployeePrivilege
+                    ? "/employee/employee-create-update"
+                    : "#"
+                }
+                className={`text-white`}
+                onClick={(e) => !hasAddEmployeePrivilege && e.preventDefault()} // Prevent navigation if no privilege
+              >
+                <button disabled={!hasAddEmployeePrivilege}>
+                  New Employee
+                </button>
+              </Link>
             </div>
+
             <div className="flex items-center gap-x-7">
               <div
                 className={`gap-x-2 ${
@@ -345,13 +367,17 @@ const EmployeeList = () => {
               <div className="flex justify-start p-5 gap-x-3">
                 {AllDepartments?.length > 0 && (
                   <select
+                    disabled={!hasGetEmployeesOfDepartmentPrivilege}
                     value={selectedDepartment}
                     onChange={(e) => setSelectedDepartment(e.target.value)}
                     className={`${
                       darkMode
                         ? "bg-slate-700 text-white"
                         : "bg-slate-200 text-black"
-                    } p-2 rounded-lg`}
+                    } p-2 rounded-lg  ${
+                      !hasGetEmployeesOfDepartmentPrivilege &&
+                      "cursor-not-allowed opacity-50"
+                    }`}
                   >
                     <option value="">All Employees</option>
 
@@ -368,7 +394,7 @@ const EmployeeList = () => {
 
                 <select
                   value={sortBy}
-                  disabled={AllDepartments?.length==0}
+                  disabled={AllDepartments?.length == 0}
                   onChange={(e) => setSortBy(e.target.value)}
                   className={`${
                     darkMode
@@ -497,6 +523,7 @@ const EmployeeList = () => {
                               employee?.departments.length > 0 ? (
                                 <td className="px-6 py-4 ">
                                   <button
+                                  disabled={!hasRemoveDepartmentFromEmployeePrivilege}
                                     data-testid="unassign-button"
                                     onClick={() =>
                                       handleUnAssignDepartment(
@@ -505,7 +532,7 @@ const EmployeeList = () => {
                                         employee?.employeeId
                                       )
                                     }
-                                    className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                    className={`bg-yellow-500 text-black py-1 px-4 rounded  ${!hasRemoveDepartmentFromEmployeePrivilege  && "cursor-not-allowed opacity-50"}`}
                                   >
                                     UNASSIGN
                                   </button>
@@ -513,12 +540,13 @@ const EmployeeList = () => {
                               ) : (
                                 <td className="px-6 py-4 ">
                                   <button
+                                  disabled={!hasAssignDepartmentToEmployeePrivilege}
                                     data-testid="assign-button"
                                     onClick={() => {
                                       setCurrentEmployee(employee);
                                       setShowDepartmentAssignDialog(true);
                                     }}
-                                    className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                    className={`bg-yellow-500 text-black py-1 px-4 rounded ${!hasAssignDepartmentToEmployeePrivilege && "cursor-not-allowed opacity-50"}`}
                                   >
                                     ASSIGN
                                   </button>
@@ -535,9 +563,10 @@ const EmployeeList = () => {
                                   />
                                 </button>
                                 <button
+                                  disabled={!hasDeleteEmployeePrivilege}
                                   className={`${
                                     darkMode ? "text-red-400" : "text-red-600"
-                                  } text-lg`}
+                                  } text-lg  ${!hasDeleteEmployeePrivilege  && "cursor-not-allowed opacity-50"}`}
                                   onClick={() =>
                                     setConfirmationModal({
                                       text1: "Are you sure?",
@@ -639,12 +668,13 @@ const EmployeeList = () => {
                     Select Department
                   </label>
                   <select
+                    disabled={!hasGetAllDepartmentsPrivilege}
                     id="organization-select"
                     className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                       darkMode
                         ? "bg-gray-700 border-gray-600 text-white"
                         : "bg-white border-gray-300 text-gray-700"
-                    } max-h-60 overflow-y-auto`}
+                    } max-h-60 overflow-y-auto ${!hasGetAllDepartmentsPrivilege  && "cursor-not-allowed opacity-50"}`}
                     value={selectedAssignDepartment}
                     onChange={(e) =>
                       setSelectedAssignDepartment(e.target.value)

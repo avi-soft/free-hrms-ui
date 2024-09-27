@@ -27,10 +27,15 @@ import { getSubOrganizationList } from "../../../../../services/operations/subOr
 import { setStep } from "../../../../../slices/employeeSlice.js";
 import {
   hasAddDepartmentPrivilege,
+  hasAssignDepartmentToBranchPrivilege,
   hasAssignDepartmentToOrganizationPrivilege,
   hasDeleteDepartmentPrivilege,
   hasGetAllBranchPrivilege,
   hasGetAllOrganizationsPrivilege,
+  hasGetBranchesOfOrganizationPrivilege,
+  hasGetDepartmentsOfBranchPrivilege,
+  hasGetDepartmentsOfOrganizationPrivilege,
+  hasRemoveDepartmentFromBranchPrivilege,
   hasRemoveDepartmentFromOrganizationPrivilege,
   hasUpdateDepartmentPrivilege,
 } from "../../../../../utils/privileges.js";
@@ -40,7 +45,7 @@ const DepartmentList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [selectedOrganization, setSelectedOrganization] =
     useState("unassigned");
-  const [updatedOrganization, setUpdatedOrganization] = useState("");
+  const [updatedOrganization, setUpdatedOrganization] = useState(null);
   const [selectedAssignOrganization, setSelectedAssignOrganization] =
     useState("");
 
@@ -67,9 +72,17 @@ const DepartmentList = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log("ALL SUB ORG",AllSubOrganization);
+  console.log("ALL SUB ORG", AllSubOrganization);
   console.log("GETTING RE RENDERED");
-  
+
+  console.log("udpated sub org", updatedOrganization);
+
+  let orgId;
+  if (updatedOrganization) {
+    orgId = updatedOrganization;
+  }
+
+  console.log("org id global", orgId);
 
   const fetchOrganizationList = async () => {
     if (hasGetAllOrganizationsPrivilege) {
@@ -80,7 +93,6 @@ const DepartmentList = () => {
         dispatch(setOrganization(organizations));
         if (organizations.length > 0) {
           // Set the updated organization if available
-          const orgId = updatedOrganization;
           console.log(orgId, "orgid");
 
           if (orgId) {
@@ -110,9 +122,11 @@ const DepartmentList = () => {
         dispatch(setDepartments(res?.data?.Departments?.content));
       } else {
         console.log("INSIDE ELSE", orgId);
-        const res = await dispatch(Departmentlist(AccessToken, orgId));
-        console.log("else", res);
-        dispatch(setDepartments(res?.data?.content));
+        if (hasGetDepartmentsOfOrganizationPrivilege) {
+          const res = await dispatch(Departmentlist(AccessToken, orgId));
+          console.log("else", res);
+          dispatch(setDepartments(res?.data?.content));
+        }
       }
       dispatch(setLoading(false));
     } catch (error) {
@@ -133,7 +147,7 @@ const DepartmentList = () => {
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success(response?.data?.message);
       setSelectedAssignOrganization("");
-      setRenderFlag(true);
+      setRenderFlag(!renderFlag);
       setShowOrganizationAssignDialog(false); // Close dialog
     } catch (error) {
       console.error("Error assigning organization", error);
@@ -178,7 +192,8 @@ const DepartmentList = () => {
       toast.success(response?.data?.message);
       setShowSubOrganizationAssignDialog(false);
       setSelectedAssignSubOrganization("");
-      setRenderFlag(true);
+      fetchDepartmentsList(selectedOrganization);
+      // setRenderFlag(!renderFlag);
     } catch (error) {
       console.error("Error assigning organization", error);
       toast.error("Failed to assign organization");
@@ -207,25 +222,28 @@ const DepartmentList = () => {
   console.log(hasGetAllOrganizationsPrivilege);
 
   const fetchSubOrganization = async (orgId) => {
-    if (hasGetAllBranchPrivilege) {
+    if (hasGetBranchesOfOrganizationPrivilege) {
       try {
         dispatch(setLoading(true));
-        if(selectedOrganization !="unassigned") {
-          console.log("department selected",selectedOrganization);
-        
-          const res = await dispatch(fetchSubOrganizationOrgSpecific(dispatch,AccessToken,selectedOrganization));
+        if (selectedOrganization != "unassigned") {
+          console.log("department selected", selectedOrganization);
+          if (hasGetDepartmentsOfOrganizationPrivilege) {
+            const res = await dispatch(
+              fetchSubOrganizationOrgSpecific(
+                dispatch,
+                AccessToken,
+                selectedOrganization
+              )
+            );
+            console.log(res, "sub org response");
+            dispatch(setSubOrganization(res?.data?.BranchList));
+          }
+        } else {
+          const res = await dispatch(getSubOrganizationList(AccessToken));
           console.log(res, "sub org response");
-          dispatch(setSubOrganization(res?.data?.BranchList));
 
+          dispatch(setSubOrganization(res?.data?.Branches?.content));
         }
-        else{
-        const res = await dispatch(getSubOrganizationList(AccessToken));
-        console.log(res, "sub org response");
-
-        dispatch(setSubOrganization(res?.data?.Branches?.content));
-
-        }
-
 
         dispatch(setLoading(false));
       } catch (error) {
@@ -238,12 +256,14 @@ const DepartmentList = () => {
   useEffect(() => {
     fetchSubOrganization();
     if (location.state?.updatedDepartment) {
+      console.log("here ? 2");
       setUpdatedOrganization(location.state.organizationId);
     } else if (location.state?.updatedDepartment !== undefined) {
+      console.log("here ?", location.state.organizationId);
       setUpdatedOrganization(location.state.organizationId);
     }
     fetchOrganizationList();
-  }, [dispatch,  updatedOrganization]);
+  }, [dispatch, updatedOrganization, renderFlag]);
 
   console.log(renderFlag);
 
@@ -596,6 +616,9 @@ const DepartmentList = () => {
                               department?.branches.length > 0 ? (
                                 <td className="px-6 py-4">
                                   <button
+                                    disabled={
+                                      !hasRemoveDepartmentFromBranchPrivilege
+                                    }
                                     data-testid="unassign-button"
                                     onClick={() =>
                                       handleUnassignSubOrganization(
@@ -604,7 +627,10 @@ const DepartmentList = () => {
                                         department.departmentId
                                       )
                                     }
-                                    className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                    className={`bg-yellow-500 text-black py-1 px-4 rounded ${
+                                      !hasRemoveDepartmentFromBranchPrivilege &&
+                                      "cursor-not-allowed opacity-50"
+                                    }`}
                                   >
                                     UNASSIGN
                                   </button>
@@ -612,13 +638,19 @@ const DepartmentList = () => {
                               ) : (
                                 <td className="px-6 py-4">
                                   <button
+                                    disabled={
+                                      !hasAssignDepartmentToBranchPrivilege
+                                    }
                                     data-testid="assign-button"
                                     onClick={() => {
                                       setCurrentDepartment(department);
                                       setShowSubOrganizationAssignDialog(true);
-                                      fetchSubOrganization()
+                                      fetchSubOrganization();
                                     }}
-                                    className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                    className={`bg-yellow-500 text-black py-1 px-4 rounded ${
+                                      !hasAssignDepartmentToBranchPrivilege &&
+                                      "cursor-not-allowed opacity-50"
+                                    }`}
                                   >
                                     ASSIGN
                                   </button>
@@ -796,23 +828,28 @@ const DepartmentList = () => {
                 Select Sub Organization
               </label>
               <select
+                disabled={!hasGetBranchesOfOrganizationPrivilege}
                 id="sub-organization-select"
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 text-white"
                     : "bg-white border-gray-300 text-gray-700"
-                } max-h-60 overflow-y-auto`}
+                } max-h-60 overflow-y-auto   ${
+                  !hasGetBranchesOfOrganizationPrivilege &&
+                  "cursor-not-allowed opacity-50"
+                }`}
                 value={selectedAssignSubOrganization}
                 onChange={(e) =>
                   setSelectedAssignSubOrganization(e.target.value)
                 }
               >
                 <option value="">Select Sub Organization</option>
-                { AllSubOrganization && AllSubOrganization?.map((subOrg) => (
-                  <option key={subOrg?.branchId} value={subOrg?.branchId}>
-                    {subOrg.branchName}
-                  </option>
-                ))}
+                {AllSubOrganization &&
+                  AllSubOrganization?.map((subOrg) => (
+                    <option key={subOrg?.branchId} value={subOrg?.branchId}>
+                      {subOrg.branchName}
+                    </option>
+                  ))}
               </select>
               {subOrganizationError && (
                 <p className="text-red-500 text-md mt-2">
@@ -839,7 +876,10 @@ const DepartmentList = () => {
                 className={`py-2 px-4 rounded ${
                   darkMode ? "bg-gray-600 text-white" : "bg-gray-500 text-white"
                 }`}
-                onClick={() => setShowSubOrganizationAssignDialog(false)}
+                onClick={() => {
+                  setSubOrganizationError("");
+                  setShowSubOrganizationAssignDialog(false);
+                }}
               >
                 Cancel
               </button>

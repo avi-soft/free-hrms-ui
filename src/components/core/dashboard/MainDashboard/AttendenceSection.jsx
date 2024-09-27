@@ -30,7 +30,7 @@ const AttendenceSection = () => {
     }, 1000);
 
     return () => clearInterval(interval); // Cleanup the interval on component unmount
-  }, [AccessToken, user?.userId,currentTime]);
+  }, [AccessToken, user?.userId,currentTime  ]);
 
   const handleLocationClick = () => {
     if (navigator.geolocation) {

@@ -14,6 +14,7 @@ import toast from "react-hot-toast";
 import { setDepartments } from "../../../slices/departmentSlice";
 import SkillsDesignationModal from "../dashboard/AdminPanel/Employee/SkillsDesignationModal";
 import { RxCross2 } from "react-icons/rx";
+import { useNavigate } from "react-router-dom";
 
 const EmployeePersonalInfo = () => {
   const {
@@ -35,6 +36,7 @@ const EmployeePersonalInfo = () => {
   const { AccessToken } = useSelector((state) => state.auth);
   const [localAttributes, setLocalAttributes] = useState([]);
   const { AllDepartments } = useSelector((state) => state.department);
+  const navigate=useNavigate()
 
   const darkMode = useSelector((state) => state.theme?.darkMode) || false;
   const { employees, currentOrganizationId: orgId } = useSelector(
@@ -130,11 +132,14 @@ const EmployeePersonalInfo = () => {
     return attributesObj;
   };
 
-
   useEffect(() => {
     if (isEditing && preEditedEmployeeDetails) {
-      setSelectedDesignations(preEditedEmployeeDetails.designations.map((item) => item.designation));
-      setSelectedSkills(preEditedEmployeeDetails.skills.map((item) => item.skill));
+      setSelectedDesignations(
+        preEditedEmployeeDetails.designations.map((item) => item.designation)
+      );
+      setSelectedSkills(
+        preEditedEmployeeDetails.skills.map((item) => item.skill)
+      );
 
       getLocalAttributesValue().then((data) => {
         for (const [key, value] of Object.entries(preEditedEmployeeDetails)) {
@@ -146,7 +151,7 @@ const EmployeePersonalInfo = () => {
               designations: value.designations || [],
             });
           } else if (key === "attributes") {
-            Object.keys(value).forEach(attributeKey => {
+            Object.keys(value).forEach((attributeKey) => {
               setValue(attributeKey, value[attributeKey]);
             });
           } else {
@@ -227,6 +232,18 @@ const EmployeePersonalInfo = () => {
       </div>
       {/* PERSONAL DETAILS DIV */}
       <div>
+        <div className="ml-6 mt-4">
+          <button
+            // disabled={!hasCreateBranchAttributePrivilege}
+            onClick={() =>  navigate("/employee/employee-attributes")} // Change the state to show the SubOrganizationAttribute
+            className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+      ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
+      hover:scale-95 transition-all duration-200   `}
+          >
+            Manage Attributes
+          </button>
+        </div>
+
         <h2
           className={`text-lg text-center font-semibold ${
             darkMode ? "text-slate-50" : "text-slate-600"
@@ -343,7 +360,6 @@ const EmployeePersonalInfo = () => {
                 </p>
               )}
             </div>
-            {!isEditing && (
               <div className="mt-4">
                 <label
                   htmlFor="departmentId"
@@ -378,7 +394,6 @@ const EmployeePersonalInfo = () => {
                   ))}
                 </select>
               </div>
-            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             {localAttributes.map((attr) => {
