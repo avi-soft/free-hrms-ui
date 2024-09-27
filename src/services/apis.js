@@ -1,6 +1,6 @@
 // const BASE_URL = "http://localhost:5555/api/v1"
 
-const BASE_URL =
+export const BASE_URL =
   "https://www.avihtech.com/api/v1";
 //Auth ENDPOINTS
 export const authEndpoints = {

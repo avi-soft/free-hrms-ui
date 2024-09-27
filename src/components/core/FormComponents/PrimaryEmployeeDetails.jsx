@@ -256,23 +256,25 @@ const PrimaryEmployeeDetails = () => {
               Role<sup className="text-red-900">*</sup>
             </label>
             <select
-  disabled={roles?.length === 0 || roles == undefined}
-  id="role"
-  {...register("role", { required: "Role is required" })}
-  className={`border ${
-    darkMode ? "bg-gray-500 text-white" : ""
-  } rounded px-3 py-2 mt-2 w-full max-h-40 overflow-y-auto ${
-    roles?.length === 0 || roles == undefined ? "cursor-not-allowed" : ""
-  }`}
-  data-testid="role-select"
->
-  <option value="">Select Role</option>
-  {roles?.map((role) => (
-    <option key={role.roleId} value={role.role}>
-      {role.role}
-    </option>
-  ))}
-</select>
+              disabled={roles?.length === 0 || roles == undefined}
+              id="role"
+              {...register("role", { required: "Role is required" })}
+              className={`border ${
+                darkMode ? "bg-gray-500 text-white" : ""
+              } rounded px-3 py-2 mt-2 w-full max-h-40 overflow-y-auto ${
+                roles?.length === 0 || roles == undefined
+                  ? "cursor-not-allowed"
+                  : ""
+              }`}
+              data-testid="role-select"
+            >
+              <option value="">Select Role</option>
+              {roles?.map((role) => (
+                <option key={role.roleId} value={role.role}>
+                  {role.role}
+                </option>
+              ))}
+            </select>
 
             {errors.role && (
               <p className="text-red-500 mt-1">{errors.role.message}</p>
@@ -294,7 +296,7 @@ const PrimaryEmployeeDetails = () => {
           </div>
         </form>
       )}
-      {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
+      {/* {confirmationModal && <ConfirmationModal modalData={confirmationModal} />} */}
     </div>
   );
 };
