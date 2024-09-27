@@ -9,6 +9,12 @@ import {
   updateSubOrganisationAttributes,
 } from "../../../../../services/operations/subOrganisationAPI";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
+import {
+  hasCreateBranchAttributePrivilege,
+  hasDeleteBranchAttributePrivilege,
+  hasGetBranchAttributePrivilege,
+  hasUpdateBranchAttributePrivilege,
+} from "../../../../../utils/privileges";
 
 const SubOrganizationAttribute = ({ NextHandler }) => {
   const dispatch = useDispatch();
@@ -30,8 +36,10 @@ const SubOrganizationAttribute = ({ NextHandler }) => {
   };
   const [edit, setEdit] = useState(false);
   async function getSubOrganizationAttributes() {
-    const res = await dispatch(getSubOrganisationAttributes(AccessToken));
-    setBranchAttributes(res?.data.branchAttributes);
+    if (hasGetBranchAttributePrivilege) {
+      const res = await dispatch(getSubOrganisationAttributes(AccessToken));
+      setBranchAttributes(res?.data.branchAttributes);
+    }
   }
   useEffect(() => {
     getSubOrganizationAttributes();
@@ -107,7 +115,6 @@ const SubOrganizationAttribute = ({ NextHandler }) => {
     }
   };
 
-
   return (
     <div
       className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
@@ -150,8 +157,8 @@ const SubOrganizationAttribute = ({ NextHandler }) => {
       </div>
 
       <div className="mt-4">
-        {branchAttribute.length > 0 ? (
-          branchAttribute.map((item) => (
+        {branchAttribute?.length > 0 ? (
+          branchAttribute?.map((item) => (
             <div
               key={item.attributeId}
               className={`max-w-md mx-auto shadow-md rounded flex items-center justify-between px-4 py-2 mb-4 ${
@@ -193,30 +200,43 @@ const SubOrganizationAttribute = ({ NextHandler }) => {
               )}
 
               <div className="flex gap-4">
-                <FaEdit onClick={() => handleEdit(item)} />
-                <MdDelete onClick={() => 
-                                                    setConfirmationModal({
-                                                      text1: "Are You Sure?",
-                                                      text2:
-                                                        "You want to Delete this SubOrganization Attribute. This SubOrganization attribute may contain important Information. Deleting this SubOrganization  attribute will remove all the details associated with it.",
-                                                      btn1Text: "Delete  Attribute",
-                                                      btn2Text: "Cancel",
-                                                      btn1Handler:
-                                                      async()=> {
-                                                        await dispatch(deleteSubOrganisationAttributes(AccessToken, item.attributeId));
-                                                        setConfirmationModal(null);
-                                                        getSubOrganizationAttributes();
-                                                      },
+                {
+                  hasUpdateBranchAttributePrivilege  &&                  <FaEdit onClick={() => handleEdit(item)} />
 
-                                                      btn2Handler: () =>
-                                                        setConfirmationModal(null),
-                                                    })                } 
+                }
+                {hasDeleteBranchAttributePrivilege && (
+                  <MdDelete
+                    onClick={() =>
+                      setConfirmationModal({
+                        text1: "Are You Sure?",
+                        text2:
+                          "You want to Delete this SubOrganization Attribute. This SubOrganization attribute may contain important Information. Deleting this SubOrganization attribute will remove all the details associated with it.",
+                        btn1Text: "Delete Attribute",
+                        btn2Text: "Cancel",
+                        btn1Handler: async () => {
+                          await dispatch(
+                            deleteSubOrganisationAttributes(
+                              AccessToken,
+                              item.attributeId
+                            )
+                          );
+                          setConfirmationModal(null);
+                          getSubOrganizationAttributes();
+                        },
+                        btn2Handler: () => setConfirmationModal(null),
+                      })
+                    }
                   />
+                )}
               </div>
             </div>
           ))
         ) : (
-          <p className={` mb-2 text-sm ${darkMode ? "text-white" : "text-gray-700"}`}>
+          <p
+            className={` mb-2 text-sm ${
+              darkMode ? "text-white" : "text-gray-700"
+            }`}
+          >
             No attributes available
           </p>
         )}
@@ -229,11 +249,8 @@ const SubOrganizationAttribute = ({ NextHandler }) => {
         Next
       </button>
       {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
-
     </div>
-    
   );
-  
 };
 
 export default SubOrganizationAttribute;

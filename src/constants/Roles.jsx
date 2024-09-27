@@ -124,8 +124,13 @@ export const branchPrivileges = [
     { index: 6, value: "ASSIGN_BRANCH", default: false, description: "Permission to assign branches." },
     { index: 7, value: "REMOVE_BRANCH", default: false, description: "Permission to remove branches." },
     { index: 8, value: "ASSIGN_DEPARTMENT_TO_BRANCH", default: false, description: "Permission to assign a department to a branch." },
-    { index: 9, value: "REMOVE_DEPARTMENT_FROM_BRANCH", default: false, description: "Permission to remove a department from a branch." }
+    { index: 9, value: "REMOVE_DEPARTMENT_FROM_BRANCH", default: false, description: "Permission to remove a department from a branch." },
+    { index: 10, value: "ADD_BRANCH_ATTRIBUTE", default: false, description: "Permission to add attributes to a branch." },
+    { index: 11, value: "GET_BRANCH_ATTRIBUTE", default: false, description: "View attributes of a branch." },
+    { index: 12, value: "UPDATE_BRANCH_ATTRIBUTE", default: false, description: "Permission to update attributes of a branch." },
+    { index: 13, value: "DELETE_BRANCH_ATTRIBUTE", default: false, description: "Permission to delete attributes from a branch." }
 ];
+
 
 // Attendance Privileges
 export const attendancePrivileges = [

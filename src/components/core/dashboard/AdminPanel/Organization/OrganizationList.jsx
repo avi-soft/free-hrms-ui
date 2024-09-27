@@ -125,20 +125,24 @@ const OrganizationList = () => {
                     : "cursor-not-allowed opacity-50"
                 }`}
               >
-                <span                className={`${
-                hasCreateOrganizationPrivilege
-                  ? ""
-                  : "cursor-not-allowed opacity-50"
-              }`}>
+                <span
+                  className={`${
+                    hasCreateOrganizationPrivilege
+                      ? ""
+                      : "cursor-not-allowed opacity-50"
+                  }`}
+                >
                   <HiOutlinePlusCircle />
                 </span>
                 <button
-                              className={`${
-                                hasCreateOrganizationPrivilege
-                                  ? ""
-                                  : "cursor-not-allowed opacity-50"
-                              }`}
-                >Add Organization</button>
+                  className={`${
+                    hasCreateOrganizationPrivilege
+                      ? ""
+                      : "cursor-not-allowed opacity-50"
+                  }`}
+                >
+                  Add Organization
+                </button>
               </div>
             </Link>
           </div>

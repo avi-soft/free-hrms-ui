@@ -19,6 +19,7 @@ import OrganizationAttributes from "./OrganizationAttribute";
 import {
   hasCreateOrganizationAttributePrivilege,
   hasCreateOrganizationPrivilege,
+  hasDeleteOrganizationAttributePrivilege,
   hasGetAllOrganizationAttributesPrivilege,
   hasUpdateOrganizationAttributePrivilege,
   hasUploadOrganizationImagePrivilege,
@@ -124,20 +125,30 @@ const CreateUpdateOrganisation = () => {
     // Append the organization data to the FormData object
     formData.append("organizationData", JSON.stringify(organizationData));
 
+
+    let removeImage; 
     // Append the logo image if one is selected
     if (selectedImage) {
       formData.append("file", selectedImage);
+    }else{
+      console.log("inside else")
+      removeImage=true
     }
-
+  
     try {
       let response;
       if (isEditing) {
+        // Pass removeImage as a separate variable
+
+        console.log(removeImage);
+        
         response = await dispatch(
           updateOrganisation(
             AccessToken,
             formData,
             navigate,
-            organization.organizationId
+            organization.organizationId,
+            removeImage // Send removeImage as a separate argument
           )
         );
       } else {
@@ -229,23 +240,19 @@ const CreateUpdateOrganisation = () => {
       </div>
       <div className={`container mx-auto mt-8`}>
         <button
-          disabled={
-            !hasCreateOrganizationAttributePrivilege &&
-            !hasUpdateOrganizationAttributePrivilege
-          }
+          disabled={!hasCreateOrganizationAttributePrivilege}
           onClick={() => setIsAttribute(true)} // Change the state to show the SubOrganizationAttribute
           className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
       ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
       hover:scale-95 transition-all duration-200 ${
         fileError ? "cursor-not-allowed" : ""
       }  ${
-            !hasCreateOrganizationAttributePrivilege &&
-            !hasUpdateOrganizationAttributePrivilege
+            !hasCreateOrganizationAttributePrivilege
               ? "opacity-50 cursor-not-allowed"
               : ""
           } `}
         >
-          Add Attributes
+          Manage Attributes
         </button>
 
         {isAttribute ? (
@@ -462,19 +469,30 @@ const CreateUpdateOrganisation = () => {
                 ))}
 
               {/* Submit Button */}
-              <button
-                type="submit"
-                className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
-                  darkMode
-                    ? "primary-gradient text-white"
-                    : "bg-blue-700 text-white"
-                } hover:scale-95 transition-all duration-200 ${
-                  fileError ? "cursor-not-allowed" : ""
-                }`}
-                disabled={fileError}
-              >
-                {isEditing ? "Update Organization" : "Submit Organization"}
-              </button>
+              <div className="flex justify-between gap-3">
+  <button
+    type="submit"
+    className={`flex-1 py-2 text-sm font-medium rounded-md mb-4 ${
+      darkMode
+        ? "primary-gradient text-white"
+        : "bg-blue-700 text-white"
+    } hover:scale-95 transition-all duration-200 ${
+      fileError ? "cursor-not-allowed" : ""
+    }`}
+    disabled={fileError}
+  >
+    {isEditing ? "Update Organization" : "Submit Organization"}
+  </button>
+  
+  <button
+    type="button"
+    onClick={() => navigate("/organization/organization-list")} // Replace with your navigation function
+    className="flex-1 text-center text-sm md:text-base font-medium rounded-md py-2 mb-4 bg-gray-400 text-white hover:bg-gray-500 transition-all duration-200"
+  >
+    Cancel
+  </button>
+</div>
+
             </form>
           </div>
         )}
