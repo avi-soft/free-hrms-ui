@@ -9,34 +9,28 @@ import { AttendenceClockIn, AttendenceClockOut, EmployeeAttendenceStatus } from 
 
 const AttendenceSection = () => {
   const { darkMode } = useSelector((state) => state.theme);
-  const [currentTime, setCurrentTime] = useState(new Date());
   const [locationLoader, setLocationLoader] = useState(false);
   const { user } = useSelector((state) => state.profile);
-  const [workDuration, setWorkDuration] = useState(0);
-  const [timerInterval, setTimerInterval] = useState(null);
-  const dispatch = useDispatch();
-  const { AccessToken } = useSelector((state) => state.auth);
   const [locationsData, setLocationData] = useState({
     latitude: null,
     longitude: null,
     elevation: null,
   });
-  const [isCheckedIn, setIsCheckedIn] = useState(false); // Check-in status
+  const [isCheckedIn, setIsCheckedIn] = useState(false);
+  const [clockedTime, setClockedTime] = useState("");
+  const [currentTime, setCurrentTime] = useState(new Date().toLocaleTimeString());
+
+  const dispatch = useDispatch();
+  const { AccessToken } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
+    fetchEmployeeAttendenceStatus();
+    const interval = setInterval(() => {
+      setCurrentTime(new Date().toLocaleTimeString());
     }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
-  const formatTime = (date) => date.toLocaleTimeString();
-  const formatDuration = (duration) => {
-    const hours = Math.floor(duration / 3600);
-    const minutes = Math.floor((duration % 3600) / 60);
-    const seconds = duration % 60;
-    return `${hours}h ${minutes}m ${seconds}s`;
-  };
+    return () => clearInterval(interval); // Cleanup the interval on component unmount
+  }, [AccessToken, user?.userId,currentTime  ]);
 
   const handleLocationClick = () => {
     if (navigator.geolocation) {
@@ -59,13 +53,8 @@ const AttendenceSection = () => {
     } else {
       const checkInResponse = await dispatch(AttendenceClockIn(locationsData, AccessToken));
       if (checkInResponse.status === 200) {
-        fetchEmployeeAttendenceStatus()
+        fetchEmployeeAttendenceStatus();
         toast.success("Clock In Successful");
-        setWorkDuration(0);
-        const interval = setInterval(() => {
-          setWorkDuration((prevDuration) => prevDuration + 1);
-        }, 1000);
-        setTimerInterval(interval);
       }
     }
   };
@@ -75,27 +64,17 @@ const AttendenceSection = () => {
     if (checkOutResponse.status === 200) {
       toast.success("Clock Out Successful");
       setIsCheckedIn(false);
-      clearInterval(timerInterval);
-      setWorkDuration(0);
+      setClockedTime(""); // Reset clocked time on check-out
     }
   };
 
   async function fetchEmployeeAttendenceStatus() {
     const response = await dispatch(EmployeeAttendenceStatus(AccessToken, user?.userId));
-    if (response?.status==200) {
-      setIsCheckedIn(response?.data?.isUserClockedIn); // Set check-in status based on API response
-      if (response?.data?.isUserClockedIn) {
-        const interval = setInterval(() => {
-          setWorkDuration((prevDuration) => prevDuration + 1);
-        }, 1000);
-        setTimerInterval(interval); // Start the work duration timer if checked in
-      }
+    if (response?.status === 200) {
+      setIsCheckedIn(response?.data?.isUserClockedIn);
+      setClockedTime(response?.data?.clockedTime || "0 minutes and 0 seconds"); // Set clocked time
     }
   }
-
-  useEffect(() => {
-    fetchEmployeeAttendenceStatus();
-  }, [AccessToken, user?.userId]);
 
   return (
     <div className="flex justify-center items-center h-auto mb-10 mt-5">
@@ -114,7 +93,7 @@ const AttendenceSection = () => {
             <IoLocationOutline />
             <span>{locationLoader ? "Please wait.." : "Location"}</span>
           </button>
-          <div className="text-gray-500 text-sm">{formatDuration(workDuration)}</div>
+          <div className="text-gray-500 text-sm">{clockedTime}</div> {/* Display clocked time */}
         </div>
 
         <div className="text-center border border-gray-300 rounded-lg p-4 mb-4 mt-3">
@@ -131,13 +110,13 @@ const AttendenceSection = () => {
               <p className="ml-3 font-semibold">{isCheckedIn ? "Check-out" : "Check-in"}</p>
               <div>{isCheckedIn ? <FaSignOutAlt /> : <FaSignInAlt />}</div>
             </div>
-            <div className="text-gray-500 text-sm">{formatTime(currentTime)}</div>
+            <div className="text-gray-500 text-sm">{currentTime}</div> {/* Display current time */}
           </button>
         </div>
 
         <div className="text-center">
-          <p className="text-lg font-bold">{formatDuration(workDuration)}</p>
-          <p className="text-sm text-gray-500">{formatTime(currentTime)}</p>
+          <p className="text-lg font-bold">{clockedTime}</p> {/* Display clocked time */}
+          <p className="text-sm text-gray-500">{currentTime}</p> {/* Display current time */}
           <p className="text-sm text-red-500">{isCheckedIn ? "Checked in" : "Yet to Check-in"}</p>
         </div>
 

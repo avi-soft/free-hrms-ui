@@ -78,20 +78,38 @@ export const addOrganisation = (AccessToken, body) => {
   };
 };
 
-export const updateOrganisation = (AccessToken, data,navigate, organisationId) => {
+export const updateOrganisation = (AccessToken, data,navigate, organisationId,removeImage) => {
   return async (dispatch) => {
     const toastId = toast.loading("Updating...");
     try {
+      console.log(removeImage)
       console.log(AccessToken);
       console.log(data);
-      const response = await apiConnector(
-        "PATCH",
-        UPDATE_ORGANISATION_REQUEST(organisationId),
-        data,
-        {
-          Authorization: `Bearer ${AccessToken}`,
+
+      let response;
+      if(removeImage) {
+          response = await apiConnector(
+          "PATCH",
+          UPDATE_ORGANISATION_REQUEST(organisationId,removeImage),
+          data,
+          {
+            Authorization: `Bearer ${AccessToken}`,
+          },
+          {
+            removeImage:removeImage
         }
-      );
+        );
+      }else{
+        response = await apiConnector(
+          "PATCH",
+          UPDATE_ORGANISATION_REQUEST(organisationId),
+          data,
+          {
+            Authorization: `Bearer ${AccessToken}`,
+          }
+        );
+      }
+
       console.log(response);
       if (response?.status != 200) throw new Error(response?.data?.message);
       else {
@@ -287,6 +305,7 @@ export const deleteOrganisationAttributes = (AccessToken, organisationId) => {
       console.log(response);
       if (response?.status != 200) throw new Error(response?.data?.message);
       else {
+        toast.success(response?.data?.message)
         return response;
       }
     } catch (err) {

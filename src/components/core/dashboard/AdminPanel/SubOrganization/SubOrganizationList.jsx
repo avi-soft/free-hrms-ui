@@ -21,6 +21,11 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { setStep } from "../../../../../slices/employeeSlice.js";
+import {
+  hasAddBranchPrivilege,
+  hasDeleteBranchPrivilege,
+  hasUpdateBranchPrivilege,
+} from "../../../../../utils/privileges.js";
 const SubOrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [selectedOrganization, setSelectedOrganization] =
@@ -46,23 +51,25 @@ const SubOrganizationList = () => {
 
   const fetchOrganizationList = async () => {
     try {
-      dispatch(setLoading(true));
-      const res = await dispatch(getOrganisation(AccessToken));
-      const organizations = res?.data?.content;
-      dispatch(setOrganization(organizations));
-      if (organizations.length > 0) {
-        // Set the updated organization if available
-        const orgId = updatedOrganization;
+      if (hasGetAllOrganizationsPrivilege) {
+        dispatch(setLoading(true));
+        const res = await dispatch(getOrganisation(AccessToken));
+        const organizations = res?.data?.content;
+        dispatch(setOrganization(organizations));
+        if (organizations.length > 0) {
+          // Set the updated organization if available
+          const orgId = updatedOrganization;
 
-        if (orgId) {
-          setSelectedOrganization(orgId);
-          fetchSubOrganization(orgId);
-        } else {
-          setSelectedOrganization("unassigned");
-          fetchSubOrganization("unassigned");
+          if (orgId) {
+            setSelectedOrganization(orgId);
+            fetchSubOrganization(orgId);
+          } else {
+            setSelectedOrganization("unassigned");
+            fetchSubOrganization("unassigned");
+          }
         }
+        dispatch(setLoading(false));
       }
-      dispatch(setLoading(false));
     } catch (error) {
       console.error("Error fetching AllOrganizations", error);
       dispatch(setLoading(false));
@@ -201,8 +208,13 @@ const SubOrganizationList = () => {
             </div>
           </div>
           {/* Section 2 */}
-          <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
+          <div
+            className={`m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5 ${
+              !hasAddBranchPrivilege ? "opacity-50 cursor-not-allowed" : ""
+            } `}
+          >
             <Link
+              disabled={!hasAddBranchPrivilege}
               to="/suborganization/suborganization-create-update"
               className={`flex items-center gap-x-1 ${
                 darkMode ? "primary-gradient " : "bg-red-600"
@@ -214,240 +226,218 @@ const SubOrganizationList = () => {
               <button>Add Sub Organization</button>
             </Link>
           </div>
-          {AllOrganizations.length === 0 ? (
-            <div className="p-5 mt-32 flex flex-col items-center justify-center">
-              <div
-                className={`text-xl font-semibold ${
-                  darkMode ? "text-orange-400" : "text-slate-600"
-                }`}
+
+          <>
+            <div className="flex justify-start p-5">
+              <select
+                disabled={AllOrganizations?.length == 0}
+                value={selectedOrganization}
+                onChange={(e) => setSelectedOrganization(e.target.value)}
+                className={`${
+                  darkMode
+                    ? "bg-slate-700 text-white"
+                    : "bg-slate-200 text-black"
+                } p-2 rounded-lg  ${
+                  AllOrganizations?.length == 0
+                    ? "opacity-50 cursor-not-allowed"
+                    : ""
+                } `}
               >
-                No Organizations Available
-              </div>
-              <p
-                className={`text-center mt-4 ${
-                  darkMode ? "text-white" : "text-gray-700"
-                }`}
-              >
-                You need to create an organization before managing
-                sub-organizations.
-              </p>
-              <div className="flex justify-center">
-                <Link
-                  to={`/organization/organization-create-update`}
-                  className={`text-sm md:text-base underline font-medium rounded-md py-2 px-5 ${
-                    darkMode ? "text-blue-400" : "text-blue-700"
-                  }`}
-                >
-                  Create Organization
-                </Link>
-              </div>
-            </div>
-          ) : (
-            <>
-              <div className="flex justify-start p-5">
-                <select
-                  value={selectedOrganization}
-                  onChange={(e) => setSelectedOrganization(e.target.value)}
-                  className={`${
-                    darkMode
-                      ? "bg-slate-700 text-white"
-                      : "bg-slate-200 text-black"
-                  } p-2 rounded-lg`}
-                >
-                  <option value="unassigned">
-                    Unassigned SubOrganizations
+                <option value="unassigned">Unassigned SubOrganizations</option>
+
+                {AllOrganizations?.map((org) => (
+                  <option key={org?.organizationId} value={org?.organizationId}>
+                    {org?.organizationName}
                   </option>
-
-                  {AllOrganizations.map((org) => (
-                    <option
-                      key={org?.organizationId}
-                      value={org?.organizationId}
-                    >
-                      {org.organizationName}
-                    </option>
-                  ))}
-                </select>
+                ))}
+              </select>
+            </div>
+            {/* Section 3 */}
+            {AllSubOrganization?.length === 0 ? (
+              <div>
+                <h1
+                  data-testid="No Departments Found"
+                  className="text-center text-2xl mt-10"
+                >
+                  No SubOrganization Found
+                </h1>
               </div>
-              {/* Section 3 */}
-              {AllSubOrganization?.length === 0 ? (
-                <div>
-                  <h1
-                    data-testid="No Departments Found"
-                    className="text-center text-2xl mt-10"
-                  >
-                    No SubOrganization Found
-                  </h1>
-                </div>
-              ) : (
-                <div className="p-5">
-                  <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
-                    <table className="min-w-full text-sm text-left">
-                      <thead
-                        className={`${
-                          darkMode
-                            ? "bg-slate-700 text-white"
-                            : "bg-slate-200 text-black"
-                        } text-xs uppercase`}
-                      >
-                        <tr>
+            ) : (
+              <div className="p-5">
+                <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
+                  <table className="min-w-full text-sm text-left">
+                    <thead
+                      className={`${
+                        darkMode
+                          ? "bg-slate-700 text-white"
+                          : "bg-slate-200 text-black"
+                      } text-xs uppercase`}
+                    >
+                      <tr>
+                        {selectedOrganization == "unassigned" && (
+                          <th
+                            scope="col"
+                            className="px-6 py-3"
+                            data-testid="Department-Description-header"
+                          >
+                            Sub Organization Id
+                          </th>
+                        )}
+                        <th
+                          scope="col"
+                          className="px-6 py-3"
+                          data-testid="Department-Name-header"
+                        >
+                          SubOrganization Name
+                        </th>
+                        {AssignOrganizationHeaderFlag ? (
+                          <th
+                            scope="col"
+                            className="px-6 py-3"
+                            data-testid="Department-Description-header"
+                          >
+                            Unassign Organization
+                          </th>
+                        ) : (
+                          <th
+                            scope="col"
+                            className="px-6 py-3"
+                            data-testid="Department-Description-header"
+                          >
+                            Assign Organization
+                          </th>
+                        )}
+                        <th
+                          scope="col"
+                          className="px-6 py-3"
+                          data-testid="action-header"
+                        >
+                          Action
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {AllSubOrganization?.map((subOrganization, index) => (
+                        <tr
+                          key={subOrganization.branchId}
+                          className={
+                            index % 2 === 0
+                              ? darkMode
+                                ? "bg-slate-600 text-white"
+                                : "bg-white text-black"
+                              : darkMode
+                              ? "bg-slate-700 text-white"
+                              : "bg-gray-100 text-black"
+                          }
+                        >
                           {selectedOrganization == "unassigned" && (
-                            <th
-                              scope="col"
-                              className="px-6 py-3"
-                              data-testid="Department-Description-header"
-                            >
-                              Sub Organization Id
-                            </th>
-                          )}
-                          <th
-                            scope="col"
-                            className="px-6 py-3"
-                            data-testid="Department-Name-header"
-                          >
-                            SubOrganization Name
-                          </th>
-                          {AssignOrganizationHeaderFlag ? (
-                            <th
-                              scope="col"
-                              className="px-6 py-3"
-                              data-testid="Department-Description-header"
-                            >
-                              Unassign Organization
-                            </th>
-                          ) : (
-                            <th
-                              scope="col"
-                              className="px-6 py-3"
-                              data-testid="Department-Description-header"
-                            >
-                              Assign Organization
-                            </th>
-                          )}
-                          <th
-                            scope="col"
-                            className="px-6 py-3"
-                            data-testid="action-header"
-                          >
-                            Action
-                          </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {AllSubOrganization?.map((subOrganization, index) => (
-                          <tr
-                            key={subOrganization.branchId}
-                            className={
-                              index % 2 === 0
-                                ? darkMode
-                                  ? "bg-slate-600 text-white"
-                                  : "bg-white text-black"
-                                : darkMode
-                                ? "bg-slate-700 text-white"
-                                : "bg-gray-100 text-black"
-                            }
-                          >
-                            {selectedOrganization == "unassigned" && (
-                              <td className="px-6 py-4">
-                                {subOrganization.branchId}
-                              </td>
-                            )}
                             <td className="px-6 py-4">
-                              {subOrganization.branchName}
+                              {subOrganization.branchId}
                             </td>
-                            {AssignOrganizationHeaderFlag ? (
-                              <td className="px-6 py-4 ">
-                                <button
-                                  data-testid="unassign-button"
-                                  onClick={() =>
-                                    handleUnassignOrganization(
-                                      AccessToken,
-                                      selectedOrganization,
-                                      subOrganization.branchId
-                                    )
-                                  }
-                                  className="bg-yellow-500 text-black py-1 px-4 rounded"
-                                >
-                                  UNASSIGN
-                                </button>
-                              </td>
-                            ) : (
-                              <td className="px-6 py-4 ">
-                                <button
-                                  data-testid="assign-button"
-                                  onClick={() => {
-                                    setCurrentBranch(subOrganization);
-                                    setShowAssignDialog(true);
-                                  }}
-                                  className="bg-yellow-500 text-black py-1 px-4 rounded"
-                                >
-                                  ASSIGN
-                                </button>
-                              </td>
-                            )}
-
-                            <td className="px-6 py-4 flex gap-x-2">
+                          )}
+                          <td className="px-6 py-4">
+                            {subOrganization.branchName}
+                          </td>
+                          {AssignOrganizationHeaderFlag ? (
+                            <td className="px-6 py-4 ">
                               <button
-                                data-testid="editButton"
-                                className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
+                              // disabled={}
+                                data-testid="unassign-button"
                                 onClick={() =>
-                                  navigate(
-                                    `/suborganization/suborganization-create-update`,
-                                    {
-                                      state: {
-                                        isEditing: true,
-                                        subOrganization,
-                                        organizationId: selectedOrganization,
-                                      },
-                                    }
+                                  handleUnassignOrganization(
+                                    AccessToken,
+                                    selectedOrganization,
+                                    subOrganization.branchId
                                   )
                                 }
+                                className="bg-yellow-500 text-black py-1 px-4 rounded"
                               >
-                                <FaRegEdit />
+                                UNASSIGN
                               </button>
-                              <Link
-                                data-testid="delete-button"
-                                to="#"
-                                onClick={() =>
-                                  setConfirmationModal({
-                                    text1: "Are You Sure?",
-                                    text2:
-                                      "You want to Delete this SubOrganization. This SubOrganization may contain important Information. Deleting this SubOrganization will remove all the details associated with it.",
-                                    btn1Text: "Delete SubOrganization",
-                                    btn2Text: "Cancel",
-                                    btn1Handler: async () => {
-                                      const response = await dispatch(
-                                        deleteSubOrganisation(
-                                          AccessToken,
-                                          subOrganization.branchId
-                                        )
-                                      );
-                                      if (response?.status !== 200)
-                                        throw new Error(response.data.message);
-                                      toast.success(response?.data?.message);
-                                      // Fetch departments list based on the current selected organization
-                                      fetchSubOrganization(
-                                        selectedOrganization
-                                      );
-                                      setConfirmationModal(null);
-                                    },
-                                    btn2Handler: () =>
-                                      setConfirmationModal(null),
-                                  })
-                                }
-                                className="text-lg text-red-600 dark:text-red-500 hover:underline"
-                              >
-                                <RiDeleteBin6Line />
-                              </Link>
                             </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                          ) : (
+                            <td className="px-6 py-4 ">
+                              <button
+                                data-testid="assign-button"
+                                onClick={() => {
+                                  setCurrentBranch(subOrganization);
+                                  setShowAssignDialog(true);
+                                }}
+                                className="bg-yellow-500 text-black py-1 px-4 rounded"
+                              >
+                                ASSIGN
+                              </button>
+                            </td>
+                          )}
+
+                          <td className="px-6 py-4 flex gap-x-2">
+                            <button
+                              disabled={!hasUpdateBranchPrivilege}
+                              data-testid="editButton"
+                              className={`text-lg text-blue-600 dark:text-blue-500 hover:underline   ${
+                                !hasUpdateBranchPrivilege
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                              onClick={() =>
+                                navigate(
+                                  `/suborganization/suborganization-create-update`,
+                                  {
+                                    state: {
+                                      isEditing: true,
+                                      subOrganization,
+                                      organizationId: selectedOrganization,
+                                    },
+                                  }
+                                )
+                              }
+                            >
+                              <FaRegEdit />
+                            </button>
+                            <button
+                            disabled={!hasDeleteBranchPrivilege}
+                              data-testid="delete-button"
+                              onClick={() =>
+                                setConfirmationModal({
+                                  text1: "Are You Sure?",
+                                  text2:
+                                    "You want to Delete this SubOrganization. This SubOrganization may contain important Information. Deleting this SubOrganization will remove all the details associated with it.",
+                                  btn1Text: "Delete SubOrganization",
+                                  btn2Text: "Cancel",
+                                  btn1Handler: async () => {
+                                    const response = await dispatch(
+                                      deleteSubOrganisation(
+                                        AccessToken,
+                                        subOrganization.branchId
+                                      )
+                                    );
+                                    if (response?.status !== 200)
+                                      throw new Error(response.data.message);
+                                    toast.success(response?.data?.message);
+                                    // Fetch departments list based on the current selected organization
+                                    fetchSubOrganization(selectedOrganization);
+                                    setConfirmationModal(null);
+                                  },
+                                  btn2Handler: () => setConfirmationModal(null),
+                                })
+                              }
+                              className={`text-lg text-red-600 dark:text-red-500 hover:underline   ${
+                                !hasDeleteBranchPrivilege
+                                  ? "opacity-50 cursor-not-allowed"
+                                  : ""
+                              }`}
+                            >
+                              <RiDeleteBin6Line />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
-              )}
-            </>
-          )}
+              </div>
+            )}
+          </>
         </div>
       )}
       {confirmationModal && <ConfirmationModal modalData={confirmationModal} />}
@@ -468,16 +458,17 @@ const SubOrganizationList = () => {
               </label>
               <select
                 id="organization-select"
+                disabled={AllOrganizations?.length==0}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 text-white"
                     : "bg-white border-gray-300 text-gray-700"
-                } max-h-60 overflow-y-auto`} // Apply max-height and scrolling
+                } max-h-60 overflow-y-auto  `} // Apply max-height and scrolling
                 value={selectedAssignOrganization}
                 onChange={(e) => setSelectedAssignOrganization(e.target.value)}
               >
                 <option value="">Select Organization</option>
-                {AllOrganizations.map((org) => (
+                {AllOrganizations?.map((org) => (
                   <option key={org?.organizationId} value={org?.organizationId}>
                     {org.organizationName}
                   </option>

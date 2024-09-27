@@ -20,6 +20,15 @@ import ConfirmationModal from "../../../../common/ConfirmationModal";
 import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice";
 import { setStep } from "../../../../../slices/employeeSlice";
+import {
+  hasCreateDepartmentAttributePrivilege,
+  hasDeleteDepartmentAttributePrivilege,
+  hasGetAllDepartmentAttributesPrivilege,
+  hasGetAllOrganizationsPrivilege,
+  hasSearchEmployeeByNamePrivilege,
+  hasUpdateDepartmentAttributePrivilege,
+  hasUpdateDepartmentPrivilege,
+} from "../../../../../utils/privileges";
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -91,24 +100,6 @@ const CreateUpdateDepartment = () => {
 
   console.log(isEditing);
 
-  const fetchSubOrganizationList = async (orgId) => {
-    console.log("org id", orgId);
-
-    try {
-      dispatch(setLoading(true));
-
-      const res = await dispatch(getSubOrganizationList(AccessToken));
-      console.log(res, "sub org response");
-
-      dispatch(setSubOrganization(res?.data?.Branches?.content));
-
-      dispatch(setLoading(false));
-    } catch (error) {
-      console.error("Error fetching departments", error);
-      dispatch(setLoading(false));
-    }
-  };
-
   useEffect(() => {
     dispatch(setStep(1));
   }, [dispatch]);
@@ -117,9 +108,11 @@ const CreateUpdateDepartment = () => {
     const fetchOrganizationList = async () => {
       try {
         dispatch(setLoading(true));
-        const res = await dispatch(getOrganisation(AccessToken));
-        dispatch(setOrganization(res?.data?.content));
-        dispatch(setLoading(false));
+        if (hasGetAllOrganizationsPrivilege) {
+          const res = await dispatch(getOrganisation(AccessToken));
+          dispatch(setOrganization(res?.data?.content));
+          dispatch(setLoading(false));
+        }
       } catch (error) {
         console.error("Error fetching organizations", error);
         dispatch(setLoading(false));
@@ -127,7 +120,6 @@ const CreateUpdateDepartment = () => {
     };
 
     fetchOrganizationList();
-    fetchSubOrganizationList();
   }, [dispatch, AccessToken]);
 
   useEffect(() => {
@@ -175,8 +167,10 @@ const CreateUpdateDepartment = () => {
   }, [isEditing, department, departmentAttribute, setValue, reset]);
 
   async function getRes() {
-    const res = await dispatch(DepartmentAttributeslist(AccessToken));
-    setDepartmentAttributes(res?.data);
+    if (hasGetAllDepartmentAttributesPrivilege) {
+      const res = await dispatch(DepartmentAttributeslist(AccessToken));
+      setDepartmentAttributes(res?.data);
+    }
   }
 
   useEffect(() => {
@@ -202,7 +196,7 @@ const CreateUpdateDepartment = () => {
     const formData = {
       department: trimmedDepartmentName,
       description: trimmedDescription,
-      managerId: selectedManager?.userId || null,
+      managerId: selectedManager?.employeeId || null,
       organizationId: data?.organization,
       branchId: data?.subOrganization,
       AccessToken,
@@ -218,20 +212,21 @@ const CreateUpdateDepartment = () => {
         navigate("/department/department-list", {
           state: {
             updatedDepartment: true,
-            organizationId: selectedOrganization,
+            organizationId: data?.organization,
           },
         });
       } else {
-        const response=await dispatch(addDepartment(formData));
-        if(response?.status==201) {
+        const response = await dispatch(addDepartment(formData));
+        if (response?.status == 201) {
+          console.log(selectedOrganization, "selectedorg");
+
           navigate("/department/department-list", {
             state: {
               updatedDepartment: false,
-              organizationId: selectedOrganization,
+              organizationId: data?.organization,
             },
           });
         }
- 
       }
     } catch (error) {
       console.error("Error during department submission:", error);
@@ -271,7 +266,6 @@ const CreateUpdateDepartment = () => {
     setSelectedManager(null);
     debounceSearch(e.target.value);
   };
-
 
   const handleSelectManager = (manager) => {
     if (selectedManager?.userId === manager.userId) {
@@ -359,43 +353,22 @@ const CreateUpdateDepartment = () => {
         </div>
       </div>
       <div className="container mx-auto mt-8">
-      <button
-    onClick={() => setIsAttribute(true)}  // Change the state to show the SubOrganizationAttribute
-    className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
-      ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
-      hover:scale-95 transition-all duration-200 `}
-  >
-    Add Attributes
-  </button>
-        {AllOrganizations && AllOrganizations.length === 0 ? (
-          <div className="p-5 mt-32 flex flex-col items-center justify-center">
-            <div
-              className={`text-xl font-semibold ${
-                darkMode ? " text-orange-400" : "text-slate-600"
-              }`}
-            >
-              No Organizations Available
-            </div>
-            <p
-              className={`text-center mt-4 ${
-                darkMode ? "text-white" : "text-gray-700"
-              }`}
-            >
-              You need to create an organization before adding a department.
-            </p>
-            <div className="flex justify-center">
-              <Link
-                to={`/organization/organization-create-update`}
-                className={`  text-sm md:text-base underline font-medium  
-                rounded-md py-2 px-5 ${
-                  darkMode ? " text-blue-400" : "text-blue-700"
-                }`}
-              >
-                Create Organization
-              </Link>
-            </div>
-          </div>
-        ) : isAttribute && !isEditing ? (
+        <button
+          disabled={!hasCreateDepartmentAttributePrivilege}
+          onClick={() => setIsAttribute(true)}
+          className={`w-[220px] py-2 text-md font-medium rounded-md mb-4 
+    ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
+    hover:scale-95 transition-all duration-200 
+    ${
+      !hasCreateDepartmentAttributePrivilege
+        ? "opacity-50 cursor-not-allowed"
+        : ""
+    }`}
+        >
+          Manage Attributes
+        </button>
+
+        {isAttribute && !isEditing ? (
           <DepartmentAttributes
             NextHandler={() => {
               setIsAttribute(false);
@@ -421,12 +394,16 @@ const CreateUpdateDepartment = () => {
                   Select Organization
                 </label>
                 <select
+                  disabled={!hasGetAllOrganizationsPrivilege}
                   id="organization"
                   {...register("organization")}
                   className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-white"
                       : "bg-white text-gray-700"
+                  }  ${
+                    !hasGetAllOrganizationsPrivilege &&
+                    "cursor-not-allowed opacity-50"
                   }`}
                 >
                   <option value="">Select Organization</option>
@@ -512,84 +489,87 @@ const CreateUpdateDepartment = () => {
               )}
             </div>
             <div className="mb-4">
-              <label
-                htmlFor="employeeSearch"
-                className={`block text-sm font-bold mb-2 ${
-                  darkMode ? "text-white" : "text-gray-700"
-                }`}
-              >
-                Add Manager<sup className="text-red-900 font-bold">*</sup>
-              </label>
-              <input
-                data-testid="employeeSearch"
-                type="text"
-                id="employeeSearch"
-                placeholder="Search employee for adding as manager.."
-                onChange={handleInputChange}
-                className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                  darkMode
-                    ? "bg-gray-700 border-gray-600 text-white"
-                    : "bg-white text-gray-700"
-                }`}
-                defaultValue={
-                  isEditing && department?.managerFirstName
-                    ? `${department.managerFirstName} ${department.managerLastName}`
-                    : ""
-                }
-              />
-            </div>
-            {showCheckbox && searchResults?.length > 0 ? (
-              <div className="mb-4">
-                {searchResults.slice(0, 1).map((result) => (
-                  <div key={result.userId} className="flex items-center mb-2">
-                    <input
-                      type="checkbox"
-                      id={`employee_${result.userId}`}
-                      name="selectedEmployee"
-                      required
-                      value={result?.userId}
-                      checked={selectedManager?.userId === result.userId}
-                      onChange={() => handleSelectManager(result)}
-                      className="mr-2"
-                    />
-                    <label
-                      htmlFor={`employee_${result.userId}`}
-                      className={`text-sm font-semibold ${
-                        darkMode ? "text-white" : "text-gray-700"
-                      }`}
-                      data-testid={`search-result-item-label-${result.userId}`}
-                    >
-                      {result.firstName} {result.lastName}
-                    </label>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              noSearch && (
-                <div className="mb-4">
-                  <p className="text-red-500 text-sm font-semibold">
-                    No employees found with the given search term.
-                  </p>
-                </div>
-              )
-            )}
-            {selectedManager && (
-              <div className="mb-4">
-                <div className="flex items-center">
-                  <p className="text-sm font-semibold mr-2">
-                    Selected Manager: {selectedManager.firstName}{" "}
-                    {selectedManager.lastName}
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedManager(null)}
-                    className="text-red-500 text-sm"
-                  >
-                    Clear
-                  </button>
-                </div>
-              </div>
-            )}
+  <label
+    htmlFor="employeeSearch"
+    className={`block text-sm font-bold mb-2 ${darkMode ? "text-white" : "text-gray-700"}`}
+  >
+    Add Manager<sup className="text-red-900 font-bold">*</sup>
+  </label>
+  <input
+    data-testid="employeeSearch"
+    type="text"
+    id="employeeSearch"
+    placeholder="Search employee for adding as manager.."
+    onChange={handleInputChange}
+    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+      darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"
+    }`}
+    defaultValue={
+      isEditing && department?.managerFirstName
+        ? `${department.managerFirstName} ${department.managerLastName}`
+        : ""
+    }
+    disabled={!hasSearchEmployeeByNamePrivilege}
+  />
+</div>
+
+{!hasSearchEmployeeByNamePrivilege ? (
+  <div className="mb-4">
+    <p className="text-red-500 text-sm font-semibold">
+      You do not have the privilege to search for employees.
+    </p>
+  </div>
+) : showCheckbox && searchResults?.length > 0 ? (
+  <div className="mb-4">
+    {searchResults.slice(0, 1).map((result) => (
+      <div key={result.employeeId} className="flex items-center mb-2">
+        <input
+          type="checkbox"
+          id={`employee_${result.employeeId}`}
+          name="selectedEmployee"
+          required
+          value={result?.employeeId}
+          checked={selectedManager?.employeeId === result.employeeId}
+          onChange={() => handleSelectManager(result)}
+          className="mr-2"
+        />
+        <label
+          htmlFor={`employee_${result.userId}`}
+          className={`text-sm font-semibold ${darkMode ? "text-white" : "text-gray-700"}`}
+          data-testid={`search-result-item-label-${result.employeeId}`}
+        >
+          {result.firstName} {result.lastName}
+        </label>
+      </div>
+    ))}
+  </div>
+) : (
+  noSearch && (
+    <div className="mb-4">
+      <p className="text-red-500 text-sm font-semibold">
+        No employees found with the given search term.
+      </p>
+    </div>
+  )
+)}
+
+{selectedManager && (
+  <div className="mb-4">
+    <div className="flex items-center">
+      <p className="text-sm font-semibold mr-2">
+        Selected Manager: {selectedManager.firstName} {selectedManager.lastName}
+      </p>
+      <button
+        type="button"
+        onClick={() => setSelectedManager(null)}
+        className="text-red-500 text-sm"
+      >
+        Clear
+      </button>
+    </div>
+  </div>
+)}
+
             {departmentAttribute &&
               departmentAttribute.map((attribute) => (
                 <div className="mb-4" key={attribute.attributeId}>
@@ -620,20 +600,30 @@ const CreateUpdateDepartment = () => {
                   )}
                 </div>
               ))}
-            <button
-              type="submit"
-              className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${
-                loading ? "bg-slate-900" : "bg-blue-700"
-              } ${
-                darkMode ? "text-white" : "text-white"
-              } hover:scale-95 transition-all duration-200`}
-            >
-              {isEditing ? "Update Department" : "Create Department"}
-            </button>
+
+<div className="flex justify-between  gap-3">
+  <button
+    type="submit"
+    className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${
+      loading ? "bg-slate-900" : "bg-blue-700"
+    } ${darkMode ? "text-white" : "text-white"} hover:scale-95 transition-all duration-200`}
+  >
+    {isEditing ? "Update Department" : "Create Department"}
+  </button>
+  
+  <button
+    type="button"
+    onClick={() => navigate('/department/department-list')} // Replace with your navigation function
+    className="text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 bg-gray-400 text-white hover:bg-gray-500 transition-all duration-200"
+  >
+    Cancel
+  </button>
+</div>
+
+
           </form>
         )}
       </div>
-
     </div>
   );
 };

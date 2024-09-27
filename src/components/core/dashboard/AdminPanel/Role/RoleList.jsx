@@ -14,6 +14,7 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import toast from "react-hot-toast";
 import { setRoles, setLoading } from "../../../../../slices/roleSlice";
 import { setStep } from "../../../../../slices/employeeSlice";
+import { hasCreateRolePrivilege, hasDeleteRolePrivilege, hasUpdateRolePrivilege } from "../../../../../utils/privileges";
 
 const RoleList = () => {
   const dispatch = useDispatch();
@@ -50,10 +51,6 @@ const RoleList = () => {
   const handleEdit = (role) => {
     navigate("/role/role-create-update", { state: { isEditing: true, role } });
   };
-
-  function refreshPage() {
-    window.location.reload(false);
-  }
 
   return (
     <div className={` mb-2 rounded-md ${darkMode ? "text-white" : ""}`}>
@@ -93,19 +90,22 @@ const RoleList = () => {
             </div>
           </div>
           <div className="m-5 flex items-center justify-between rounded p-5">
-            <Link to="/role/role-create-update">
-              <div
-                className={`flex items-center ${
-                  darkMode ? "primary-gradient" : ""
-                } text-white gap-x-1 bg-red-600 w-fit p-2 rounded-lg`}
-              >
-                <span>
-                  <HiOutlinePlusCircle />
-                </span>
-                <button>New Role</button>
-              </div>
+            <Link
+              to={hasCreateRolePrivilege ? "/role/role-create-update" : "#"}
+              className={`flex items-center ${
+                darkMode ? "primary-gradient" : ""
+              } text-white gap-x-1 bg-red-600 w-fit p-2 rounded-lg ${
+                !hasCreateRolePrivilege ? "opacity-50 cursor-not-allowed" : ""
+              }`}
+              onClick={(e) => !hasCreateRolePrivilege && e.preventDefault()} // Prevent navigation if no privilege
+            >
+              <span>
+                <HiOutlinePlusCircle />
+              </span>
+              <button disabled={!hasCreateRolePrivilege}>New Role</button>
             </Link>
           </div>
+
           <div className="p-5">
             {roles?.length > 0 ? (
               <div className="relative overflow-x-auto shadow-md rounded-md">
@@ -174,20 +174,22 @@ const RoleList = () => {
                           </td>
                           <td className="px-6 py-4 flex gap-x-1">
                             <button
+                            disabled={!hasUpdateRolePrivilege}
                               className="mr-2"
                               onClick={() => handleEdit(role)}
                             >
                               <FaRegEdit
                                 className={`${
                                   darkMode ? "text-yellow-500" : "text-blue-500"
-                                }`}
+                                } ${!hasUpdateRolePrivilege && "cursor-not-allowed opacity-50"}`}
                               />
                             </button>
                             <button
+                            disabled={!hasDeleteRolePrivilege}
                               data-testid="deleteBtn"
                               className={`${
                                 darkMode ? "text-red-400" : "text-red-600"
-                              } text-lg`}
+                              } text-lg  ${!hasDeleteRolePrivilege && "cursor-not-allowed opacity-50"}`}
                               onClick={() =>
                                 setConfirmationModal({
                                   text1: "Are you sure?",

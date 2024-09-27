@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { FaRegEdit } from "react-icons/fa";
+import { FaBan, FaRegEdit } from "react-icons/fa";
 import ConfirmationModal from "../../../../common/ConfirmationModal.jsx";
 import { HiOutlinePlusCircle } from "react-icons/hi";
 import { RiDeleteBin6Line } from "react-icons/ri";
@@ -25,13 +25,27 @@ import toast from "react-hot-toast";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice.js";
 import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI.js";
 import { setStep } from "../../../../../slices/employeeSlice.js";
-import { hasAddDepartmentPrivilege, hasGetAllBranchPrivilege } from "../../../../../utils/privileges.js";
+import {
+  hasAddDepartmentPrivilege,
+  hasAssignDepartmentToBranchPrivilege,
+  hasAssignDepartmentToOrganizationPrivilege,
+  hasDeleteDepartmentPrivilege,
+  hasGetAllBranchPrivilege,
+  hasGetAllOrganizationsPrivilege,
+  hasGetBranchesOfOrganizationPrivilege,
+  hasGetDepartmentsOfBranchPrivilege,
+  hasGetDepartmentsOfOrganizationPrivilege,
+  hasRemoveDepartmentFromBranchPrivilege,
+  hasRemoveDepartmentFromOrganizationPrivilege,
+  hasUpdateDepartmentPrivilege,
+} from "../../../../../utils/privileges.js";
+import { fetchSubOrganizationOrgSpecific } from "../../../../../utils/subOrg.functions.js";
 
 const DepartmentList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [selectedOrganization, setSelectedOrganization] =
     useState("unassigned");
-  const [updatedOrganization, setUpdatedOrganization] = useState("");
+  const [updatedOrganization, setUpdatedOrganization] = useState(null);
   const [selectedAssignOrganization, setSelectedAssignOrganization] =
     useState("");
 
@@ -53,21 +67,25 @@ const DepartmentList = () => {
   const [renderFlag, setRenderFlag] = useState(false);
   const [organizationError, setOrganizationError] = useState("");
   const [subOrganizationError, setSubOrganizationError] = useState("");
- const { user } = useSelector((state) => state.profile);
-
+  const { user } = useSelector((state) => state.profile);
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  console.log(AllDepartments);
-  console.log(AllOrganizations, "SELECTED ASSIGN ");
+  console.log("ALL SUB ORG", AllSubOrganization);
+  console.log("GETTING RE RENDERED");
 
-  console.log("user",user);
-  
-  
+  console.log("udpated sub org", updatedOrganization);
+
+  let orgId;
+  if (updatedOrganization) {
+    orgId = updatedOrganization;
+  }
+
+  console.log("org id global", orgId);
 
   const fetchOrganizationList = async () => {
-    if(hasAddDepartmentPrivilege) {
+    if (hasGetAllOrganizationsPrivilege) {
       try {
         dispatch(setLoading(true));
         const res = await dispatch(getOrganisation(AccessToken));
@@ -75,9 +93,8 @@ const DepartmentList = () => {
         dispatch(setOrganization(organizations));
         if (organizations.length > 0) {
           // Set the updated organization if available
-          const orgId = updatedOrganization;
           console.log(orgId, "orgid");
-  
+
           if (orgId) {
             setSelectedOrganization(orgId);
             fetchDepartmentsList(orgId);
@@ -91,9 +108,8 @@ const DepartmentList = () => {
         console.error("Error fetching AllOrganizations", error);
         dispatch(setLoading(false));
       }
-    };
     }
-
+  };
 
   const fetchDepartmentsList = async (orgId) => {
     try {
@@ -106,9 +122,11 @@ const DepartmentList = () => {
         dispatch(setDepartments(res?.data?.Departments?.content));
       } else {
         console.log("INSIDE ELSE", orgId);
-        const res = await dispatch(Departmentlist(AccessToken, orgId));
-        console.log("else", res);
-        dispatch(setDepartments(res?.data?.content));
+        if (hasGetDepartmentsOfOrganizationPrivilege) {
+          const res = await dispatch(Departmentlist(AccessToken, orgId));
+          console.log("else", res);
+          dispatch(setDepartments(res?.data?.content));
+        }
       }
       dispatch(setLoading(false));
     } catch (error) {
@@ -128,8 +146,8 @@ const DepartmentList = () => {
       );
       if (response?.status !== 200) throw new Error(response.data.message);
       toast.success(response?.data?.message);
-      setSelectedAssignOrganization("")
-      setRenderFlag(true);
+      setSelectedAssignOrganization("");
+      setRenderFlag(!renderFlag);
       setShowOrganizationAssignDialog(false); // Close dialog
     } catch (error) {
       console.error("Error assigning organization", error);
@@ -174,7 +192,8 @@ const DepartmentList = () => {
       toast.success(response?.data?.message);
       setShowSubOrganizationAssignDialog(false);
       setSelectedAssignSubOrganization("");
-      setRenderFlag(true);
+      fetchDepartmentsList(selectedOrganization);
+      // setRenderFlag(!renderFlag);
     } catch (error) {
       console.error("Error assigning organization", error);
       toast.error("Failed to assign organization");
@@ -199,39 +218,54 @@ const DepartmentList = () => {
       toast.error("Failed to unassign organization");
     }
   };
+
+  console.log(hasGetAllOrganizationsPrivilege);
+
   const fetchSubOrganization = async (orgId) => {
-   if(hasGetAllBranchPrivilege) {
-    try {
-      dispatch(setLoading(true));
+    if (hasGetBranchesOfOrganizationPrivilege) {
+      try {
+        dispatch(setLoading(true));
+        if (selectedOrganization != "unassigned") {
+          console.log("department selected", selectedOrganization);
+          if (hasGetDepartmentsOfOrganizationPrivilege) {
+            const res = await dispatch(
+              fetchSubOrganizationOrgSpecific(
+                dispatch,
+                AccessToken,
+                selectedOrganization
+              )
+            );
+            console.log(res, "sub org response");
+            dispatch(setSubOrganization(res?.data?.BranchList));
+          }
+        } else {
+          const res = await dispatch(getSubOrganizationList(AccessToken));
+          console.log(res, "sub org response");
 
-      const res = await dispatch(getSubOrganizationList(AccessToken));
-      console.log(res, "sub org response");
+          dispatch(setSubOrganization(res?.data?.Branches?.content));
+        }
 
-      dispatch(setSubOrganization(res?.data?.Branches?.content));
-
-      dispatch(setLoading(false));
-    } catch (error) {
-      console.error("Error fetching departments", error);
-      dispatch(setLoading(false));
+        dispatch(setLoading(false));
+      } catch (error) {
+        console.error("Error fetching departments", error);
+        dispatch(setLoading(false));
+      }
     }
-   }
-
   };
 
-  
   useEffect(() => {
     fetchSubOrganization();
     if (location.state?.updatedDepartment) {
+      console.log("here ? 2");
       setUpdatedOrganization(location.state.organizationId);
     } else if (location.state?.updatedDepartment !== undefined) {
+      console.log("here ?", location.state.organizationId);
       setUpdatedOrganization(location.state.organizationId);
-      // Reload departments or show updated message
     }
     fetchOrganizationList();
-  }, [dispatch, AccessToken, location.state, updatedOrganization]);
+  }, [dispatch, updatedOrganization, renderFlag]);
 
   console.log(renderFlag);
-  
 
   useEffect(() => {
     console.log("inside  useeffeccttt");
@@ -326,24 +360,45 @@ const DepartmentList = () => {
             </div>
           </div>
           {/* Section 2 */}
-          <div className="m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5">
-  <Link
-    to={hasAddDepartmentPrivilege ? "/department/department-create-update" : "#"}
-    className={`flex items-center gap-x-1 ${
-      darkMode ? "primary-gradient" : "bg-red-600"
-    } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white ${
-      hasAddDepartmentPrivilege ? "" : "cursor-not-allowed opacity-50"
-    }`}
-    onClick={(e) => {
-      if (!hasAddDepartmentPrivilege) e.preventDefault(); // Prevent navigation if no privilege
-    }}
-  >
-    <span>
-      <HiOutlinePlusCircle />
-    </span>
-    <button disabled={!hasAddDepartmentPrivilege}>Add Department</button>
-  </Link>
-</div>
+          <div
+            className={`m-5 flex flex-col lg:flex-row items-start lg:items-center justify-between rounded p-5   ${
+              hasAddDepartmentPrivilege ? "" : "cursor-not-allowed opacity-50"
+            }`}
+          >
+            <Link
+              to={
+                hasAddDepartmentPrivilege
+                  ? "/department/department-create-update"
+                  : "#"
+              }
+              className={`flex items-center gap-x-1 ${
+                darkMode ? "primary-gradient" : "bg-red-600"
+              } w-fit p-2 rounded-lg mb-3 lg:mb-0 text-white`}
+              onClick={(e) => {
+                if (!hasAddDepartmentPrivilege) e.preventDefault(); // Prevent navigation if no privilege
+              }}
+            >
+              <span
+                className={`${
+                  hasAddDepartmentPrivilege
+                    ? ""
+                    : "cursor-not-allowed opacity-50"
+                }`}
+              >
+                <HiOutlinePlusCircle />
+              </span>
+              <button
+                className={`${
+                  hasAddDepartmentPrivilege
+                    ? ""
+                    : "cursor-not-allowed opacity-50"
+                }`}
+                disabled={!hasAddDepartmentPrivilege}
+              >
+                Add Department
+              </button>
+            </Link>
+          </div>
           {AllOrganizations?.content?.length === 0 ? (
             <div className="p-5 mt-32 flex flex-col items-center justify-center">
               <div
@@ -374,26 +429,34 @@ const DepartmentList = () => {
           ) : (
             <>
               <div className="flex justify-start p-5">
-              <select
-  value={selectedOrganization}
-  onChange={(e) => setSelectedOrganization(e.target.value)}
-  disabled={AllOrganizations?.length === 0 || AllOrganizations == undefined}
-  className={`${
-    darkMode ? "bg-slate-700 text-white" : "bg-slate-200 text-black"
-  } p-2 rounded-lg ${
-    AllOrganizations?.length === 0 || AllOrganizations == undefined
-      ? "cursor-not-allowed"
-      : ""
-  }`}
->
-  <option value="unassigned">Unassigned Departments</option>
-  {AllOrganizations?.map((org) => (
-    <option key={org?.organizationId} value={org?.organizationId}>
-      {org.organizationName}
-    </option>
-  ))}
-</select>
-
+                <select
+                  value={selectedOrganization}
+                  onChange={(e) => setSelectedOrganization(e.target.value)}
+                  disabled={
+                    AllOrganizations?.length === 0 ||
+                    AllOrganizations == undefined
+                  }
+                  className={`${
+                    darkMode
+                      ? "bg-slate-700 text-white"
+                      : "bg-slate-200 text-black"
+                  } p-2 rounded-lg ${
+                    AllOrganizations?.length === 0 ||
+                    AllOrganizations == undefined
+                      ? "cursor-not-allowed"
+                      : ""
+                  }`}
+                >
+                  <option value="unassigned">Unassigned Departments</option>
+                  {AllOrganizations?.map((org) => (
+                    <option
+                      key={org?.organizationId}
+                      value={org?.organizationId}
+                    >
+                      {org.organizationName}
+                    </option>
+                  ))}
+                </select>
               </div>
               {/* Section 3 */}
               {AllDepartments?.length === 0 ? (
@@ -514,7 +577,14 @@ const DepartmentList = () => {
                                       department.departmentId
                                     )
                                   }
-                                  className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                  className={`bg-yellow-500 text-black py-1 px-4 rounded ${
+                                    !hasRemoveDepartmentFromOrganizationPrivilege
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                  disabled={
+                                    !hasRemoveDepartmentFromOrganizationPrivilege
+                                  } // Disable if privilege is not present
                                 >
                                   UNASSIGN
                                 </button>
@@ -527,7 +597,14 @@ const DepartmentList = () => {
                                     setCurrentDepartment(department);
                                     setShowOrganizationAssignDialog(true);
                                   }}
-                                  className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                  className={`bg-yellow-500 text-black py-1 px-4 rounded ${
+                                    !hasAssignDepartmentToOrganizationPrivilege
+                                      ? "opacity-50 cursor-not-allowed"
+                                      : ""
+                                  }`}
+                                  disabled={
+                                    !hasAssignDepartmentToOrganizationPrivilege
+                                  } // Disable if privilege is not present
                                 >
                                   ASSIGN
                                 </button>
@@ -539,6 +616,9 @@ const DepartmentList = () => {
                               department?.branches.length > 0 ? (
                                 <td className="px-6 py-4">
                                   <button
+                                    disabled={
+                                      !hasRemoveDepartmentFromBranchPrivilege
+                                    }
                                     data-testid="unassign-button"
                                     onClick={() =>
                                       handleUnassignSubOrganization(
@@ -547,7 +627,10 @@ const DepartmentList = () => {
                                         department.departmentId
                                       )
                                     }
-                                    className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                    className={`bg-yellow-500 text-black py-1 px-4 rounded ${
+                                      !hasRemoveDepartmentFromBranchPrivilege &&
+                                      "cursor-not-allowed opacity-50"
+                                    }`}
                                   >
                                     UNASSIGN
                                   </button>
@@ -555,12 +638,19 @@ const DepartmentList = () => {
                               ) : (
                                 <td className="px-6 py-4">
                                   <button
+                                    disabled={
+                                      !hasAssignDepartmentToBranchPrivilege
+                                    }
                                     data-testid="assign-button"
                                     onClick={() => {
                                       setCurrentDepartment(department);
                                       setShowSubOrganizationAssignDialog(true);
+                                      fetchSubOrganization();
                                     }}
-                                    className="bg-yellow-500 text-black py-1 px-4 rounded"
+                                    className={`bg-yellow-500 text-black py-1 px-4 rounded ${
+                                      !hasAssignDepartmentToBranchPrivilege &&
+                                      "cursor-not-allowed opacity-50"
+                                    }`}
                                   >
                                     ASSIGN
                                   </button>
@@ -571,31 +661,38 @@ const DepartmentList = () => {
                             <td className="px-6 py-4 flex items-center justify-between w-1/2 gap-x-2">
                               <button
                                 data-testid="editButton"
-                                className="text-lg text-blue-600 dark:text-blue-500 hover:underline"
-                                onClick={() =>
-                                  navigate(
-                                    `/department/department-create-update`,
-                                    {
-                                      state: {
-                                        isEditing: true,
-                                        department,
-                                        organizationId: selectedOrganization,
-                                      },
-                                    }
-                                  )
-                                }
+                                className={`text-lg text-blue-600 ${
+                                  hasUpdateDepartmentPrivilege
+                                    ? "text-blue-600 hover:underline"
+                                    : " opacity-50 cursor-not-allowed"
+                                }`}
+                                onClick={() => {
+                                  if (hasUpdateDepartmentPrivilege) {
+                                    navigate(
+                                      `/department/department-create-update`,
+                                      {
+                                        state: {
+                                          isEditing: true,
+                                          department,
+                                          organizationId: selectedOrganization,
+                                        },
+                                      }
+                                    );
+                                  }
+                                }}
+                                disabled={!hasUpdateDepartmentPrivilege}
                               >
                                 <FaRegEdit />
                               </button>
-
-                              <Link
+                              <button
+                                disabled={!hasDeleteDepartmentPrivilege}
                                 data-testid="delete-button"
                                 to="#"
-                                onClick={() =>
+                                onClick={() => {
                                   setConfirmationModal({
                                     text1: "Are You Sure?",
                                     text2:
-                                      "You want to Delete this Department. This Department may contain important Information. Deleting this department will remove all the details associated with it.",
+                                      "You want to delete this department. This department may contain important information. Deleting this department will remove all the details associated with it.",
                                     btn1Text: "Delete Department",
                                     btn2Text: "Cancel",
                                     btn1Handler: async () => {
@@ -616,12 +713,21 @@ const DepartmentList = () => {
                                     },
                                     btn2Handler: () =>
                                       setConfirmationModal(null),
-                                  })
-                                }
-                                className="text-lg text-red-600 dark:text-red-500 hover:underline"
+                                  });
+                                }}
+                                className={`text-red-600 text-lg   ${
+                                  hasDeleteDepartmentPrivilege
+                                    ? "text-red-600 text-lg"
+                                    : "opacity-50 cursor-not-allowed"
+                                }`}
+                                style={{
+                                  pointerEvents: hasDeleteDepartmentPrivilege
+                                    ? "auto"
+                                    : "none",
+                                }}
                               >
                                 <RiDeleteBin6Line />
-                              </Link>
+                              </button>
                             </td>
                           </tr>
                         ))}
@@ -656,12 +762,17 @@ const DepartmentList = () => {
                   darkMode
                     ? "bg-gray-700 border-gray-600 text-white"
                     : "bg-white border-gray-300 text-gray-700"
-                } max-h-60 overflow-y-auto`}
+                } max-h-60 overflow-y-auto  ${
+                  !hasGetAllOrganizationsPrivilege
+                    ? "text-blue-400 cursor-not-allowed"
+                    : "text-lg text-blue-600 dark:text-blue-500 hover:underline"
+                }`}
                 value={selectedAssignOrganization}
+                disabled={!hasGetAllOrganizationsPrivilege} // Disable the select field based on privilege
                 onChange={(e) => setSelectedAssignOrganization(e.target.value)}
               >
                 <option value="">Select Organization</option>
-                {AllOrganizations.map((org) => (
+                {AllOrganizations?.map((org) => (
                   <option key={org?.organizationId} value={org?.organizationId}>
                     {org.organizationName}
                   </option>
@@ -717,23 +828,28 @@ const DepartmentList = () => {
                 Select Sub Organization
               </label>
               <select
+                disabled={!hasGetBranchesOfOrganizationPrivilege}
                 id="sub-organization-select"
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 text-white"
                     : "bg-white border-gray-300 text-gray-700"
-                } max-h-60 overflow-y-auto`}
+                } max-h-60 overflow-y-auto   ${
+                  !hasGetBranchesOfOrganizationPrivilege &&
+                  "cursor-not-allowed opacity-50"
+                }`}
                 value={selectedAssignSubOrganization}
                 onChange={(e) =>
                   setSelectedAssignSubOrganization(e.target.value)
                 }
               >
                 <option value="">Select Sub Organization</option>
-                {AllSubOrganization.map((subOrg) => (
-                  <option key={subOrg?.branchId} value={subOrg?.branchId}>
-                    {subOrg.branchName}
-                  </option>
-                ))}
+                {AllSubOrganization &&
+                  AllSubOrganization?.map((subOrg) => (
+                    <option key={subOrg?.branchId} value={subOrg?.branchId}>
+                      {subOrg.branchName}
+                    </option>
+                  ))}
               </select>
               {subOrganizationError && (
                 <p className="text-red-500 text-md mt-2">
@@ -760,7 +876,10 @@ const DepartmentList = () => {
                 className={`py-2 px-4 rounded ${
                   darkMode ? "bg-gray-600 text-white" : "bg-gray-500 text-white"
                 }`}
-                onClick={() => setShowSubOrganizationAssignDialog(false)}
+                onClick={() => {
+                  setSubOrganizationError("");
+                  setShowSubOrganizationAssignDialog(false);
+                }}
               >
                 Cancel
               </button>

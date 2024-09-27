@@ -14,6 +14,14 @@ import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { setStep } from "../../../../../slices/employeeSlice";
+import {
+  hasCreateBranchAttributePrivilege,
+  hasDeleteBranchAttributePrivilege,
+  hasGetAllOrganizationAttributesPrivilege,
+  hasGetAllOrganizationsPrivilege,
+  hasGetBranchAttributePrivilege,
+  hasUpdateBranchAttributePrivilege,
+} from "../../../../../utils/privileges";
 
 const CreateUpdateSubOrganization = () => {
   const { darkMode } = useSelector((state) => state.theme);
@@ -49,7 +57,7 @@ const CreateUpdateSubOrganization = () => {
       }, {});
     return attributesObj;
   };
-  console.log(subOrganization);
+  console.log(AllOrganizations);
   useEffect(() => {
     if (isEditing && subOrganization) {
       setValue("branchName", subOrganization.branchName);
@@ -139,17 +147,21 @@ const CreateUpdateSubOrganization = () => {
   };
 
   async function getSubOrganizationAttributes() {
-    const res = await dispatch(getSubOrganisationAttributes(AccessToken));
-    setBranchAttributes(res?.data.branchAttributes);
-    return res?.data.branchAttributes;
+    if (hasGetBranchAttributePrivilege) {
+      const res = await dispatch(getSubOrganisationAttributes(AccessToken));
+      setBranchAttributes(res?.data.branchAttributes);
+      return res?.data.branchAttributes;
+    }
   }
 
   const fetchOrganizationList = async () => {
     try {
-      dispatch(setLoading(true));
-      const res = await dispatch(getOrganisation(AccessToken));
-      dispatch(setOrganization(res?.data?.content));
-      dispatch(setLoading(false));
+      if (hasGetAllOrganizationsPrivilege) {
+        dispatch(setLoading(true));
+        const res = await dispatch(getOrganisation(AccessToken));
+        dispatch(setOrganization(res?.data?.content));
+        dispatch(setLoading(false));
+      }
     } catch (error) {
       console.error("Error fetching organizations", error);
       dispatch(setLoading(false));
@@ -157,8 +169,6 @@ const CreateUpdateSubOrganization = () => {
   };
 
   useEffect(() => {
-    console.log("executed");
-    
     getSubOrganizationAttributes();
     fetchOrganizationList();
   }, [dispatch, AccessToken]);
@@ -166,8 +176,6 @@ const CreateUpdateSubOrganization = () => {
   useEffect(() => {
     dispatch(setStep(1));
   }, [dispatch]);
-
-
 
   return (
     <div
@@ -197,43 +205,20 @@ const CreateUpdateSubOrganization = () => {
         </div>
       </div>
       <div className={`container mx-auto mt-8`}>
-      <button
-    onClick={() => setIsAttribute(true)}  // Change the state to show the SubOrganizationAttribute
-    className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+        <button
+          disabled={!hasCreateBranchAttributePrivilege}
+          onClick={() => setIsAttribute(true)} // Change the state to show the SubOrganizationAttribute
+          className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
       ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
-      hover:scale-95 transition-all duration-200 `}
-  >
-    Add Attributes
-  </button>
-        {AllOrganizations && AllOrganizations.length === 0 ? (
-          <div className="p-5 mt-32 flex flex-col items-center justify-center">
-            <div
-              className={`text-xl font-semibold ${
-                darkMode ? " text-orange-400" : "text-slate-600"
-              }`}
-            >
-              No Organizations Available
-            </div>
-            <p
-              className={`text-center mt-4 ${
-                darkMode ? "text-white" : "text-gray-700"
-              }`}
-            >
-              You need to create an organization before adding a department.
-            </p>
-            <div className="flex justify-center">
-              <Link
-                to={`/organization/organization-create-update`}
-                className={`  text-sm md:text-base underline font-medium  
-                rounded-md py-2 px-5 ${
-                  darkMode ? " text-blue-400" : "text-blue-700"
-                }`}
-              >
-                Create Organization
-              </Link>
-            </div>
-          </div>
-        ) : isAttribute ? (
+      hover:scale-95 transition-all duration-200   ${
+        !hasCreateBranchAttributePrivilege
+          ? "opacity-50 cursor-not-allowed"
+          : ""
+      } `}
+        >
+          Manage Attributes
+        </button>
+        {isAttribute ? (
           <SubOrganizationAttribute
             NextHandler={() => {
               setIsAttribute(false);
@@ -259,6 +244,10 @@ const CreateUpdateSubOrganization = () => {
                   Select Organization
                 </label>
                 <select
+                  disabled={
+                    AllOrganizations?.length == 0 ||
+                    AllOrganizations == undefined
+                  }
                   id="organization"
                   {...register("organization")}
                   value={selectedOrganization}
@@ -269,7 +258,14 @@ const CreateUpdateSubOrganization = () => {
                     darkMode
                       ? "bg-gray-700 border-gray-600 text-white"
                       : "bg-white text-gray-700"
-                  }`}
+                  }
+                  ${
+                    AllOrganizations?.length == 0 ||
+                    AllOrganizations == undefined
+                      ? "opacity-50 cursor-not-allowed"
+                      : ""
+                  }
+                  `}
                 >
                   <option value="">Select Organization</option>
                   {AllOrganizations &&
@@ -346,18 +342,30 @@ const CreateUpdateSubOrganization = () => {
                   )}
                 </div>
               ))}
-            <button
-              type="submit"
-              className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${
-                loading ? "bg-slate-900" : "bg-blue-700"
-              } ${
-                darkMode ? "text-white" : "text-white"
-              } hover:scale-95 transition-all duration-200`}
-            >
-              {isEditing
-                ? "Update Sub Organization"
-                : "Create Sub Organization"}
-            </button>
+            <div className="flex justify-between gap-3">
+              <button
+                type="submit"
+                className={`flex-1 text-center text-sm md:text-base font-medium rounded-md px-3 py-2 mb-4 ${
+                  loading ? "bg-slate-900" : "bg-blue-700"
+                } ${
+                  darkMode ? "text-white" : "text-white"
+                } hover:scale-95 transition-all duration-200`}
+              >
+                {isEditing
+                  ? "Update Sub Organization"
+                  : "Create Sub Organization"}
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  navigate("/suborganization/suborganization-list")
+                }
+                className="flex-1 text-center text-sm md:text-base font-medium rounded-md py-2 mb-4 bg-gray-400 text-white hover:bg-gray-500 transition-all duration-200"
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         )}
       </div>

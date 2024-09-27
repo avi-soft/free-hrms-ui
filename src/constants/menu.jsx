@@ -213,6 +213,50 @@ const MenuItems = () => {
                 icon: <RiDashboardLine className="side-bar-item-icon" />,
             },
             {
+                key: "Organization",
+                label: t("Organization"),
+                isTitle: false,
+                icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+                children: [
+                    hasPrivilege("CREATE_ORGANIZATION") && {
+                        key: "NewOrganization",
+                        label: t("New Organization"),
+                        url: "/organization/organization-create-update",
+                        parentKey: "Organization",
+                        icon: <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />,
+                    },
+                    hasPrivilege("GET_ALL_ORGANIZATIONS") && {
+                        key: "OrganizationList",
+                        label: t("Organization List"),
+                        url: "/organization/organization-list",
+                        parentKey: "Organization",
+                        icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+                    },
+                ].filter(Boolean),
+            },
+            {
+                key: "SubOrganization",
+                label: t("SubOrganization"),
+                isTitle: false,
+                icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
+                children: [
+                    hasPrivilege("ADD_BRANCH") && {
+                        key: "NewSubOrganization",
+                        label: t("New SubOrganization"),
+                        url: "/suborganization/suborganization-create-update",
+                        parentKey: "SubOrganization",
+                        icon: <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />,
+                    },
+                    hasPrivilege("GET_ALL_BRANCH") && {
+                        key: "SubOrganizationList",
+                        label: t("SubOrganization List"),
+                        url: "/suborganization/suborganization-list",
+                        parentKey: "SubOrganization",
+                        icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
+                    },
+                ].filter(Boolean),
+            },
+            {
                 key: "Department",
                 label: t("Department"),
                 isTitle: false,
@@ -279,28 +323,6 @@ const MenuItems = () => {
                 ].filter(Boolean),
             },
             {
-                key: "Performance Review",
-                label: t("Performance Review"),
-                isTitle: false,
-                icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
-                children: [
-                    hasPrivilege("GET_ALL_PERFORMANCE_OF_EMPLOYEE") && {
-                        key: "PerformanceReviewList",
-                        label: t("Performance Review List"),
-                        url: "/performancereview/performancereview-list",
-                        parentKey: "Performance Review",
-                        icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
-                    },
-                    hasPrivilege("ADD_EMPLOYEE_PERFORMANCE") && {
-                        key: "NewPerformanceReview",
-                        label: t("New Performance Review"),
-                        url: "/performancereview/performancereview-create-update",
-                        parentKey: "Performance Review",
-                        icon: <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />,
-                    },
-                ].filter(Boolean),
-            },
-            {
                 key: "Leave",
                 label: t("Leave"),
                 isTitle: false,
@@ -321,29 +343,7 @@ const MenuItems = () => {
                         icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
                     },
                 ].filter(Boolean),
-            },
-            {
-                key: "Emergency Contacts",
-                label: t("Emergency Contacts"),
-                isTitle: false,
-                icon: <HiOutlineDocumentDuplicate className="side-bar-item-icon" />,
-                children: [
-                    hasPrivilege("ADD_EMERGENCY_CONTACT") && {
-                        key: "NewEmergencyContact",
-                        label: t("New Emergency Contact"),
-                        url: "/emergencycontact/emergencycontact-create-update",
-                        parentKey: "Emergency Contacts",
-                        icon: <AiOutlineUserAdd size={16} className="side-bar-subitem-icon" />,
-                    },
-                    hasPrivilege("GET_EMPLOYEE_EMERGENCY_CONTACT") && {
-                        key: "EmergencyContactList",
-                        label: t("Emergency Contact List"),
-                        url: "/emergencycontact/emergencycontact-list",
-                        parentKey: "Emergency Contacts",
-                        icon: <BsCircle size={16} className="side-bar-subitem-icon" />,
-                    },
-                ].filter(Boolean),
-            },
+            },    
         ];
     };
 

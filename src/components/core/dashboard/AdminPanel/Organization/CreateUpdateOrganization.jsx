@@ -16,6 +16,14 @@ import ConfirmationModal from "../../../../common/ConfirmationModal";
 import { FaTimesCircle } from "react-icons/fa";
 import { setStep } from "../../../../../slices/employeeSlice";
 import OrganizationAttributes from "./OrganizationAttribute";
+import {
+  hasCreateOrganizationAttributePrivilege,
+  hasCreateOrganizationPrivilege,
+  hasDeleteOrganizationAttributePrivilege,
+  hasGetAllOrganizationAttributesPrivilege,
+  hasUpdateOrganizationAttributePrivilege,
+  hasUploadOrganizationImagePrivilege,
+} from "../../../../../utils/privileges";
 
 const CreateUpdateOrganisation = () => {
   const { AccessToken } = useSelector((state) => state.auth);
@@ -46,13 +54,11 @@ const CreateUpdateOrganisation = () => {
   const [showLogoUploadDialog, setShowLogoUploadDialog] = useState(false);
   const [isAttribute, setIsAttribute] = useState(false);
   const [organizationAttributes, setOrganizationAttributes] = useState(null);
-
-
+  const [renderFlag, setRenderFlag] = useState(false);
   useEffect(() => {
     console.log("executed");
-    
-getRes()
-  }, [dispatch, AccessToken,navigate]);
+    getRes();
+  }, [dispatch, AccessToken, navigate]);
 
   useEffect(() => {
     dispatch(setStep(1));
@@ -76,20 +82,26 @@ getRes()
         });
       }
     } else {
+      console.log("inside else");
+
       reset();
       setSelectedImage(null);
       setExistingImage(null);
+      setFileError("");
     }
-  }, [isEditing, organization, organizationAttributes]);
+  }, [isEditing, organization, organizationAttributes, renderFlag]);
+
+  console.log(renderFlag);
 
   async function getRes() {
-    const res = await dispatch(getOrganisationAttributes(AccessToken));
-    console.log(res);
-    
-    setOrganizationAttributes(res?.data);
-    return res?.data
+    if (hasGetAllOrganizationAttributesPrivilege) {
+      const res = await dispatch(getOrganisationAttributes(AccessToken));
+      console.log(res);
+      setOrganizationAttributes(res?.data);
+      setRenderFlag(!renderFlag);
+      return res?.data;
+    }
   }
-
 
   const handleOrganizationSubmit = async (data) => {
     // Check for file errors before proceeding
@@ -113,20 +125,30 @@ getRes()
     // Append the organization data to the FormData object
     formData.append("organizationData", JSON.stringify(organizationData));
 
+
+    let removeImage; 
     // Append the logo image if one is selected
     if (selectedImage) {
       formData.append("file", selectedImage);
+    }else{
+      console.log("inside else")
+      removeImage=true
     }
-
+  
     try {
       let response;
       if (isEditing) {
+        // Pass removeImage as a separate variable
+
+        console.log(removeImage);
+        
         response = await dispatch(
           updateOrganisation(
             AccessToken,
             formData,
             navigate,
-            organization.organizationId
+            organization.organizationId,
+            removeImage // Send removeImage as a separate argument
           )
         );
       } else {
@@ -150,25 +172,24 @@ getRes()
   const handleFileChange = (e) => {
     if (!e.target.files[0]) return;
     const file = e.target.files[0];
-  
+
     // Validate file type and size
     const validTypes = ["image/jpeg", "image/jpg", "image/png"];
     if (!validTypes.includes(file.type)) {
       setFileError("Only JPEG and PNG images are allowed.");
-      setSelectedImage(file);  // Ensure this is null if invalid
+      setSelectedImage(file); // Ensure this is null if invalid
       return;
     }
     if (file.size > 5 * 1024 * 1024) {
       // 5MB limit
       setFileError("File size must not exceed 5MB.");
-      setSelectedImage(file);  // Ensure this is null if invalid
+      setSelectedImage(file); // Ensure this is null if invalid
       return;
     }
-  
+
     setFileError(""); // Clear error if file is valid
     setSelectedImage(file); // Update local state for selected image
   };
-  
 
   const handleRemoveImage = async () => {
     if (isEditing && existingImage) {
@@ -185,11 +206,10 @@ getRes()
       setSelectedImage(null);
       setFileError("");
     }
-    
+
     // Reset the file input so the same file can be selected again
     inputRef.current.value = null;
   };
-  
 
   return (
     <div
@@ -219,243 +239,264 @@ getRes()
         </div>
       </div>
       <div className={`container mx-auto mt-8`}>
-      <button
-    onClick={() => setIsAttribute(true)}  // Change the state to show the SubOrganizationAttribute
-    className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+        <button
+          disabled={!hasCreateOrganizationAttributePrivilege}
+          onClick={() => setIsAttribute(true)} // Change the state to show the SubOrganizationAttribute
+          className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
       ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
-      hover:scale-95 transition-all duration-200 ${fileError ? "cursor-not-allowed" : ""}`}
-  >
-    Add Attributes
-  </button>
+      hover:scale-95 transition-all duration-200 ${
+        fileError ? "cursor-not-allowed" : ""
+      }  ${
+            !hasCreateOrganizationAttributePrivilege
+              ? "opacity-50 cursor-not-allowed"
+              : ""
+          } `}
+        >
+          Manage Attributes
+        </button>
 
-
-   { isAttribute ? (
-  <OrganizationAttributes
-    NextHandler={() => {
-      setIsAttribute(false);
-      getRes();
-    }}
-  />
-)  :
-        <div className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${darkMode ? "bg-slate-600" : "bg-white"}`}>
-          <form role="form" onSubmit={handleSubmit(handleOrganizationSubmit)}>
-            {/* Logo Section */}
-            <div className="mb-4">
-              <div className="flex items-center">
-                <img
-                  src={
-                    selectedImage
-                      ? URL.createObjectURL(selectedImage)
-                      : existingImage || defaultImage
-                  }
-                  alt="Organization Logo"
-                  className="aspect-square rounded-full object-cover h-20"
-                />
-                <div className="w-[80%] flex gap-4 ml-5 flex-col">
-                  <p
-                    className={`font-normal text-lg ${
-                      darkMode ? "text-white" : "text-zinc-800"
-                    }`}
-                  >
-                    {isEditing
-                      ? "Edit Organization Logo"
-                      : "Add Organization Logo"}
-                  </p>
-                  <div className="flex items-center gap-4">
-                    <input
-                      data-testid="file-input"
-                      className="hidden"
-                      ref={inputRef}
-                      type="file"
-                      accept="image/*"
-                      onChange={handleFileChange}
+        {isAttribute ? (
+          <OrganizationAttributes
+            NextHandler={() => {
+              setIsAttribute(false);
+              getRes();
+            }}
+          />
+        ) : (
+          <div
+            className={`max-w-md mx-auto shadow-md rounded px-8 pt-6 pb-8 mb-4 ${
+              darkMode ? "bg-slate-600" : "bg-white"
+            }`}
+          >
+            <form role="form" onSubmit={handleSubmit(handleOrganizationSubmit)}>
+              {/* Logo Section */}
+              {hasUploadOrganizationImagePrivilege && (
+                <div className="mb-4">
+                  <div className="flex items-center">
+                    <img
+                      src={
+                        selectedImage
+                          ? URL.createObjectURL(selectedImage)
+                          : existingImage || defaultImage
+                      }
+                      alt="Organization Logo"
+                      className="aspect-square rounded-full object-cover h-20"
                     />
-                    <button
-                      type="button"
-                      onClick={() => inputRef.current.click()}
-                      className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
-                        darkMode
-                          ? "bg-slate-400 text-black"
-                          : "bg-gray-900 text-white"
-                      } py-1 px-5`}
-                      disabled={loading}
-                    >
-                      Select
-                    </button>
-                    {selectedImage || existingImage ? (
-                      <button
-                        type="button"
-                        onClick={handleRemoveImage}
-                        className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
-                          darkMode
-                            ? "bg-red-600 text-white"
-                            : "bg-red-500 text-white"
-                        } py-1 px-5`}
-                        disabled={loading}
+                    <div className="w-[80%] flex gap-4 ml-5 flex-col">
+                      <p
+                        className={`font-normal text-lg ${
+                          darkMode ? "text-white" : "text-zinc-800"
+                        }`}
                       >
-                        Remove
-                      </button>
-                    ) : null}
+                        {isEditing
+                          ? "Edit Organization Logo"
+                          : "Add Organization Logo"}
+                      </p>
+                      <div className="flex items-center gap-4">
+                        <input
+                          data-testid="file-input"
+                          className="hidden"
+                          ref={inputRef}
+                          type="file"
+                          accept="image/*"
+                          onChange={handleFileChange}
+                        />
+                        <button
+                          type="button"
+                          onClick={() => inputRef.current.click()}
+                          className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
+                            darkMode
+                              ? "bg-slate-400 text-black"
+                              : "bg-gray-900 text-white"
+                          } py-1 px-5`}
+                          disabled={loading}
+                        >
+                          Select
+                        </button>
+                        {selectedImage || existingImage ? (
+                          <button
+                            type="button"
+                            onClick={handleRemoveImage}
+                            className={`text-center text-sm md:text-base font-medium rounded-md leading-6 hover:scale-95 transition-all duration-200 ${
+                              darkMode
+                                ? "bg-red-600 text-white"
+                                : "bg-red-500 text-white"
+                            } py-1 px-5`}
+                            disabled={loading}
+                          >
+                            Remove
+                          </button>
+                        ) : null}
+                      </div>
+                      {fileError && (
+                        <p className="text-red-500 mt-1">{fileError}</p>
+                      )}
+                    </div>
                   </div>
-                  {fileError && (
-                    <p className="text-red-500 mt-1">{fileError}</p>
-                  )}
                 </div>
+              )}
+
+              {/* Organization Name */}
+              <div className="mb-4">
+                <label
+                  htmlFor="organizationName"
+                  className={`block text-gray-700 text-sm font-bold mb-2 ${
+                    darkMode ? "text-white" : ""
+                  }`}
+                >
+                  Organization Name
+                </label>
+                <input
+                  id="organizationName"
+                  type="text"
+                  placeholder="Organization Name..."
+                  {...register("organizationName", {
+                    required: "Organization Name is required",
+                    minLength: {
+                      value: 3,
+                      message:
+                        "Organization Name must be at least 3 characters",
+                    },
+                    maxLength: {
+                      value: 50,
+                      message:
+                        "Organization Name should not exceed 50 characters",
+                    },
+                    validate: {
+                      noNumbers: (value) =>
+                        !/\d/.test(value) ||
+                        "Organization Name must not contain numbers",
+                      noSpecialChars: (value) =>
+                        /^[a-zA-Z\s]+$/.test(value) ||
+                        "Organization Name must not contain special characters",
+                      noEmptyAfterTrim: (value) => {
+                        const trimmedValue = value.trim();
+                        return (
+                          trimmedValue !== "" ||
+                          "Organization Name can't be empty or just spaces."
+                        );
+                      },
+                      noExtraSpaces: (value) => {
+                        const trimmedValue = value.trim();
+                        return (
+                          !/\s{2,}/.test(trimmedValue) ||
+                          "Organization Name must not contain consecutive spaces"
+                        );
+                      },
+                    },
+                  })}
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
+                  }`}
+                />
+                {errors.organizationName && (
+                  <p className="text-red-500 mt-1">
+                    {errors.organizationName.message}
+                  </p>
+                )}
               </div>
-            </div>
 
-            {/* Organization Name */}
-            <div className="mb-4">
-              <label
-                htmlFor="organizationName"
-                className={`block text-gray-700 text-sm font-bold mb-2 ${
-                  darkMode ? "text-white" : ""
-                }`}
-              >
-                Organization Name
-                  
-              </label>
-              <input
-                id="organizationName"
-                type="text"
-                placeholder="Organization Name..."
-                {...register("organizationName", {
-                  required: "Organization Name is required",
-                  minLength: {
-                    value: 3,
-                    message: "Organization Name must be at least 3 characters",
-                  },
-                  maxLength: {
-                    value: 50,
-                    message:
-                      "Organization Name should not exceed 50 characters",
-                  },
-                  validate: {
-                    noNumbers: (value) =>
-                      !/\d/.test(value) ||
-                      "Organization Name must not contain numbers",
-                    noSpecialChars: (value) =>
-                      /^[a-zA-Z\s]+$/.test(value) ||
-                      "Organization Name must not contain special characters",
-                    noEmptyAfterTrim: (value) => {
-                      const trimmedValue = value.trim();
-                      return (
-                        trimmedValue !== "" ||
-                        "Organization Name can't be empty or just spaces."
-                      );
+              {/* Organization Description */}
+              <div className="mb-4">
+                <label
+                  htmlFor="organizationDescription"
+                  className={`block text-gray-700 text-sm font-bold mb-2 ${
+                    darkMode ? "text-white" : ""
+                  }`}
+                >
+                  Organization Description
+                  <sup className="text-red-900 font-bold">*</sup>
+                </label>
+                <textarea
+                  id="organizationDescription"
+                  placeholder="Organization Description..."
+                  {...register("organizationDescription", {
+                    required: "Description is required",
+                    minLength: {
+                      value: 5,
+                      message: "Description must be at least 5 characters",
                     },
-                    noExtraSpaces: (value) => {
-                      const trimmedValue = value.trim();
-                      return (
-                        !/\s{2,}/.test(trimmedValue) ||
-                        "Organization Name must not contain consecutive spaces"
-                      );
+                    maxLength: {
+                      value: 200,
+                      message: "Description should not exceed 200 characters.",
                     },
-                  },
-                })}
-                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                  darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
-                }`}
-              />
-              {errors.organizationName && (
-                <p className="text-red-500 mt-1">
-                  {errors.organizationName.message}
-                </p>
-              )}
-            </div>
+                    validate: (value) =>
+                      value.trim().length >= 5 ||
+                      "Description must not be empty or less than 5 characters",
+                  })}
+                  className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+                    darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
+                  }`}
+                  rows={3}
+                />
+                {errors.organizationDescription && (
+                  <p className="text-red-500 mt-1">
+                    {errors.organizationDescription.message}
+                  </p>
+                )}
+              </div>
 
-            {/* Organization Description */}
-            <div className="mb-4">
-              <label
-                htmlFor="organizationDescription"
-                className={`block text-gray-700 text-sm font-bold mb-2 ${
-                  darkMode ? "text-white" : ""
-                }`}
-              >
-                Organization Description
-                <sup className="text-red-900 font-bold">*</sup>
-              </label>
-              <textarea
-                id="organizationDescription"
-                placeholder="Organization Description..."
-                {...register("organizationDescription", {
-                  required: "Description is required",
-                  minLength: {
-                    value: 5,
-                    message: "Description must be at least 5 characters",
-                  },
-                  maxLength: {
-                    value: 200,
-                    message: "Description should not exceed 200 characters.",
-                  },
-                  validate: (value) =>
-                    value.trim().length >= 5 ||
-                    "Description must not be empty or less than 5 characters",
-                })}
-                className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
-                  darkMode ? "bg-gray-700 border-gray-600 text-white" : ""
-                }`}
-                rows={3}
-              />
-              {errors.organizationDescription && (
-                <p className="text-red-500 mt-1">
-                  {errors.organizationDescription.message}
-                </p>
-              )}
-            </div>
+              {/* Dynamic Organization Attributes */}
+              {organizationAttributes &&
+                organizationAttributes.map((attribute) => (
+                  <div className="mb-4" key={attribute.attributeId}>
+                    <label
+                      htmlFor={attribute.attributeKey}
+                      className={`block text-sm font-bold mb-2 ${
+                        darkMode ? "text-white" : "text-gray-700"
+                      }`}
+                    >
+                      {attribute.attributeKey}
+                    </label>
+                    <input
+                      id={attribute.attributeKey}
+                      type="text"
+                      data-testid={attribute.attributeKey}
+                      placeholder={`${attribute.attributeKey}...`}
+                      {...register(attribute.attributeKey)}
+                      className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                        darkMode
+                          ? "bg-gray-700 border-gray-600 text-white"
+                          : "bg-white text-gray-700"
+                      }`}
+                    />
+                    {errors[attribute.attributeKey] && (
+                      <p className="text-red-500 mt-1">
+                        {errors[attribute.attributeKey].message}
+                      </p>
+                    )}
+                  </div>
+                ))}
 
-            {/* Dynamic Organization Attributes */}
-            {organizationAttributes &&
-              organizationAttributes.map((attribute) => (
-                <div className="mb-4" key={attribute.attributeId}>
-                  <label
-                    htmlFor={attribute.attributeKey}
-                    className={`block text-sm font-bold mb-2 ${
-                      darkMode ? "text-white" : "text-gray-700"
-                    }`}
-                  >
-                    {attribute.attributeKey}
-                  </label>
-                  <input
-                    id={attribute.attributeKey}
-                    type="text"
-                    data-testid={attribute.attributeKey}
-                    placeholder={`${attribute.attributeKey}...`}
-                    {...register(attribute.attributeKey)}
-                    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-                      darkMode
-                        ? "bg-gray-700 border-gray-600 text-white"
-                        : "bg-white text-gray-700"
-                    }`}
-                  />
-                  {errors[attribute.attributeKey] && (
-                    <p className="text-red-500 mt-1">
-                      {errors[attribute.attributeKey].message}
-                    </p>
-                  )}
-                </div>
-              ))}
+              {/* Submit Button */}
+              <div className="flex justify-between gap-3">
+  <button
+    type="submit"
+    className={`flex-1 py-2 text-sm font-medium rounded-md mb-4 ${
+      darkMode
+        ? "primary-gradient text-white"
+        : "bg-blue-700 text-white"
+    } hover:scale-95 transition-all duration-200 ${
+      fileError ? "cursor-not-allowed" : ""
+    }`}
+    disabled={fileError}
+  >
+    {isEditing ? "Update Organization" : "Submit Organization"}
+  </button>
+  
+  <button
+    type="button"
+    onClick={() => navigate("/organization/organization-list")} // Replace with your navigation function
+    className="flex-1 text-center text-sm md:text-base font-medium rounded-md py-2 mb-4 bg-gray-400 text-white hover:bg-gray-500 transition-all duration-200"
+  >
+    Cancel
+  </button>
+</div>
 
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className={`w-full py-2 text-sm font-medium rounded-md mb-4 ${
-                darkMode
-                  ? "primary-gradient text-white"
-                  : "bg-blue-700 text-white"
-              } hover:scale-95 transition-all duration-200 ${
-                fileError ? "cursor-not-allowed" : ""
-              }`}
-              disabled={fileError}
-            >
-              {isEditing ? "Update Organization" : "Submit Organization"}
-            </button>
-          </form>
-        </div>
-}
+            </form>
+          </div>
+        )}
       </div>
-
-
     </div>
   );
 };
