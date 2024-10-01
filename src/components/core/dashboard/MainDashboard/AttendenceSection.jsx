@@ -24,13 +24,24 @@ const AttendenceSection = () => {
   const { AccessToken } = useSelector((state) => state.auth);
 
   useEffect(() => {
-    fetchEmployeeAttendenceStatus();
+      fetchEmployeeAttendenceStatus();  // Only fetch attendance status if not checked in
+
+  
+  }, [AccessToken, user?.userId, currentTime, isCheckedIn]);
+
+  useEffect(() => {
+    if(isCheckedIn) {
+    fetchEmployeeAttendenceStatus(); 
+    } // Only fetch attendance status if not checked in
     const interval = setInterval(() => {
       setCurrentTime(new Date().toLocaleTimeString());
     }, 1000);
+  
+    return () => clearInterval(interval); // Cleanup the interval on component unmount // Cleanup the interval on component unmount
 
-    return () => clearInterval(interval); // Cleanup the interval on component unmount
-  }, [AccessToken, user?.userId,currentTime  ]);
+}, [AccessToken, user?.userId, currentTime, isCheckedIn]);
+
+  
 
   const handleLocationClick = () => {
     if (navigator.geolocation) {
