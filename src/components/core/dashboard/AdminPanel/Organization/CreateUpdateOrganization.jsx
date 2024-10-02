@@ -16,17 +16,10 @@ import ConfirmationModal from "../../../../common/ConfirmationModal";
 import { FaTimesCircle } from "react-icons/fa";
 import { setStep } from "../../../../../slices/employeeSlice";
 import OrganizationAttributes from "./OrganizationAttribute";
-import {
-  hasCreateOrganizationAttributePrivilege,
-  hasCreateOrganizationPrivilege,
-  hasDeleteOrganizationAttributePrivilege,
-  hasGetAllOrganizationAttributesPrivilege,
-  hasUpdateOrganizationAttributePrivilege,
-  hasUploadOrganizationImagePrivilege,
-} from "../../../../../utils/privileges";
 
 const CreateUpdateOrganisation = () => {
   const { AccessToken } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.profile);
   const {
     register,
     handleSubmit,
@@ -45,7 +38,6 @@ const CreateUpdateOrganisation = () => {
   const [existingImage, setExistingImage] = useState(null);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [fileError, setFileError] = useState(""); // State for file validation errors
-
   const { isEditing, organization } = location.state || {
     isEditing: false,
     organization: null,
@@ -55,6 +47,13 @@ const CreateUpdateOrganisation = () => {
   const [isAttribute, setIsAttribute] = useState(false);
   const [organizationAttributes, setOrganizationAttributes] = useState(null);
   const [renderFlag, setRenderFlag] = useState(false);
+  const hasGetAllOrganizationAttributesPrivilege =
+    user?.roles?.[0]?.privilege?.includes("GET_ALL_ORGANIZATION_ATTRIBUTES");
+  const hasCreateOrganizationAttributePrivilege =
+    user?.roles?.[0]?.privilege?.includes("CREATE_ORGANIZATION_ATTRIBUTE");
+  const hasUploadOrganizationImagePrivilege =
+    user?.roles?.[0]?.privilege?.includes("UPLOAD_ORGANIZATION_IMAGE");
+
   useEffect(() => {
     console.log("executed");
     getRes();
@@ -125,23 +124,22 @@ const CreateUpdateOrganisation = () => {
     // Append the organization data to the FormData object
     formData.append("organizationData", JSON.stringify(organizationData));
 
-
-    let removeImage; 
+    let removeImage;
     // Append the logo image if one is selected
     if (selectedImage) {
       formData.append("file", selectedImage);
-    }else{
-      console.log("inside else")
-      removeImage=true
+    } else {
+      console.log("inside else");
+      removeImage = true;
     }
-  
+
     try {
       let response;
       if (isEditing) {
         // Pass removeImage as a separate variable
 
         console.log(removeImage);
-        
+
         response = await dispatch(
           updateOrganisation(
             AccessToken,
@@ -242,7 +240,7 @@ const CreateUpdateOrganisation = () => {
         <button
           disabled={!hasCreateOrganizationAttributePrivilege}
           onClick={() => setIsAttribute(true)} // Change the state to show the SubOrganizationAttribute
-          className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+          className={`w-[220px] ml-2 py-2 text-md font-medium rounded-md mb-4
       ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
       hover:scale-95 transition-all duration-200 ${
         fileError ? "cursor-not-allowed" : ""
@@ -470,29 +468,28 @@ const CreateUpdateOrganisation = () => {
 
               {/* Submit Button */}
               <div className="flex justify-between gap-3">
-  <button
-    type="submit"
-    className={`flex-1 py-2 text-sm font-medium rounded-md mb-4 ${
-      darkMode
-        ? "primary-gradient text-white"
-        : "bg-blue-700 text-white"
-    } hover:scale-95 transition-all duration-200 ${
-      fileError ? "cursor-not-allowed" : ""
-    }`}
-    disabled={fileError}
-  >
-    {isEditing ? "Update Organization" : "Submit Organization"}
-  </button>
-  
-  <button
-    type="button"
-    onClick={() => navigate("/organization/organization-list")} // Replace with your navigation function
-    className="flex-1 text-center text-sm md:text-base font-medium rounded-md py-2 mb-4 bg-gray-400 text-white hover:bg-gray-500 transition-all duration-200"
-  >
-    Cancel
-  </button>
-</div>
+                <button
+                  type="submit"
+                  className={`flex-1 py-2 text-sm font-medium rounded-md mb-4 ${
+                    darkMode
+                      ? "primary-gradient text-white"
+                      : "bg-blue-700 text-white"
+                  } hover:scale-95 transition-all duration-200 ${
+                    fileError ? "cursor-not-allowed" : ""
+                  }`}
+                  disabled={fileError}
+                >
+                  {isEditing ? "Update Organization" : "Submit Organization"}
+                </button>
 
+                <button
+                  type="button"
+                  onClick={() => navigate("/organization/organization-list")} // Replace with your navigation function
+                  className="flex-1 text-center text-sm md:text-base font-medium rounded-md py-2 mb-4 bg-gray-400 text-white hover:bg-gray-500 transition-all duration-200"
+                >
+                  Cancel
+                </button>
+              </div>
             </form>
           </div>
         )}

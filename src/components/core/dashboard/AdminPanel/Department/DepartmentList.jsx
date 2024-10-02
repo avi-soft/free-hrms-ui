@@ -25,23 +25,34 @@ import toast from "react-hot-toast";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice.js";
 import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI.js";
 import { setStep } from "../../../../../slices/employeeSlice.js";
-import {
-  hasAddDepartmentPrivilege,
-  hasAssignDepartmentToBranchPrivilege,
-  hasAssignDepartmentToOrganizationPrivilege,
-  hasDeleteDepartmentPrivilege,
-  hasGetAllBranchPrivilege,
-  hasGetAllOrganizationsPrivilege,
-  hasGetBranchesOfOrganizationPrivilege,
-  hasGetDepartmentsOfBranchPrivilege,
-  hasGetDepartmentsOfOrganizationPrivilege,
-  hasRemoveDepartmentFromBranchPrivilege,
-  hasRemoveDepartmentFromOrganizationPrivilege,
-  hasUpdateDepartmentPrivilege,
-} from "../../../../../utils/privileges.js";
 import { fetchSubOrganizationOrgSpecific } from "../../../../../utils/subOrg.functions.js";
 
 const DepartmentList = () => {
+  const { user } = useSelector((state) => state.profile);
+  const hasAddDepartmentPrivilege =
+    user?.roles?.[0]?.privilege?.includes("ADD_DEPARTMENT");
+  const hasUpdateDepartmentPrivilege =
+    user?.roles?.[0]?.privilege?.includes("UPDATE_DEPARTMENT");
+  const hasDeleteDepartmentPrivilege =
+    user?.roles?.[0]?.privilege?.includes("DELETE_DEPARTMENT");
+  const hasAssignDepartmentToOrganizationPrivilege =
+    user?.roles?.[0]?.privilege?.includes("ASSIGN_DEPARTMENT_TO_ORGANIZATION");
+  const hasRemoveDepartmentFromOrganizationPrivilege =
+    user?.roles?.[0]?.privilege?.includes(
+      "REMOVE_DEPARTMENT_FROM_ORGANIZATION"
+    );
+  const hasAssignDepartmentToBranchPrivilege =
+    user?.roles?.[0]?.privilege?.includes("ASSIGN_DEPARTMENT_TO_BRANCH");
+  const hasGetAllOrganizationsPrivilege = user?.roles?.[0]?.privilege?.includes(
+    "GET_ALL_ORGANIZATIONS"
+  );
+  const hasGetBranchesOfOrganizationPrivilege =
+    user?.roles?.[0]?.privilege?.includes("GET_BRANCHES_OF_ORGANIZATION");
+  const hasGetDepartmentsOfOrganizationPrivilege =
+    user?.roles?.[0]?.privilege?.includes("GET_DEPARTMENTS_OF_ORGANIZATION");
+  const hasRemoveDepartmentFromBranchPrivilege =
+    user?.roles?.[0]?.privilege?.includes("REMOVE_DEPARTMENT_FROM_BRANCH");
+
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [selectedOrganization, setSelectedOrganization] =
     useState("unassigned");
@@ -67,7 +78,6 @@ const DepartmentList = () => {
   const [renderFlag, setRenderFlag] = useState(false);
   const [organizationError, setOrganizationError] = useState("");
   const [subOrganizationError, setSubOrganizationError] = useState("");
-  const { user } = useSelector((state) => state.profile);
 
   const navigate = useNavigate();
   const location = useLocation();

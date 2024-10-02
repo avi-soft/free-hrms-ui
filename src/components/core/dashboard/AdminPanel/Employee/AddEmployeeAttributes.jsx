@@ -10,27 +10,27 @@ import {
 } from "../../../../../services/operations/employeeAPI";
 import { useNavigate } from "react-router-dom";
 import { setStep } from "../../../../../slices/employeeSlice";
-import { hasGetAllEmployeeAttributesPrivilege } from "../../../../../utils/privileges";
 
 const EmployeeAttributes = () => {
+  const { user } = useSelector((state) => state.profile);
   const { darkMode } = useSelector((state) => state.theme);
   const { attributes } = useSelector((state) => state.employee); // Fetch existing attributes from Redux state
   const dispatch = useDispatch();
-  const [newAttribute, setNewAttribute] = useState("");
   const [editAttributeId, setEditAttributeId] = useState(null);
   const [editAttributeValue, setEditAttributeValue] = useState("");
   const { register, handleSubmit, reset, control } = useForm();
   const [localAttributes, setLocalAttributes] = useState(null);
   const { AccessToken } = useSelector((state) => state.auth);
   const navigate = useNavigate();
+  const hasGetAllEmployeeAttributesPrivilege =
+    user?.roles?.[0]?.privilege?.includes("GET_ALL_EMPLOYEE_ATTRIBUTES");
 
   async function getAttributes() {
-    if(hasGetAllEmployeeAttributesPrivilege) {
+    if (hasGetAllEmployeeAttributesPrivilege) {
       const attributes = await dispatch(GetEmployeeAttributes(AccessToken));
       console.log(attributes?.data);
       setLocalAttributes(attributes?.data); // Sync with Redux state
     }
-
   }
 
   useEffect(() => {
