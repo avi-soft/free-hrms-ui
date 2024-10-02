@@ -20,18 +20,19 @@ import ConfirmationModal from "../../../../common/ConfirmationModal";
 import { getSubOrganizationList } from "../../../../../services/operations/subOrganisationAPI";
 import { setSubOrganization } from "../../../../../slices/subOrganizationSlice";
 import { setStep } from "../../../../../slices/employeeSlice";
-import {
-  hasCreateDepartmentAttributePrivilege,
-  hasDeleteDepartmentAttributePrivilege,
-  hasGetAllDepartmentAttributesPrivilege,
-  hasGetAllOrganizationsPrivilege,
-  hasSearchEmployeeByNamePrivilege,
-  hasUpdateDepartmentAttributePrivilege,
-  hasUpdateDepartmentPrivilege,
-} from "../../../../../utils/privileges";
 
 const CreateUpdateDepartment = () => {
   const { AccessToken } = useSelector((state) => state.auth);
+  const { user } = useSelector((state) => state.profile);
+  const hasCreateDepartmentAttributePrivilege =
+    user?.roles?.[0]?.privilege?.includes("CREATE_DEPARTMENT_ATTRIBUTE");
+  const hasGetAllDepartmentAttributesPrivilege =
+    user?.roles?.[0]?.privilege?.includes("GET_ALL_DEPARTMENT_ATTRIBUTES");
+  const hasGetAllOrganizationsPrivilege = user?.roles?.[0]?.privilege?.includes(
+    "GET_ALL_ORGANIZATIONS"
+  );
+  const hasSearchEmployeeByNamePrivilege =
+    user?.roles?.[0]?.privilege?.includes("SEARCH_EMPLOYEE_BY_NAME");
 
   const {
     register,
@@ -356,7 +357,7 @@ const CreateUpdateDepartment = () => {
         <button
           disabled={!hasCreateDepartmentAttributePrivilege}
           onClick={() => setIsAttribute(true)}
-          className={`w-[220px] py-2 text-md font-medium rounded-md mb-4 
+          className={`w-[220px] ml-2 py-2 text-md font-medium rounded-md mb-4 
     ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
     hover:scale-95 transition-all duration-200 
     ${
@@ -489,86 +490,98 @@ const CreateUpdateDepartment = () => {
               )}
             </div>
             <div className="mb-4">
-  <label
-    htmlFor="employeeSearch"
-    className={`block text-sm font-bold mb-2 ${darkMode ? "text-white" : "text-gray-700"}`}
-  >
-    Add Manager<sup className="text-red-900 font-bold">*</sup>
-  </label>
-  <input
-    data-testid="employeeSearch"
-    type="text"
-    id="employeeSearch"
-    placeholder="Search employee for adding as manager.."
-    onChange={handleInputChange}
-    className={`shadow appearance-none border rounded w-full py-2 px-3 ${
-      darkMode ? "bg-gray-700 border-gray-600 text-white" : "bg-white text-gray-700"
-    }`}
-    defaultValue={
-      isEditing && department?.managerFirstName
-        ? `${department.managerFirstName} ${department.managerLastName}`
-        : ""
-    }
-    disabled={!hasSearchEmployeeByNamePrivilege}
-  />
-</div>
+              <label
+                htmlFor="employeeSearch"
+                className={`block text-sm font-bold mb-2 ${
+                  darkMode ? "text-white" : "text-gray-700"
+                }`}
+              >
+                Add Manager<sup className="text-red-900 font-bold">*</sup>
+              </label>
+              <input
+                data-testid="employeeSearch"
+                type="text"
+                id="employeeSearch"
+                placeholder="Search employee for adding as manager.."
+                onChange={handleInputChange}
+                className={`shadow appearance-none border rounded w-full py-2 px-3 ${
+                  darkMode
+                    ? "bg-gray-700 border-gray-600 text-white"
+                    : "bg-white text-gray-700"
+                }`}
+                defaultValue={
+                  isEditing && department?.managerFirstName
+                    ? `${department.managerFirstName} ${department.managerLastName}`
+                    : ""
+                }
+                disabled={!hasSearchEmployeeByNamePrivilege}
+              />
+            </div>
 
-{!hasSearchEmployeeByNamePrivilege ? (
-  <div className="mb-4">
-    <p className="text-red-500 text-sm font-semibold">
-      You do not have the privilege to search for employees.
-    </p>
-  </div>
-) : showCheckbox && searchResults?.length > 0 ? (
-  <div className="mb-4">
-    {searchResults.slice(0, 1).map((result) => (
-      <div key={result.employeeId} className="flex items-center mb-2">
-        <input
-          type="checkbox"
-          id={`employee_${result.employeeId}`}
-          name="selectedEmployee"
-          required
-          value={result?.employeeId}
-          checked={selectedManager?.employeeId === result.employeeId}
-          onChange={() => handleSelectManager(result)}
-          className="mr-2"
-        />
-        <label
-          htmlFor={`employee_${result.userId}`}
-          className={`text-sm font-semibold ${darkMode ? "text-white" : "text-gray-700"}`}
-          data-testid={`search-result-item-label-${result.employeeId}`}
-        >
-          {result.firstName} {result.lastName}
-        </label>
-      </div>
-    ))}
-  </div>
-) : (
-  noSearch && (
-    <div className="mb-4">
-      <p className="text-red-500 text-sm font-semibold">
-        No employees found with the given search term.
-      </p>
-    </div>
-  )
-)}
+            {!hasSearchEmployeeByNamePrivilege ? (
+              <div className="mb-4">
+                <p className="text-red-500 text-sm font-semibold">
+                  You do not have the privilege to search for employees.
+                </p>
+              </div>
+            ) : showCheckbox && searchResults?.length > 0 ? (
+              <div className="mb-4">
+                {searchResults.slice(0, 1).map((result) => (
+                  <div
+                    key={result.employeeId}
+                    className="flex items-center mb-2"
+                  >
+                    <input
+                      type="checkbox"
+                      id={`employee_${result.employeeId}`}
+                      name="selectedEmployee"
+                      required
+                      value={result?.employeeId}
+                      checked={
+                        selectedManager?.employeeId === result.employeeId
+                      }
+                      onChange={() => handleSelectManager(result)}
+                      className="mr-2"
+                    />
+                    <label
+                      htmlFor={`employee_${result.userId}`}
+                      className={`text-sm font-semibold ${
+                        darkMode ? "text-white" : "text-gray-700"
+                      }`}
+                      data-testid={`search-result-item-label-${result.employeeId}`}
+                    >
+                      {result.firstName} {result.lastName}
+                    </label>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              noSearch && (
+                <div className="mb-4">
+                  <p className="text-red-500 text-sm font-semibold">
+                    No employees found with the given search term.
+                  </p>
+                </div>
+              )
+            )}
 
-{selectedManager && (
-  <div className="mb-4">
-    <div className="flex items-center">
-      <p className="text-sm font-semibold mr-2">
-        Selected Manager: {selectedManager.firstName} {selectedManager.lastName}
-      </p>
-      <button
-        type="button"
-        onClick={() => setSelectedManager(null)}
-        className="text-red-500 text-sm"
-      >
-        Clear
-      </button>
-    </div>
-  </div>
-)}
+            {selectedManager && (
+              <div className="mb-4">
+                <div className="flex items-center">
+                  <p className="text-sm font-semibold mr-2">
+                    Selected Manager: {selectedManager.firstName}{" "}
+                    {selectedManager.lastName}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedManager(null)}
+                    className="text-red-500 text-sm"
+                  >
+                    Clear
+                  </button>
+                </div>
+              </div>
+            )}
 
             {departmentAttribute &&
               departmentAttribute.map((attribute) => (
@@ -601,26 +614,26 @@ const CreateUpdateDepartment = () => {
                 </div>
               ))}
 
-<div className="flex justify-between  gap-3">
-  <button
-    type="submit"
-    className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${
-      loading ? "bg-slate-900" : "bg-blue-700"
-    } ${darkMode ? "text-white" : "text-white"} hover:scale-95 transition-all duration-200`}
-  >
-    {isEditing ? "Update Department" : "Create Department"}
-  </button>
-  
-  <button
-    type="button"
-    onClick={() => navigate('/department/department-list')} // Replace with your navigation function
-    className="text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 bg-gray-400 text-white hover:bg-gray-500 transition-all duration-200"
-  >
-    Cancel
-  </button>
-</div>
+            <div className="flex justify-between  gap-3">
+              <button
+                type="submit"
+                className={`text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 ${
+                  loading ? "bg-slate-900" : "bg-blue-700"
+                } ${
+                  darkMode ? "text-white" : "text-white"
+                } hover:scale-95 transition-all duration-200`}
+              >
+                {isEditing ? "Update Department" : "Create Department"}
+              </button>
 
-
+              <button
+                type="button"
+                onClick={() => navigate("/department/department-list")} // Replace with your navigation function
+                className="text-center w-full text-sm md:text-base font-medium rounded-md py-2 px-5 bg-gray-400 text-white hover:bg-gray-500 transition-all duration-200"
+              >
+                Cancel
+              </button>
+            </div>
           </form>
         )}
       </div>
