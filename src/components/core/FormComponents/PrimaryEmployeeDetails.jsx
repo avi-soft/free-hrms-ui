@@ -72,19 +72,20 @@ const PrimaryEmployeeDetails = () => {
       if (response?.data?.success == true) {
         dispatch(addEmployees(response?.data?.newUser?.employeeId));
         dispatch(setCurrentOrganizationId(data?.organization));
-        setConfirmationModal({
-          text1: "Employee added successfully!",
-          text2:
-            "Do you want to continue with default attributes or proceed with adding new ones?",
-          btn1Text: "Add New Attributes",
-          btn2Text: "Skip",
-          btn1Handler: async () => {
-            navigate("/employee/employee-attributes");
-          },
-          btn2Handler: () => {
-            setConfirmationModal(null), dispatch(setStep(2));
-          },
-        });
+        dispatch(setStep(2))
+        // setConfirmationModal({
+        //   text1: "Employee added successfully!",
+        //   text2:
+        //     "Do you want to continue with default attributes or proceed with adding new ones?",
+        //   btn1Text: "Add New Attributes",
+        //   btn2Text: "Skip",
+        //   btn1Handler: async () => {
+        //     navigate("/employee/employee-attributes");
+        //   },
+        //   btn2Handler: () => {
+        //     setConfirmationModal(null), dispatch(setStep(2));
+        //   },
+        // });
       }
     } catch (error) {
       console.error("Error adding employee", error);

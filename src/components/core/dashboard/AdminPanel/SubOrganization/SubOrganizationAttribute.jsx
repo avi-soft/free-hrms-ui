@@ -9,14 +9,16 @@ import {
   updateSubOrganisationAttributes,
 } from "../../../../../services/operations/subOrganisationAPI";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
-import {
-  hasCreateBranchAttributePrivilege,
-  hasDeleteBranchAttributePrivilege,
-  hasGetBranchAttributePrivilege,
-  hasUpdateBranchAttributePrivilege,
-} from "../../../../../utils/privileges";
 
 const SubOrganizationAttribute = ({ NextHandler }) => {
+  const { user } = useSelector((state) => state.profile);
+  const hasGetBranchAttributePrivilege = user?.roles?.[0]?.privilege?.includes(
+    "GET_BRANCH_ATTRIBUTE"
+  );
+  const hasUpdateBranchAttributePrivilege =
+    user?.roles?.[0]?.privilege?.includes("UPDATE_BRANCH_ATTRIBUTE");
+  const hasDeleteBranchAttributePrivilege =
+    user?.roles?.[0]?.privilege?.includes("DELETE_BRANCH_ATTRIBUTE");
   const dispatch = useDispatch();
   const { darkMode } = useSelector((state) => state.theme);
   const { AccessToken } = useSelector((state) => state.auth);
@@ -200,10 +202,9 @@ const SubOrganizationAttribute = ({ NextHandler }) => {
               )}
 
               <div className="flex gap-4">
-                {
-                  hasUpdateBranchAttributePrivilege  &&                  <FaEdit onClick={() => handleEdit(item)} />
-
-                }
+                {hasUpdateBranchAttributePrivilege && (
+                  <FaEdit onClick={() => handleEdit(item)} />
+                )}
                 {hasDeleteBranchAttributePrivilege && (
                   <MdDelete
                     onClick={() =>

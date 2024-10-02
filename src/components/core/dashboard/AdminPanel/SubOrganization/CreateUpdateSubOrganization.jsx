@@ -14,17 +14,10 @@ import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { setStep } from "../../../../../slices/employeeSlice";
-import {
-  hasCreateBranchAttributePrivilege,
-  hasDeleteBranchAttributePrivilege,
-  hasGetAllOrganizationAttributesPrivilege,
-  hasGetAllOrganizationsPrivilege,
-  hasGetBranchAttributePrivilege,
-  hasUpdateBranchAttributePrivilege,
-} from "../../../../../utils/privileges";
 
 const CreateUpdateSubOrganization = () => {
   const { darkMode } = useSelector((state) => state.theme);
+  const { user } = useSelector((state) => state.profile);
   const { AccessToken } = useSelector((state) => state.auth);
   const [branchAttribute, setBranchAttributes] = useState([]);
   const [isAttribute, setIsAttribute] = useState(null);
@@ -32,6 +25,14 @@ const CreateUpdateSubOrganization = () => {
   const [selectedOrganization, setSelectedOrganization] = useState("");
   const { AllOrganizations } = useSelector((state) => state.Organisation);
   const { loading } = useSelector((state) => state.subOrganization);
+  const hasCreateBranchAttributePrivilege =
+    user?.roles?.[0]?.privilege?.includes("ADD_BRANCH_ATTRIBUTE");
+  const hasGetBranchAttributePrivilege = user?.roles?.[0]?.privilege?.includes(
+    "GET_BRANCH_ATTRIBUTE"
+  );
+  const hasGetAllOrganizationsPrivilege = user?.roles?.[0]?.privilege?.includes(
+    "GET_ALL_ORGANIZATIONS"
+  );
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -208,7 +209,7 @@ const CreateUpdateSubOrganization = () => {
         <button
           disabled={!hasCreateBranchAttributePrivilege}
           onClick={() => setIsAttribute(true)} // Change the state to show the SubOrganizationAttribute
-          className={`w-[220px] py-2 text-md font-medium rounded-md mb-4
+          className={`w-[220px] py-2 ml-2 text-md font-medium rounded-md mb-4
       ${darkMode ? "primary-gradient text-white" : "bg-blue-700 text-white"} 
       hover:scale-95 transition-all duration-200   ${
         !hasCreateBranchAttributePrivilege
@@ -345,7 +346,7 @@ const CreateUpdateSubOrganization = () => {
             <div className="flex justify-between gap-3">
               <button
                 type="submit"
-                className={`flex-1 text-center text-sm md:text-base font-medium rounded-md px-3 py-2 mb-4 ${
+                className={`flex-1 text-center text-sm md:text-base font-medium rounded-md px-2 py-2 mb-4 ${
                   loading ? "bg-slate-900" : "bg-blue-700"
                 } ${
                   darkMode ? "text-white" : "text-white"
