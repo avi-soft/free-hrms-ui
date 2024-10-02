@@ -14,13 +14,19 @@ import { RiDeleteBin6Line } from "react-icons/ri";
 import toast from "react-hot-toast";
 import { setRoles, setLoading } from "../../../../../slices/roleSlice";
 import { setStep } from "../../../../../slices/employeeSlice";
-import { hasCreateRolePrivilege, hasDeleteRolePrivilege, hasUpdateRolePrivilege } from "../../../../../utils/privileges";
 
 const RoleList = () => {
+  const { user } = useSelector((state) => state.profile);
   const dispatch = useDispatch();
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
   const { loading, roles } = useSelector((state) => state.role);
+  const hasCreateRolePrivilege =
+    user?.roles?.[0]?.privilege?.includes("CREATE_ROLE");
+  const hasUpdateRolePrivilege =
+    user?.roles?.[0]?.privilege?.includes("UPDATE_ROLE");
+  const hasDeleteRolePrivilege =
+    user?.roles?.[0]?.privilege?.includes("DELETE_ROLE");
 
   const [confirmationModal, setConfirmationModal] = useState(null);
   console.log(confirmationModal);
@@ -174,22 +180,28 @@ const RoleList = () => {
                           </td>
                           <td className="px-6 py-4 flex gap-x-1">
                             <button
-                            disabled={!hasUpdateRolePrivilege}
+                              disabled={!hasUpdateRolePrivilege}
                               className="mr-2"
                               onClick={() => handleEdit(role)}
                             >
                               <FaRegEdit
                                 className={`${
                                   darkMode ? "text-yellow-500" : "text-blue-500"
-                                } ${!hasUpdateRolePrivilege && "cursor-not-allowed opacity-50"}`}
+                                } ${
+                                  !hasUpdateRolePrivilege &&
+                                  "cursor-not-allowed opacity-50"
+                                }`}
                               />
                             </button>
                             <button
-                            disabled={!hasDeleteRolePrivilege}
+                              disabled={!hasDeleteRolePrivilege}
                               data-testid="deleteBtn"
                               className={`${
                                 darkMode ? "text-red-400" : "text-red-600"
-                              } text-lg  ${!hasDeleteRolePrivilege && "cursor-not-allowed opacity-50"}`}
+                              } text-lg  ${
+                                !hasDeleteRolePrivilege &&
+                                "cursor-not-allowed opacity-50"
+                              }`}
                               onClick={() =>
                                 setConfirmationModal({
                                   text1: "Are you sure?",

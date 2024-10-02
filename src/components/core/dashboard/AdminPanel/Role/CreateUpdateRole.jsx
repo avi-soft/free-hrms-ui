@@ -10,9 +10,10 @@ import {
   employeePrivileges,
   attendancePrivileges,
   branchPrivileges,
-  organizationPrivileges,personalProfilePrivileges,
+  organizationPrivileges,
+  personalProfilePrivileges,
   rolePrivileges,
-  addressPrivileges
+  addressPrivileges,
 } from "../../../../../constants/Roles";
 import {
   addRole,
@@ -175,9 +176,8 @@ const CreateUpdateRole = () => {
     organization: organizationPrivileges,
     department: departmentPrivileges,
     branch: branchPrivileges,
-    attendance: attendancePrivileges
-};
-
+    attendance: attendancePrivileges,
+  };
 
   return (
     <div className="container mx-auto p-5">
@@ -261,7 +261,7 @@ const CreateUpdateRole = () => {
           </div>
 
           <div className=" mb-4 text-orange-600">
-            <label className="flex items-center w-fit">
+            <label className="flex items-center  w-fit">
               <input
                 type="checkbox"
                 checked={isGlobalAllSelected()}
@@ -270,7 +270,7 @@ const CreateUpdateRole = () => {
               />
               Select All Privileges
             </label>
-            <div className="mt-4 mb-4 flex items-center gap-4">
+            <div className="mt-4 mb-4 flex items-center flex-wrap gap-4">
               {Object.keys(privilegeGroups).map((group) => (
                 <button
                   key={group}

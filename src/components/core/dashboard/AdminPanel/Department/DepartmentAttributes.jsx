@@ -9,15 +9,13 @@ import {
   updateDepartmentAttributes,
 } from "../../../../../services/operations/departmentAPI";
 import ConfirmationModal from "../../../../common/ConfirmationModal";
-import {
-  hasCreateDepartmentAttributePrivilege,
-  hasDeleteDepartmentAttributePrivilege,
-  hasGetAllDepartmentAttributesPrivilege,
-  hasUpdateDepartmentAttributePrivilege,
-} from "../../../../../utils/privileges";
 
 const DepartmentAttributes = ({ NextHandler }) => {
+  const { user } = useSelector((state) => state.profile);
   const dispatch = useDispatch();
+  const hasGetAllDepartmentAttributesPrivilege =
+    user?.roles?.[0]?.privilege?.includes("GET_ALL_DEPARTMENT_ATTRIBUTES");
+
   const [confirmationModal, setConfirmationModal] = useState(null);
   const { darkMode } = useSelector((state) => state.theme);
   const { AccessToken } = useSelector((state) => state.auth);
@@ -33,7 +31,7 @@ const DepartmentAttributes = ({ NextHandler }) => {
   const [edit, setEdit] = useState(false);
 
   console.log(hasGetAllDepartmentAttributesPrivilege);
-  
+
   async function getRes() {
     if (hasGetAllDepartmentAttributesPrivilege) {
       const res = await dispatch(DepartmentAttributeslist(AccessToken));

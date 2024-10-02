@@ -37,10 +37,23 @@ import {
   Departmentlist,
 } from "../../../../../services/operations/departmentAPI";
 import { BASE_URL } from "../../../../../services/apis";
-import { hasAddEmployeePrivilege, hasAssignDepartmentToEmployeePrivilege, hasDeleteEmployeeAttributePrivilege, hasDeleteEmployeePrivilege, hasGetAllDepartmentsPrivilege, hasGetEmployeesOfDepartmentPrivilege, hasRemoveDepartmentFromEmployeePrivilege } from "../../../../../utils/privileges";
 
 const EmployeeList = () => {
   const dispatch = useDispatch();
+  const { user } = useSelector((state) => state.profile);
+  const hasAddEmployeePrivilege =
+    user?.roles?.[0]?.privilege?.includes("ADD_EMPLOYEE");
+  const hasAssignDepartmentToEmployeePrivilege =
+    user?.roles?.[0]?.privilege?.includes("ASSIGN_DEPARTMENT_TO_EMPLOYEE");
+  const hasDeleteEmployeePrivilege =
+    user?.roles?.[0]?.privilege?.includes("DELETE_EMPLOYEE");
+  const hasGetAllDepartmentsPrivilege =
+    user?.roles?.[0]?.privilege?.includes("GETALL_DEPARTMENTS");
+  const hasGetEmployeesOfDepartmentPrivilege =
+    user?.roles?.[0]?.privilege?.includes("GET_EMPLOYEES_OF_DEPARTMENT");
+  const hasRemoveDepartmentFromEmployeePrivilege =
+    user?.roles?.[0]?.privilege?.includes("REMOVE_DEPARTMENT_FROM_EMPLOYEE");
+
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
   const [employees, setEmployees] = useState([]);
@@ -62,9 +75,6 @@ const EmployeeList = () => {
   const [departmentError, setDepartmentError] = useState("");
   const [renderFlag, setRenderFlag] = useState(false);
   const [lastPage, setLastPage] = useState(false);
-  const { user } = useSelector((state) => state.profile);
-  const hasAddDepartmentPrivilege =
-    user?.roles?.[0]?.privilege?.includes("ADD_DEPARTMENT");
 
   const navigate = useNavigate();
 
@@ -156,7 +166,7 @@ const EmployeeList = () => {
 
   const handleEdit = async (employee) => {
     console.log(employee?.employeeId);
-    try{
+    try {
       const response = await axios.get(
         `${BASE_URL}/employee/${employee.employeeId}`,
         {
@@ -167,19 +177,19 @@ const EmployeeList = () => {
       );
       console.log("response", response);
 
-  
       const editedEmployeeData = response?.data?.Employee?.employee;
-  
+
       console.log(editedEmployeeData);
       dispatch(setEditing(true));
       dispatch(setPreEditedEmployeeDetails(editedEmployeeData));
       navigate("/employee/employee-create-update", { state: { employee } });
       dispatch(setStep(2));
-    }catch(err) {
-       console.log("errr")
-       toast.error("You cannot update employee details because you do not have the necessary privileges to access all employee information by ID.")
+    } catch (err) {
+      console.log("errr");
+      toast.error(
+        "You cannot update employee details because you do not have the necessary privileges to access all employee information by ID."
+      );
     }
-
   };
 
   console.log("sub org", selectedDepartment);
@@ -523,7 +533,9 @@ const EmployeeList = () => {
                               employee?.departments.length > 0 ? (
                                 <td className="px-6 py-4 ">
                                   <button
-                                  disabled={!hasRemoveDepartmentFromEmployeePrivilege}
+                                    disabled={
+                                      !hasRemoveDepartmentFromEmployeePrivilege
+                                    }
                                     data-testid="unassign-button"
                                     onClick={() =>
                                       handleUnAssignDepartment(
@@ -532,7 +544,10 @@ const EmployeeList = () => {
                                         employee?.employeeId
                                       )
                                     }
-                                    className={`bg-yellow-500 text-black py-1 px-4 rounded  ${!hasRemoveDepartmentFromEmployeePrivilege  && "cursor-not-allowed opacity-50"}`}
+                                    className={`bg-yellow-500 text-black py-1 px-4 rounded  ${
+                                      !hasRemoveDepartmentFromEmployeePrivilege &&
+                                      "cursor-not-allowed opacity-50"
+                                    }`}
                                   >
                                     UNASSIGN
                                   </button>
@@ -540,13 +555,18 @@ const EmployeeList = () => {
                               ) : (
                                 <td className="px-6 py-4 ">
                                   <button
-                                  disabled={!hasAssignDepartmentToEmployeePrivilege}
+                                    disabled={
+                                      !hasAssignDepartmentToEmployeePrivilege
+                                    }
                                     data-testid="assign-button"
                                     onClick={() => {
                                       setCurrentEmployee(employee);
                                       setShowDepartmentAssignDialog(true);
                                     }}
-                                    className={`bg-yellow-500 text-black py-1 px-4 rounded ${!hasAssignDepartmentToEmployeePrivilege && "cursor-not-allowed opacity-50"}`}
+                                    className={`bg-yellow-500 text-black py-1 px-4 rounded ${
+                                      !hasAssignDepartmentToEmployeePrivilege &&
+                                      "cursor-not-allowed opacity-50"
+                                    }`}
                                   >
                                     ASSIGN
                                   </button>
@@ -566,7 +586,10 @@ const EmployeeList = () => {
                                   disabled={!hasDeleteEmployeePrivilege}
                                   className={`${
                                     darkMode ? "text-red-400" : "text-red-600"
-                                  } text-lg  ${!hasDeleteEmployeePrivilege  && "cursor-not-allowed opacity-50"}`}
+                                  } text-lg  ${
+                                    !hasDeleteEmployeePrivilege &&
+                                    "cursor-not-allowed opacity-50"
+                                  }`}
                                   onClick={() =>
                                     setConfirmationModal({
                                       text1: "Are you sure?",
@@ -674,7 +697,10 @@ const EmployeeList = () => {
                       darkMode
                         ? "bg-gray-700 border-gray-600 text-white"
                         : "bg-white border-gray-300 text-gray-700"
-                    } max-h-60 overflow-y-auto ${!hasGetAllDepartmentsPrivilege  && "cursor-not-allowed opacity-50"}`}
+                    } max-h-60 overflow-y-auto ${
+                      !hasGetAllDepartmentsPrivilege &&
+                      "cursor-not-allowed opacity-50"
+                    }`}
                     value={selectedAssignDepartment}
                     onChange={(e) =>
                       setSelectedAssignDepartment(e.target.value)

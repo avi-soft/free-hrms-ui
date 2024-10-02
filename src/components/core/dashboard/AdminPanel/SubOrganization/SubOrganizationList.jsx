@@ -21,12 +21,9 @@ import {
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { setStep } from "../../../../../slices/employeeSlice.js";
-import {
-  hasAddBranchPrivilege,
-  hasDeleteBranchPrivilege,
-  hasUpdateBranchPrivilege,
-} from "../../../../../utils/privileges.js";
+
 const SubOrganizationList = () => {
+  const { user } = useSelector((state) => state.profile);
   const [confirmationModal, setConfirmationModal] = useState(null);
   const [selectedOrganization, setSelectedOrganization] =
     useState("unassigned");
@@ -42,6 +39,12 @@ const SubOrganizationList = () => {
     (state) => state.subOrganization
   );
   const { AllOrganizations } = useSelector((state) => state.Organisation);
+  const hasUpdateBranchPrivilege =
+    user?.roles?.[0]?.privilege?.includes("UPDATE_BRANCH");
+  const hasDeleteBranchPrivilege =
+    user?.roles?.[0]?.privilege?.includes("DELETE_BRANCH");
+  const hasAddBranchPrivilege =
+    user?.roles?.[0]?.privilege?.includes("ADD_BRANCH");
 
   const { AccessToken } = useSelector((state) => state.auth);
   const { darkMode } = useSelector((state) => state.theme);
@@ -341,7 +344,7 @@ const SubOrganizationList = () => {
                           {AssignOrganizationHeaderFlag ? (
                             <td className="px-6 py-4 ">
                               <button
-                              // disabled={}
+                                // disabled={}
                                 data-testid="unassign-button"
                                 onClick={() =>
                                   handleUnassignOrganization(
@@ -395,7 +398,7 @@ const SubOrganizationList = () => {
                               <FaRegEdit />
                             </button>
                             <button
-                            disabled={!hasDeleteBranchPrivilege}
+                              disabled={!hasDeleteBranchPrivilege}
                               data-testid="delete-button"
                               onClick={() =>
                                 setConfirmationModal({
@@ -458,7 +461,7 @@ const SubOrganizationList = () => {
               </label>
               <select
                 id="organization-select"
-                disabled={AllOrganizations?.length==0}
+                disabled={AllOrganizations?.length == 0}
                 className={`shadow appearance-none border rounded w-full py-2 px-3 ${
                   darkMode
                     ? "bg-gray-700 border-gray-600 text-white"

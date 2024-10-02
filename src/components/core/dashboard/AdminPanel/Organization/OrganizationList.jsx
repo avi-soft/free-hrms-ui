@@ -17,12 +17,6 @@ import {
 } from "../../../../../services/operations/OrganisationAPI.js";
 import toast from "react-hot-toast";
 import { setStep } from "../../../../../slices/employeeSlice.js";
-import {
-  hasCreateOrganizationPrivilege,
-  hasDeleteOrganizationPrivilege,
-  hasUpdateOrganizationAttributePrivilege,
-  hasUpdateOrganizationPrivilege,
-} from "../../../../../utils/privileges.js";
 
 const OrganizationList = () => {
   const [confirmationModal, setConfirmationModal] = useState(null);
@@ -35,6 +29,16 @@ const OrganizationList = () => {
   const organizationsPerPage = 10;
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
+  const { user } = useSelector((state) => state.profile);
+  const hasCreateOrganizationPrivilege = user?.roles?.[0]?.privilege?.includes(
+    "CREATE_ORGANIZATION"
+  );
+  const hasUpdateOrganizationPrivilege = user?.roles?.[0]?.privilege?.includes(
+    "UPDATE_ORGANIZATION"
+  );
+  const hasDeleteOrganizationPrivilege = user?.roles?.[0]?.privilege?.includes(
+    "DELETE_ORGANIZATION"
+  );
 
   console.log(loading);
   console.log(AllOrganizations);
